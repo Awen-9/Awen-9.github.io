@@ -1,1 +1,1620 @@
-:root{--bg:#fcfcfa;--bg-soft:#f4f4f1;--text:#2c2c2a;--text-muted:#88857e;--border:#e8e6e0;--accent:#3a7ca5;--accent-soft:rgba(58, 124, 165, 0.08);--code-bg:#f0f0ec;--font-body:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;--font-heading:"LXGW WenKai Screen","Songti SC",serif;--max-width:680px;--glass:rgba(252, 252, 250, 0.84);--glass-border:rgba(44, 44, 42, 0.08);--glass-shadow:0 10px 34px rgba(44, 44, 42, 0.13);--ease:cubic-bezier(0.22, 0.61, 0.36, 1)}[data-theme=dark]{--bg:#1c1e22;--bg-soft:#24262b;--text:#d8d6d0;--text-muted:#7d7b76;--border:#33363c;--accent:#7fb3d5;--accent-soft:rgba(127, 179, 213, 0.1);--code-bg:#2a2d33;--glass:rgba(30, 32, 37, 0.82);--glass-border:rgba(255, 255, 255, 0.08);--glass-shadow:0 10px 34px rgba(0, 0, 0, 0.5)}*{box-sizing:border-box}[hidden]{display:none!important}html{font-size:16px;scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.85;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}a{color:var(--text);text-decoration:none;transition:color .18s var(--ease)}a:hover{color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}::selection{background:rgba(58,124,165,.22)}[data-theme=dark] ::selection{background:rgba(127,179,213,.3)}.container{max-width:var(--max-width);margin:0 auto;padding:3rem 1.25rem 4rem;min-height:calc(100vh - 260px)}.read-progress{position:fixed;top:0;left:0;right:0;height:2px;z-index:50;pointer-events:none}.read-progress span{display:block;height:100%;width:0;background:var(--accent);opacity:.85;transition:width .1s linear}.site-header{border-bottom:1px solid var(--border);background:var(--bg);transition:background .25s}.header-inner{max-width:var(--max-width);margin:0 auto;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}.site-title{font-family:var(--font-heading);font-size:1.25rem;font-weight:500;letter-spacing:.04em}.site-nav{display:flex;align-items:center;gap:1.25rem;font-size:.92rem;color:var(--text-muted)}.site-nav a{color:var(--text-muted);position:relative}.site-nav a::after{content:"";position:absolute;left:0;bottom:-3px;width:100%;height:1.5px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .2s}.site-nav a:hover{color:var(--accent)}.site-nav a:hover::after{transform:scaleX(1)}#theme-toggle{border:none;background:0 0;font-size:1rem;cursor:pointer;padding:0;opacity:.75}#theme-toggle:hover{opacity:1}.post-item{display:flex;align-items:baseline;gap:1.25rem;padding:.7rem 0}.post-date{font-size:.85rem;color:var(--text-muted);font-variant-numeric:tabular-nums;min-width:3.2em;flex-shrink:0}.post-info{display:flex;align-items:baseline;gap:.75rem;flex-wrap:wrap}.tag{color:var(--text-muted);font-size:.82rem}.tag:hover{color:var(--accent)}.page-title{font-family:var(--font-heading);font-size:1.6rem;font-weight:500;margin:0 0 1.5rem}.archive-year{font-family:var(--font-heading);font-size:1.15rem;font-weight:500;color:var(--accent);margin:2rem 0 .4rem}.pagination{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:.45rem;margin:2.6rem 0 .5rem}.pagination a,.pagination span{display:inline-flex;align-items:center;justify-content:center;min-width:2.15rem;height:2.15rem;border:1px solid var(--border);border-radius:999px;font-size:.88rem;color:var(--text);text-decoration:none;transition:border-color .18s var(--ease),color .18s var(--ease),background-color .18s var(--ease)}.pagination a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}.pagination .page-number.current{background:var(--accent);border-color:var(--accent);color:#fff}.pagination .extend{padding:0 1.05rem}@media (max-width:600px){.pagination a,.pagination span{min-width:2rem;height:2rem;font-size:.84rem}.pagination .extend{padding:0 .9rem}}.tag-cloud{display:flex;flex-wrap:wrap;gap:.6rem}.tag-cloud-item{display:inline-flex;align-items:baseline;gap:.4rem;padding:.32rem .8rem;border:1px solid var(--border);border-radius:999px;font-size:.9rem;transition:border-color .18s var(--ease),background .18s var(--ease)}.tag-cloud-item:hover{border-color:var(--accent);background:var(--accent-soft)}.tag-count{font-size:.74rem;color:var(--text-muted);font-variant-numeric:tabular-nums}.tag-cloud-item:hover .tag-count{color:var(--accent)}.category-list{list-style:none;margin:0;padding:0}.category-list li{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--border)}.category-list li:first-child{border-top:1px solid var(--border)}.cat-count{font-size:.82rem;color:var(--text-muted);font-variant-numeric:tabular-nums}.empty-hint{color:var(--text-muted);font-size:.92rem}.post-header{margin-bottom:2.5rem}.post-title{font-family:var(--font-heading);font-size:1.75rem;font-weight:500;line-height:1.4;margin:0 0 .5rem}.post-meta{color:var(--text-muted);font-size:.88rem;margin:0}.post-content h1{font-family:var(--font-heading);font-weight:500;line-height:1.45;font-size:1.45rem;margin:2.2em 0 .8em}.post-content h5,.post-content h6{font-family:var(--font-body);font-weight:600;font-size:.95rem;line-height:1.6;margin:1.7em 0 .6em}.post-content h1,.post-content h2,.post-content h3,.post-content h4,.post-content h5,.post-content h6{scroll-margin-top:5rem}.post-content>:first-child{margin-top:0}.post-content>:last-child{margin-bottom:0}.post-toc{margin:0 0 2rem;padding:.75rem 1.1rem;border:1px solid var(--border);border-radius:8px;font-size:.92rem}.post-toc summary{cursor:pointer;color:var(--text-muted);font-size:.86rem;letter-spacing:.05em;list-style-position:inside}.post-toc summary:hover,.post-toc[open] summary{color:var(--accent)}.toc-body{padding-top:.6rem}.toc-list,.toc-sub{list-style:none;margin:0;padding:0}.toc-list li{padding:.15rem 0}.toc-list a{display:block;color:var(--text-muted);line-height:1.6}.toc-list a.active,.toc-list a:hover{color:var(--accent)}.toc-sub{margin:.1rem 0 .3rem;padding-left:1rem}.toc-sub a{font-size:.88rem}.post-content{font-size:1.02rem;line-height:1.95;letter-spacing:.02em}.post-content h2,.post-content h3,.post-content h4{font-family:var(--font-heading);font-weight:500;margin:2.2em 0 .8em;line-height:1.45}.post-content h2{font-size:1.35rem;padding-bottom:.35em;border-bottom:1px solid var(--border)}.post-content h3{font-size:1.15rem}.post-content p{margin:1.1em 0}.post-content blockquote{margin:1.4em 0;padding:.6em 1.2em;border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 6px 6px 0;color:var(--text-muted)}.post-content blockquote p{margin:.3em 0}.post-content code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.87em;background:var(--code-bg);padding:.15em .45em;border-radius:4px}.post-content pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:1rem 1.2rem;overflow-x:auto;line-height:1.6}.post-content pre code{background:0 0;padding:0;font-size:.86rem}.post-content .highlight{position:relative;margin:1.5em 0;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden}.post-content .highlight table{width:100%;margin:0;border-collapse:collapse;font-size:.86rem;table-layout:fixed}.post-content .highlight td,.post-content .highlight th{border:none;padding:0;vertical-align:top}.post-content .highlight pre{margin:0;padding:.9rem 1.1rem;background:0 0;border:none;border-radius:0;font-size:.86rem;line-height:1.65}.post-content .highlight td.code pre{overflow-x:auto}.post-content :not(pre)>code{overflow-wrap:anywhere}.post-content .highlight .gutter{user-select:none;border-right:1px solid var(--border);width:3.5em}.post-content .highlight .gutter pre{padding:.9rem .7rem .9rem .9rem;text-align:right;color:var(--text-muted);opacity:.6}.post-content a{color:var(--accent);text-decoration:underline;text-decoration-color:color-mix(in srgb,var(--accent) 34%,transparent);text-underline-offset:3px;transition:text-decoration-color .18s var(--ease),color .18s var(--ease)}.post-content a:hover{text-decoration-color:var(--accent)}.headerlink,.post-content a.headerlink{color:inherit;text-decoration:none}.post-content img{max-width:100%;border-radius:8px}.post-content hr{border:none;border-top:1px solid var(--border);margin:2.5em auto;width:40%}.post-content table{width:100%;border-collapse:collapse;font-size:.92rem;margin:1.4em 0}.post-content td,.post-content th{border:1px solid var(--border);padding:.5em .9em;text-align:left}.post-content th{background:var(--bg-soft)}.code-block{position:relative;padding-top:2rem}.code-block .code-lang{position:absolute;top:8px;left:12px;font-size:.72rem;letter-spacing:.07em;color:var(--text-muted);opacity:.8;user-select:none}.code-block .copy-btn{position:absolute;top:4px;right:8px;border:1px solid var(--border);background:var(--bg);color:var(--text-muted);font-size:.75rem;padding:.2em .7em;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .2s var(--ease),color .18s var(--ease)}.code-block:hover .copy-btn{opacity:1}.code-block .copy-btn:hover{color:var(--accent)}.code-block .copy-btn.copied{color:var(--accent);border-color:var(--accent);opacity:1}.heading-anchor{margin-left:.4em;color:var(--text-muted);opacity:0;font-weight:400;transition:opacity .15s}.post-content h2:hover .heading-anchor,.post-content h3:hover .heading-anchor,.post-content h4:hover .heading-anchor{opacity:.7}.heading-anchor:hover{color:var(--accent);opacity:1!important}.highlight .comment,.highlight .quote{color:var(--text-muted);font-style:italic}.highlight .keyword,.highlight .literal,.highlight .selector-tag{color:#3a7ca5;font-weight:500}[data-theme=dark] .highlight .keyword,[data-theme=dark] .highlight .selector-tag{color:#7fb3d5}.highlight .number,.highlight .string{color:#8a9459}[data-theme=dark] .highlight .number,[data-theme=dark] .highlight .string{color:#a3b56e}.post>.post-tags{margin-top:2.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}.post-nav{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--border)}.post-related{margin-top:2rem}.post-related-title{font-family:var(--font-heading);font-size:1.05rem;font-weight:500;color:var(--text-muted);margin:0 0 .8rem}.post-related-list{display:grid;gap:.5rem}.post-related-item{display:flex;align-items:baseline;gap:.6rem;padding:.55rem .8rem;background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;text-decoration:none;transition:border-color .2s,transform .2s}.post-related-item:hover{border-color:var(--accent);transform:translateY(-1px)}.post-related-cat{flex-shrink:0;font-size:.72rem;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:.12rem .55rem}.post-related-name{flex:1;min-width:0;font-size:.92rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.post-related-date{flex-shrink:0;font-size:.75rem;color:var(--text-muted);font-variant-numeric:tabular-nums}@media (max-width:600px){.post-related-item{flex-wrap:wrap;row-gap:.15rem}.post-related-name{white-space:normal}.post-related-date{margin-left:auto}}.post-nav-item{display:flex;flex-direction:column;gap:.3rem;padding:.85rem 1rem;border:1px solid var(--border);border-radius:8px;transition:border-color .18s var(--ease),background .18s var(--ease)}.post-nav-item.next{text-align:right;grid-column:2}.post-nav-item:hover{border-color:var(--accent);background:var(--accent-soft)}.post-nav-label{font-size:.78rem;color:var(--text-muted);letter-spacing:.03em}.post-nav-title{font-size:.92rem;line-height:1.5;color:var(--text)}.post-nav-item:hover .post-nav-title{color:var(--accent)}.pagination{margin-top:2.5rem;text-align:center;font-size:.92rem}.pagination a,.pagination span{padding:.2em .7em;margin:0 .15em;color:var(--text-muted)}.pagination .current{color:var(--accent);font-weight:500}.site-footer{background:linear-gradient(var(--border),var(--border)) top center/min(100%,var(--max-width)) 1px no-repeat;text-align:center;padding:2rem 1.25rem;font-size:.85rem;color:var(--text-muted)}.site-footer p{margin:.3em 0}.footer-sub{font-family:var(--font-heading);opacity:.75}.footer-stats{font-variant-numeric:tabular-nums;opacity:.85}.footer-uptime{opacity:.85}.music-root{position:fixed;left:1.25rem;bottom:1.25rem;z-index:45;font-family:var(--font-body)}.music-root[data-mode=page]{position:static;margin-top:1.9rem}.music-root[hidden]{display:none!important}.mp-pill{display:flex;align-items:center;height:50px;padding-right:.4rem;border:1px solid var(--glass-border);border-radius:999px;background:var(--glass);-webkit-backdrop-filter:blur(14px) saturate(1.5);backdrop-filter:blur(14px) saturate(1.5);box-shadow:var(--glass-shadow);transition:border-color .2s var(--ease),transform .2s var(--ease)}.mp-pill:hover{border-color:var(--accent)}.music-root[data-mode=page] .mp-pill{display:none}.mp-expand{display:flex;align-items:center;gap:.6rem;max-width:170px;padding:0 .35rem;border:0;background:0 0;color:var(--text);font:inherit;cursor:pointer}.mp-cover{flex:none;width:38px;height:38px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,var(--accent-soft),var(--bg-soft))}.mp-cover-img{display:block;width:100%;height:100%;object-fit:cover}.mp-cover-img[hidden]{display:none}.music-root.is-playing .mp-cover{animation:18s linear infinite mp-spin}@keyframes mp-spin{to{transform:rotate(360deg)}}.mp-text{display:flex;align-items:baseline;gap:.4rem;overflow:hidden;white-space:nowrap}.mp-title{font-size:.88rem;overflow:hidden;text-overflow:ellipsis}.mp-artist{flex:none;font-size:.75rem;color:var(--text-muted)}.mp-chevron{flex:none;width:14px;height:14px;color:var(--text-muted);transition:transform .22s var(--ease)}.mp-chevron svg{display:block;width:100%;height:100%}.music-root.open .mp-chevron{transform:rotate(180deg)}.mp-toggle{flex:none;width:32px;height:32px;margin-left:.45rem;padding:0;border:0;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;cursor:pointer;transition:transform .16s var(--ease),opacity .16s var(--ease)}.mp-toggle:hover{transform:scale(1.07)}.mp-toggle:active{transform:scale(.96)}.mp-toggle svg{width:15px;height:15px}.mp-panel{position:absolute;left:0;bottom:calc(100% + .65rem);width:312px;padding:.95rem 1rem 1.05rem;border:1px solid var(--glass-border);border-radius:16px;background:var(--glass);-webkit-backdrop-filter:blur(18px) saturate(1.6);backdrop-filter:blur(18px) saturate(1.6);box-shadow:var(--glass-shadow);opacity:0;visibility:hidden;transform:translateY(8px) scale(.98);transform-origin:bottom left;transition:opacity .22s var(--ease),transform .22s var(--ease),visibility .22s}.music-root.open .mp-panel{opacity:1;visibility:visible;transform:none}.music-root[data-mode=page] .mp-panel{position:static;width:100%;border-radius:14px;opacity:1;visibility:visible;transform:none}.mp-head{display:flex;align-items:center;gap:.85rem;margin-bottom:.9rem}.mp-cover-lg{width:46px;height:46px}.music-root[data-mode=page] .mp-cover-lg{width:76px;height:76px}.mp-meta{display:flex;flex-direction:column;gap:.15rem;overflow:hidden}.mp-meta .mp-title{font-family:var(--font-heading);font-size:1rem}.music-root[data-mode=page] .mp-meta .mp-title{font-size:1.2rem}.mp-meta .mp-artist{font-size:.78rem;color:var(--text-muted)}.mp-bar{position:relative;height:14px;cursor:pointer;touch-action:none}.mp-bar::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;border-radius:2px;background:var(--border)}.mp-played{position:absolute;left:0;top:6px;width:0;height:2px;border-radius:2px;background:var(--accent)}.mp-thumb{position:absolute;right:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--accent);opacity:0;transition:opacity .16s var(--ease)}.mp-bar:active .mp-thumb,.mp-bar:hover .mp-thumb{opacity:1}.mp-time{display:flex;justify-content:space-between;margin-top:.15rem;font-size:.72rem;color:var(--text-muted);font-variant-numeric:tabular-nums}.mp-controls{display:flex;align-items:center;gap:.1rem;margin-top:.5rem}.mp-btn{flex:none;width:30px;height:30px;padding:0;border:0;border-radius:8px;background:0 0;color:var(--text-muted);display:grid;place-items:center;cursor:pointer;transition:color .16s var(--ease),background .16s var(--ease),transform .16s var(--ease)}.mp-btn svg{width:17px;height:17px}.mp-btn:hover{color:var(--accent);background:var(--accent-soft)}.mp-btn-main{width:34px;height:34px;margin:0 .15rem;border-radius:50%;background:var(--accent);color:#fff}.mp-btn-main:hover{color:#fff;background:var(--accent);transform:scale(1.06)}.mp-btn-main svg{width:16px;height:16px}.mp-loop{position:relative}.mp-loop[data-mode=none]{opacity:.45}.mp-loop.is-on{color:var(--accent)}.mp-loop[data-mode=one]::after{content:"1";position:absolute;top:1px;right:3px;font-size:.55rem;line-height:1;font-weight:600}.mp-vol{position:relative;flex:0 0 auto;width:104px;height:14px;margin-left:auto;cursor:pointer;touch-action:none}.mp-vol::before{content:"";position:absolute;left:0;right:0;top:6px;height:2px;border-radius:2px;background:var(--text-muted);opacity:.5}.mp-vol-fill::after{content:"";position:absolute;right:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.35);opacity:0;transition:opacity .16s var(--ease)}.mp-vol:active .mp-vol-fill::after,.mp-vol:hover .mp-vol-fill::after{opacity:1}.mp-vol-fill{position:absolute;left:0;top:6px;width:60%;height:2px;border-radius:2px;background:var(--accent)}.music-root[data-mode=page] .mp-mute{margin-left:auto}.music-root[data-mode=page] .mp-vol{margin-left:.4rem}.mp-lrc[hidden],.music-root[data-mode=global] .mp-lrc{display:none}.mp-lrc{position:relative;height:116px;margin-top:.85rem;overflow:hidden;-webkit-mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%);mask-image:linear-gradient(180deg,transparent 0,#000 16%,#000 84%,transparent 100%)}.mp-lrc-inner{transition:transform .45s var(--ease)}.mp-lrc p{margin:.34rem 0;font-size:.82rem;line-height:1.5;text-align:center;color:var(--text-muted);opacity:.72;transition:color .25s var(--ease),opacity .25s var(--ease)}.mp-lrc p.active{color:var(--accent);opacity:1}.music-page .music-tip{color:var(--text-muted);font-size:.92rem}@media (max-width:600px){.post-nav{grid-template-columns:1fr}.post-nav-item.next{grid-column:1}.music-root{left:.8rem;bottom:.8rem}.mp-expand{max-width:44vw}.mp-panel{width:calc(100vw - 1.6rem);max-width:312px}.music-root[data-mode=page] .mp-panel{width:100%}.music-root[data-mode=page] .mp-cover-lg{width:64px;height:64px}}.back-to-top{position:fixed;right:1.5rem;bottom:1.5rem;width:38px;height:38px;display:flex;align-items:center;justify-content:center;padding:0;border:1px solid var(--border);border-radius:50%;background:var(--bg);color:var(--text-muted);cursor:pointer;z-index:40;transition:color .18s var(--ease),border-color .18s var(--ease)}.back-to-top:hover{color:var(--accent);border-color:var(--accent)}.site-footer a{color:var(--text-muted);border-bottom:1px solid var(--border)}.site-footer a:hover{color:var(--accent)}.notfound{padding:3.2rem 0 4rem;text-align:center}.post:has(.notfound) .post-title{text-align:center}.notfound .nf-code{margin:0;font-family:var(--font-heading);font-size:4.6rem;line-height:1;letter-spacing:.04em;color:var(--accent)}.notfound .nf-text{margin:1.1rem 0 1.9rem;color:var(--text-muted)}.notfound .nf-actions{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin:0}.notfound .nf-btn{display:inline-block;padding:.55em 1.5em;border:1px solid var(--accent);border-radius:8px;color:var(--accent);text-decoration:none;transition:background .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}.notfound .nf-btn:hover{background:var(--accent);color:#fff}.notfound .nf-ghost{border-color:var(--border);color:var(--text-muted)}.notfound .nf-ghost:hover{background:var(--bg-soft);border-color:var(--accent);color:var(--accent)}@media (max-width:600px){.container{padding:2rem 1rem 3rem}.post-item{flex-direction:column;gap:.15rem}.post-item .post-title{font-size:1.05rem}.post-title{font-size:1.5rem}.post-content{font-size:1rem}.site-nav{gap:.85rem;font-size:.88rem}.back-to-top{right:1rem;bottom:1rem}.post-content>table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}}.site-header{position:sticky;top:0;z-index:40;background:rgba(252,252,250,.78);-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px)}[data-theme=dark] .site-header{background:rgba(28,30,34,.78)}.site-title{display:inline-flex;align-items:center;gap:.3rem}.back-icon{display:inline-flex;width:15px;height:15px;color:var(--accent)}.back-icon svg{width:100%;height:100%;display:block}#theme-toggle{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;color:inherit}#theme-toggle svg{display:block;width:100%;height:100%}#theme-toggle .ti-sun{display:none}[data-theme=dark] #theme-toggle .ti-sun{display:block}[data-theme=dark] #theme-toggle .ti-moon{display:none}@media (hover:none){.post-nav-item:hover,.tag-cloud-item:hover{border-color:var(--border);background:0 0}.tag-cloud-item:hover .tag-count{color:var(--text-muted)}.site-nav a:hover::after{transform:scaleX(0)}.code-block .copy-btn{opacity:1}.heading-anchor{display:none}}#awen-pjax-bar{position:fixed;top:0;left:0;right:0;height:2px;z-index:9999;pointer-events:none;opacity:0}#awen-pjax-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),#8fc7ec);box-shadow:0 0 8px rgba(58,124,165,.45);transition:width .45s cubic-bezier(.2, .7, .3, 1)}#awen-pjax-bar.is-on{opacity:1}#awen-pjax-bar.is-on i{width:78%}#awen-pjax-bar.is-done i{width:100%;transition-duration:.16s}#awen-pjax-bar.is-done{opacity:0;transition:opacity .2s .1s}@media (prefers-reduced-motion:reduce){#awen-pjax-bar i{transition:none}}
+/* ============================================================
+   Awen — 极简主题
+   单栏 · 留白 · 青蓝点缀 · 文楷标题
+   ============================================================ */
+
+:root {
+  --bg: #fcfcfa;
+  --bg-soft: #f4f4f1;
+  --text: #2c2c2a;
+  --text-muted: #88857e;
+  --border: #e8e6e0;
+  --accent: #3a7ca5;
+  --accent-soft: rgba(58, 124, 165, 0.08);
+  --code-bg: #f0f0ec;
+  --font-body: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --font-heading: "LXGW WenKai Screen", "Songti SC", serif;
+  --max-width: 680px;
+  --glass: rgba(252, 252, 250, 0.84);
+  --glass-border: rgba(44, 44, 42, 0.08);
+  --glass-shadow: 0 10px 34px rgba(44, 44, 42, 0.13);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+[data-theme="dark"] {
+  --bg: #1c1e22;
+  --bg-soft: #24262b;
+  --text: #d8d6d0;
+  --text-muted: #7d7b76;
+  --border: #33363c;
+  --accent: #7fb3d5;
+  --accent-soft: rgba(127, 179, 213, 0.1);
+  --code-bg: #2a2d33;
+  --glass: rgba(30, 32, 37, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+[hidden] { display: none !important; }
+
+html { font-size: 16px; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+a {
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.18s var(--ease);
+}
+
+a:hover { color: var(--accent); }
+
+/* 键盘可达性：鼠标点击时不画，只有 Tab 过来才显出一圈焦点环。
+   整站原来一个 :focus 都没有，用键盘根本看不出光标停在哪。 */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+html { scroll-behavior: smooth; }
+
+::selection {
+  background: rgba(58, 124, 165, 0.22);
+}
+
+[data-theme="dark"] ::selection {
+  background: rgba(127, 179, 213, 0.3);
+}
+
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 3rem 1.25rem 4rem;
+  min-height: calc(100vh - 260px);
+}
+
+/* ---------- 阅读进度条 ---------- */
+
+.read-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.read-progress span {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  opacity: 0.85;
+  transition: width 0.1s linear;
+}
+
+/* ---------- 头部 ---------- */
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  transition: background 0.25s ease;
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.site-title {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
+}
+
+.site-nav a { color: var(--text-muted); position: relative; }
+
+.site-nav a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1.5px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.2s ease;
+}
+
+.site-nav a:hover { color: var(--accent); }
+
+.site-nav a:hover::after { transform: scaleX(1); }
+
+#theme-toggle {
+  border: none;
+  background: none;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+  opacity: 0.75;
+}
+
+#theme-toggle:hover { opacity: 1; }
+
+/* ---------- 文章列表（归档 / 标签 / 分类页共用）---------- */
+
+.post-item {
+  display: flex;
+  align-items: baseline;
+  gap: 1.25rem;
+  padding: 0.7rem 0;
+}
+
+.post-date {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2em;
+  flex-shrink: 0;
+}
+
+.post-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.post-title { font-size: 1.02rem; }
+
+.tag {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.tag:hover { color: var(--accent); }
+
+/* ---------- 归档 ---------- */
+
+.page-title {
+  font-family: var(--font-heading);
+  font-size: 1.6rem;
+  font-weight: 500;
+  margin: 0 0 1.5rem;
+}
+
+.archive-year {
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--accent);
+  margin: 2rem 0 0.4rem;
+}
+
+/* ---------- 分页（列表页超过每页 10 篇时出现在底部）---------- */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 2.6rem 0 0.5rem;
+}
+
+.pagination a,
+.pagination span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.15rem;
+  height: 2.15rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  color: var(--text);
+  text-decoration: none;
+  transition: border-color 0.18s var(--ease), color 0.18s var(--ease),
+              background-color 0.18s var(--ease);
+}
+
+.pagination a:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* 当前页：实心胶囊，一眼看出「你在哪」 */
+.pagination .page-number.current {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* 「上一页 / 下一页」文字长一些，多点内边距 */
+.pagination .extend { padding: 0 1.05rem; }
+
+@media (max-width: 600px) {
+  .pagination a,
+  .pagination span { min-width: 2rem; height: 2rem; font-size: 0.84rem; }
+  .pagination .extend { padding: 0 0.9rem; }
+}
+
+/* ---------- 标签页 / 分类页 ---------- */
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.tag-cloud-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding: 0.32rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.9rem;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.tag-cloud-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.tag-count {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.tag-cloud-item:hover .tag-count { color: var(--accent); }
+
+.category-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.category-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.72rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.category-list li:first-child { border-top: 1px solid var(--border); }
+
+.cat-count {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.empty-hint {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* ---------- 文章页 ---------- */
+
+.post-header { margin-bottom: 2.5rem; }
+
+.post-title {
+  font-family: var(--font-heading);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0 0 0.5rem;
+}
+
+.post-meta {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ---------- 正文标题里被漏掉的两档 ----------
+   h2 / h3 / h4 在下面「正文排版」那一节里已经有了（同一套衬线、2.2em 上间距、
+   h2 还带一条分隔线）。这里只补它没写的：
+
+     · h1 —— 一条规则都没有，浏览器默认给的是 2em（32.6px）的 sans-serif，
+       比页面标题（1.75rem = 28px）还大、还不是同一个字体家族。
+       「关于」页里正文的「你好，我是 Awen」比页名「关于」更抢眼，层级是倒的；
+     · h5 / h6 —— 默认 0.83em / 0.67em 的衬线字，又小又别扭，
+       退回正文字体、靠字号和字重分层级更清楚。
+
+   这两条都故意不写 color：正文标题跟正文同色、让它自己继承。
+   写死 var(--text) 会在「深色机身里的一块浅色纸」那种上下文里突然变黑。 */
+
+.post-content h1 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  line-height: 1.45;
+  font-size: 1.45rem;
+  margin: 2.2em 0 0.8em;
+}
+
+.post-content h5,
+.post-content h6 {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 1.7em 0 0.6em;
+}
+
+/* 手机上站点头部是吸顶的（sticky，约 60px），点目录跳锚点时
+   标题别正好被压在它下面 */
+.post-content h1,
+.post-content h2,
+.post-content h3,
+.post-content h4,
+.post-content h5,
+.post-content h6 { scroll-margin-top: 5rem; }
+
+/* 正文首尾的元素别再额外多顶一截空白（外层的 header / footer 已经留过了） */
+.post-content > :first-child { margin-top: 0; }
+.post-content > :last-child { margin-bottom: 0; }
+
+/* 文章目录 */
+
+.post-toc {
+  margin: 0 0 2rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.post-toc summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  letter-spacing: 0.05em;
+  list-style-position: inside;
+}
+
+.post-toc[open] summary,
+.post-toc summary:hover { color: var(--accent); }
+
+.toc-body { padding-top: 0.6rem; }
+
+.toc-list,
+.toc-sub {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc-list li { padding: 0.15rem 0; }
+
+.toc-list a {
+  display: block;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.toc-list a:hover,
+.toc-list a.active { color: var(--accent); }
+
+.toc-sub {
+  margin: 0.1rem 0 0.3rem;
+  padding-left: 1rem;
+}
+
+.toc-sub a { font-size: 0.88rem; }
+
+/* 正文排版 */
+
+.post-content {
+  font-size: 1.02rem;
+  line-height: 1.95;
+  letter-spacing: 0.02em;
+}
+
+.post-content h2,
+.post-content h3,
+.post-content h4 {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  margin: 2.2em 0 0.8em;
+  line-height: 1.45;
+}
+
+.post-content h2 {
+  font-size: 1.35rem;
+  padding-bottom: 0.35em;
+  border-bottom: 1px solid var(--border);
+}
+
+.post-content h3 { font-size: 1.15rem; }
+
+.post-content p { margin: 1.1em 0; }
+
+.post-content blockquote {
+  margin: 1.4em 0;
+  padding: 0.6em 1.2em;
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: 0 6px 6px 0;
+  color: var(--text-muted);
+}
+
+.post-content blockquote p { margin: 0.3em 0; }
+
+.post-content code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.87em;
+  background: var(--code-bg);
+  padding: 0.15em 0.45em;
+  border-radius: 4px;
+}
+
+.post-content pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+
+.post-content pre code {
+  background: none;
+  padding: 0;
+  font-size: 0.86rem;
+}
+
+/* Hexo highlight 的输出是 figure.highlight > table > td.gutter / td.code
+   边框与底色统一放在最外层，内部表格去掉默认表格样式 */
+
+.post-content .highlight {
+  position: relative;
+  margin: 1.5em 0;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.post-content .highlight table {
+  width: 100%;
+  margin: 0;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+  /* 关键：不许表格被一行超长代码撑开 —— table-layout:auto 时单元格的
+     min-content 会把表撑到内容那么宽，移动端直接把页面撑出横向滚动；
+     fixed 之后表格老实待在 100% 里，长行交给下面的 pre 自己横向滚 */
+  table-layout: fixed;
+}
+
+.post-content .highlight td,
+.post-content .highlight th {
+  border: none;
+  padding: 0;
+  vertical-align: top;
+}
+
+.post-content .highlight pre {
+  margin: 0;
+  padding: 0.9rem 1.1rem;
+  background: none;
+  border: none;
+  border-radius: 0;
+  font-size: 0.86rem;
+  line-height: 1.65;
+}
+
+/* 长代码行的横向滚动发生在 td.code 的 pre 里（行号列保持不动），
+   figure 本身保持 overflow:hidden —— 复制按钮是 absolute 定位在它身上的，
+   要是把 figure 改成滚动容器，按钮就会跟着内容一起滚走 */
+.post-content .highlight td.code pre {
+  overflow-x: auto;
+}
+
+/* 行内代码里的长 token（比如一长串包名）没有空格可断，
+   不处理的话会把段落撑出容器 */
+.post-content :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
+.post-content .highlight .gutter {
+  user-select: none;
+  border-right: 1px solid var(--border);
+  /* table-layout:fixed 之后列宽全靠显式声明 —— 行号列给个够放 3 位数的宽度 */
+  width: 3.5em;
+}
+
+.post-content .highlight .gutter pre {
+  padding: 0.9rem 0.7rem 0.9rem 0.9rem;
+  text-align: right;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* 正文里的链接：原来跟普通文字一个颜色、也没有下划线，
+   读者根本看不出哪里能点。给它一点辨识度。 */
+.post-content a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 34%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.post-content a:hover { text-decoration-color: var(--accent); }
+
+/* 标题上那个锚点 # 只是个跳转手柄，不该长成一条链接 */
+.headerlink,
+.post-content a.headerlink {
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-content img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.post-content hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5em auto;
+  width: 40%;
+}
+
+.post-content table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 1.4em 0;
+}
+
+.post-content th,
+.post-content td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.9em;
+  text-align: left;
+}
+
+.post-content th { background: var(--bg-soft); }
+
+/* 代码块：顶部信息带（语言名 + 复制按钮） */
+
+.code-block {
+  position: relative;
+  padding-top: 2rem;
+}
+
+.code-block .code-lang {
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  font-size: 0.72rem;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  opacity: 0.8;
+  user-select: none;
+}
+
+.code-block .copy-btn {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  padding: 0.2em 0.7em;
+  border-radius: 5px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s var(--ease), color 0.18s var(--ease);
+}
+
+.code-block:hover .copy-btn { opacity: 1; }
+
+.code-block .copy-btn:hover { color: var(--accent); }
+
+.code-block .copy-btn.copied {
+  color: var(--accent);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+/* 标题锚点：悬浮时才出现，不干扰阅读 */
+
+.heading-anchor {
+  margin-left: 0.4em;
+  color: var(--text-muted);
+  opacity: 0;
+  font-weight: 400;
+  transition: opacity 0.15s ease;
+}
+
+.post-content h2:hover .heading-anchor,
+.post-content h3:hover .heading-anchor,
+.post-content h4:hover .heading-anchor {
+  opacity: 0.7;
+}
+
+.heading-anchor:hover { color: var(--accent); opacity: 1 !important; }
+
+.highlight .comment,
+.highlight .quote { color: var(--text-muted); font-style: italic; }
+
+.highlight .keyword,
+.highlight .selector-tag,
+.highlight .literal { color: #3a7ca5; font-weight: 500; }
+
+[data-theme="dark"] .highlight .keyword,
+[data-theme="dark"] .highlight .selector-tag { color: #7fb3d5; }
+
+.highlight .string,
+.highlight .number { color: #8a9459; }
+
+[data-theme="dark"] .highlight .string,
+[data-theme="dark"] .highlight .number { color: #a3b56e; }
+
+/* 文章底部 */
+
+.post > .post-tags {
+  margin-top: 2.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+}
+
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ---------- 相关文章 ---------- */
+.post-related {
+  margin-top: 2rem;
+}
+
+.post-related-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin: 0 0 0.8rem;
+}
+
+.post-related-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.post-related-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.post-related-item:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.post-related-cat {
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+}
+
+.post-related-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.post-related-date {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 600px) {
+  .post-related-item { flex-wrap: wrap; row-gap: 0.15rem; }
+  .post-related-name { white-space: normal; }
+  .post-related-date { margin-left: auto; }
+}
+
+.post-nav-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.post-nav-item.next { text-align: right; grid-column: 2; }
+
+.post-nav-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.post-nav-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+
+.post-nav-title {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.post-nav-item:hover .post-nav-title { color: var(--accent); }
+
+@media (max-width: 600px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav-item.next { grid-column: 1; }
+}
+
+/* ---------- 分页 ---------- */
+
+.pagination {
+  margin-top: 2.5rem;
+  text-align: center;
+  font-size: 0.92rem;
+}
+
+.pagination a,
+.pagination span {
+  padding: 0.2em 0.7em;
+  margin: 0 0.15em;
+  color: var(--text-muted);
+}
+
+.pagination .current { color: var(--accent); font-weight: 500; }
+
+/* ---------- 页脚 ---------- */
+
+.site-footer {
+  /* 原来是 border-top：在平板的文档 App 里 footer 是通栏的，而正文列
+     只有 680px 居中 —— 一条线从左缘穿到右缘，两头各翘出一大截。
+     改用与内容列同宽、居中放置的背景线，宽屏上不再两头翘；窄屏
+     min(100%, …) 自动退化成通栏，和原来一样。 */
+  background: linear-gradient(var(--border), var(--border)) top center / min(100%, var(--max-width)) 1px no-repeat;
+  text-align: center;
+  padding: 2rem 1.25rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.site-footer p { margin: 0.3em 0; }
+
+.footer-sub {
+  font-family: var(--font-heading);
+  opacity: 0.75;
+}
+
+.footer-stats {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.footer-uptime { opacity: 0.85; }
+
+/* ---------- 音乐播放器 ---------- */
+
+.music-root {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 45;
+  font-family: var(--font-body);
+}
+
+.music-root[data-mode="page"] {
+  position: static;
+  margin-top: 1.9rem;
+}
+
+.music-root[hidden] { display: none !important; }
+
+/* --- 收起态：胶囊 --- */
+
+.mp-pill {
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding-right: 0.4rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow: var(--glass-shadow);
+  transition: border-color 0.2s var(--ease), transform 0.2s var(--ease);
+}
+
+.mp-pill:hover { border-color: var(--accent); }
+
+.music-root[data-mode="page"] .mp-pill { display: none; }
+
+.mp-expand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 170px;
+  padding: 0 0.35rem 0 0.35rem;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.mp-cover {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--accent-soft), var(--bg-soft));
+}
+
+.mp-cover-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 封面拿不到时 <img> 会被打上 hidden；但它自己声明了 display:block，
+   作者样式盖过 UA 的 [hidden]，所以必须显式写一条把它真的收起来，
+   否则露出的是破图图标而不是 .mp-cover 的底纹 */
+.mp-cover-img[hidden] { display: none; }
+
+/* 播放时封面像唱片一样慢慢转 */
+.music-root.is-playing .mp-cover { animation: mp-spin 18s linear infinite; }
+
+@keyframes mp-spin {
+  to { transform: rotate(360deg); }
+}
+
+.mp-text {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.mp-title {
+  font-size: 0.88rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mp-artist {
+  flex: none;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.mp-chevron {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  transition: transform 0.22s var(--ease);
+}
+
+.mp-chevron svg { display: block; width: 100%; height: 100%; }
+
+.music-root.open .mp-chevron { transform: rotate(180deg); }
+
+.mp-toggle {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin-left: 0.45rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.16s var(--ease), opacity 0.16s var(--ease);
+}
+
+.mp-toggle:hover { transform: scale(1.07); }
+.mp-toggle:active { transform: scale(0.96); }
+.mp-toggle svg { width: 15px; height: 15px; }
+
+/* --- 展开态：毛玻璃面板 --- */
+
+.mp-panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 0.65rem);
+  width: 312px;
+  padding: 0.95rem 1rem 1.05rem;
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(18px) saturate(1.6);
+  backdrop-filter: blur(18px) saturate(1.6);
+  box-shadow: var(--glass-shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: bottom left;
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease), visibility 0.22s;
+}
+
+.music-root.open .mp-panel {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+.music-root[data-mode="page"] .mp-panel {
+  position: static;
+  width: 100%;
+  border-radius: 14px;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+}
+
+/* 面板头部 */
+
+.mp-head {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+.mp-cover-lg {
+  width: 46px;
+  height: 46px;
+}
+
+.music-root[data-mode="page"] .mp-cover-lg {
+  width: 76px;
+  height: 76px;
+}
+
+.mp-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  overflow: hidden;
+}
+
+.mp-meta .mp-title {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+}
+
+.music-root[data-mode="page"] .mp-meta .mp-title { font-size: 1.2rem; }
+
+.mp-meta .mp-artist {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* 进度条 */
+
+.mp-bar {
+  position: relative;
+  height: 14px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.mp-bar::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.mp-played {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.mp-thumb {
+  position: absolute;
+  right: -5px;
+  top: -4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.16s var(--ease);
+}
+
+.mp-bar:hover .mp-thumb,
+.mp-bar:active .mp-thumb { opacity: 1; }
+
+.mp-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.15rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 控制栏 */
+
+.mp-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  margin-top: 0.5rem;
+}
+
+.mp-btn {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: color 0.16s var(--ease), background 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.mp-btn svg { width: 17px; height: 17px; }
+.mp-btn:hover { color: var(--accent); background: var(--accent-soft); }
+
+.mp-btn-main {
+  width: 34px;
+  height: 34px;
+  margin: 0 0.15rem;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+}
+
+.mp-btn-main:hover { color: #fff; background: var(--accent); transform: scale(1.06); }
+.mp-btn-main svg { width: 16px; height: 16px; }
+
+.mp-loop { position: relative; }
+.mp-loop[data-mode="none"] { opacity: 0.45; }
+.mp-loop.is-on { color: var(--accent); }
+
+.mp-loop[data-mode="one"]::after {
+  content: "1";
+  position: absolute;
+  top: 1px;
+  right: 3px;
+  font-size: 0.55rem;
+  line-height: 1;
+  font-weight: 600;
+}
+
+/* 音量条：原来写的是 flex: 1，于是它把控制栏剩下的宽度全吃掉 ——
+   在音乐页那张 750px 宽的卡片里被拉成一条横贯半个卡片的细线，
+   看着根本不像音量，倒像一条没来由的分隔线。改成有界的宽度 + 推到最右。 */
+.mp-vol {
+  position: relative;
+  flex: 0 0 auto;
+  width: 104px;
+  height: 14px;
+  margin-left: auto;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.mp-vol::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 6px;
+  height: 2px;
+  border-radius: 2px;
+  /* --border 在深色文档里跟背景几乎同亮度，轨道看不见，
+     剩下的就只有一条凭空浮着的蓝色填充线。换 --text-muted 打个对折，
+     浅色深色两档都刚好「看得见但不抢戏」。 */
+  background: var(--text-muted);
+  opacity: 0.5;
+}
+
+/* 滑块拇指：挂在填充条自己的右沿（宽度是 JS 按音量写的内联样式），
+   悬停 / 按住时才出现 —— 和进度条 .mp-thumb 是同一套交互语言 */
+.mp-vol-fill::after {
+  content: "";
+  position: absolute;
+  right: -4px;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 0.16s var(--ease);
+}
+
+.mp-vol:hover .mp-vol-fill::after,
+.mp-vol:active .mp-vol-fill::after { opacity: 1; }
+
+.mp-vol-fill {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 60%;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* 音乐页：静音键跟音量条是一对，拆在卡片两头谁也认不出谁。
+   让静音键把整组（图标 + 轨道）一起推到右边，中间那截空白还给歌词。 */
+.music-root[data-mode="page"] .mp-mute { margin-left: auto; }
+.music-root[data-mode="page"] .mp-vol { margin-left: 0.4rem; }
+
+/* 歌词 */
+
+.music-root[data-mode="global"] .mp-lrc { display: none; }
+
+/* 歌词窗。当前唱到的那句会被居中，所以窗口上下各留半屏是设计如此；
+   但窗口本身别开太高 —— 132px 在"只有前奏的作词作曲三行"时显得空。
+   渐隐区也从 26% 收到 16%，免得仅有的几行字正好落在被淡掉的位置。 */
+/* 拿不到歌词时由 main.js 打上 hidden：空着一大块比没有更难看 */
+.mp-lrc[hidden] { display: none; }
+
+.mp-lrc {
+  position: relative;
+  height: 116px;
+  margin-top: 0.85rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 16%, #000 84%, transparent 100%);
+}
+
+.mp-lrc-inner { transition: transform 0.45s var(--ease); }
+
+/* 非当前行的对比度：0.5 太虚了 —— --text-muted(#88857e) 再乘 0.5，
+   在浅色卡片上基本只剩下一点影子。0.72 既能退到背景里，又读得出来。 */
+.mp-lrc p {
+  margin: 0.34rem 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-align: center;
+  color: var(--text-muted);
+  opacity: 0.72;
+  transition: color 0.25s var(--ease), opacity 0.25s var(--ease);
+}
+
+.mp-lrc p.active {
+  color: var(--accent);
+  opacity: 1;
+}
+
+/* 音乐页说明文字 */
+
+.music-page .music-tip {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
+/* 移动端 */
+
+@media (max-width: 600px) {
+  .music-root { left: 0.8rem; bottom: 0.8rem; }
+  .mp-expand { max-width: 44vw; }
+  .mp-panel { width: calc(100vw - 1.6rem); max-width: 312px; }
+  .music-root[data-mode="page"] .mp-panel { width: 100%; }
+  .music-root[data-mode="page"] .mp-cover-lg { width: 64px; height: 64px; }
+}
+
+/* ---------- 返回顶部 ---------- */
+
+.back-to-top {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  z-index: 40;
+  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+
+.back-to-top:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.site-footer a { color: var(--text-muted); border-bottom: 1px solid var(--border); }
+.site-footer a:hover { color: var(--accent); }
+
+/* ---------- 404 ----------
+   选择器都带上 .notfound 前缀：全文正文链接的 `.post-content a` 带下划线，
+   单独写 .nf-btn 会被它盖过去。 */
+
+.notfound {
+  padding: 3.2rem 0 4rem;
+  text-align: center;
+}
+
+/* 404 页的 h1 走的是 .post-title（文章标题，左对齐），而 .notfound 主体
+   是居中的 —— 标题孤零零靠左、404 大字居中，两种对齐打架。
+   页面里有 .notfound 就把标题一起居中（:has 现代浏览器全支持，
+   不支持时只是标题保持左对齐，无害降级）。 */
+.post:has(.notfound) .post-title { text-align: center; }
+
+.notfound .nf-code {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 4.6rem;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+
+.notfound .nf-text {
+  margin: 1.1rem 0 1.9rem;
+  color: var(--text-muted);
+}
+
+.notfound .nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin: 0;
+}
+
+.notfound .nf-btn {
+  display: inline-block;
+  padding: 0.55em 1.5em;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent);
+  text-decoration: none;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.notfound .nf-btn:hover { background: var(--accent); color: #fff; }
+
+.notfound .nf-ghost { border-color: var(--border); color: var(--text-muted); }
+.notfound .nf-ghost:hover { background: var(--bg-soft); border-color: var(--accent); color: var(--accent); }
+
+/* ---------- 移动端 ---------- */
+
+@media (max-width: 600px) {
+  .container { padding: 2rem 1rem 3rem; }
+  .post-item { flex-direction: column; gap: 0.15rem; }
+  .post-item .post-title { font-size: 1.05rem; }
+  .post-title { font-size: 1.5rem; }
+  .post-content { font-size: 1rem; }
+  .site-nav { gap: 0.85rem; font-size: 0.88rem; }
+  .back-to-top { right: 1rem; bottom: 1rem; }
+
+  /* 列数多的 Markdown 表格在窄屏放不下：变成块级横向滚动，
+     只滚表格自己，别把整个页面撑出横向滚动条 */
+  .post-content > table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ---------- 顶部导航：iOS 毛玻璃导航条 ---------- */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(252, 252, 250, 0.78);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+}
+
+[data-theme="dark"] .site-header { background: rgba(28, 30, 34, 0.78); }
+
+.site-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.back-icon {
+  display: inline-flex;
+  width: 15px;
+  height: 15px;
+  color: var(--accent);
+}
+
+.back-icon svg { width: 100%; height: 100%; display: block; }
+
+/* ---------- 主题切换按钮：用 SVG 图标（不再依赖 emoji 字体） ---------- */
+
+#theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+#theme-toggle svg { display: block; width: 100%; height: 100%; }
+
+/* 明暗图标按 data-theme 切换，不用 JS 换 innerHTML */
+#theme-toggle .ti-sun { display: none; }
+[data-theme="dark"] #theme-toggle .ti-sun { display: block; }
+[data-theme="dark"] #theme-toggle .ti-moon { display: none; }
+
+/* ---------- 触摸设备：不留 hover 残留、该露的按钮直接露出来 ---------- */
+
+@media (hover: none) {
+  /* 手机上点完不该一直亮着 */
+  .post-nav-item:hover,
+  .tag-cloud-item:hover {
+    border-color: var(--border);
+    background: none;
+  }
+
+  .tag-cloud-item:hover .tag-count { color: var(--text-muted); }
+  .site-nav a:hover::after { transform: scaleX(0); }
+
+  /* 没有 hover 就没有「浮出」，直接常显 */
+  .code-block .copy-btn { opacity: 1; }
+  .heading-anchor { display: none; }
+}
+
+
+/* ---------- 无刷翻页的顶部进度条 ---------- */
+/* 点站内链接时，pjax.js 只换 <body> 里的内容（文档不卸载），
+   顺带在窗口最上面拉一条很细的进度线。请求快于 180ms 时它根本不会出现，
+   慢的时候才露脸 —— 让「点了没反应」那一下有交代。 */
+#awen-pjax-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+}
+
+#awen-pjax-bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), #8fc7ec);
+  box-shadow: 0 0 8px rgba(58, 124, 165, 0.45);
+  transition: width 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+#awen-pjax-bar.is-on { opacity: 1; }
+/* 先冲到 78%：剩下的留给"真的加载完了"那一瞬间，不然进度条会先满再等 */
+#awen-pjax-bar.is-on i { width: 78%; }
+#awen-pjax-bar.is-done i { width: 100%; transition-duration: 0.16s; }
+#awen-pjax-bar.is-done { opacity: 0; transition: opacity 0.2s ease 0.1s; }
+
+/* 系统设了「减少动态效果」就别拉了，直接给个静态的顶边提示 */
+@media (prefers-reduced-motion: reduce) {
+  #awen-pjax-bar i { transition: none; }
+}
+
+
+/* ============================================================
+   阅读体验精修（对标优秀技术博客的排版细节）
+   ============================================================ */
+
+/* ---------- 正文首字下沉（drop cap）----------
+   只对「正文第一个段落的第一个字」生效：首段紧跟在标题后面，
+   放大的首字能把视线拉进文章，是文楷标题气质下的点睛之笔。
+   用 ::first-letter 而不单独包一层 <span> —— 不碰 Hexo 渲染的 HTML。
+   注意：首段若以链接 / 代码 / 标点开头，下沉反而别扭，这里用
+   「首字符必须是中文字或字母」的粗略判断再决定要不要放大。 */
+.post-content > p:first-of-type::first-letter {
+  font-family: var(--font-heading);
+  float: left;
+  font-size: 3.05em;
+  line-height: 0.86;
+  padding-right: 0.12em;
+  padding-top: 0.04em;
+  color: var(--accent);
+}
+
+/* 首段只有一个字（孤字成段）或首段就是代码块这类，别硬下沉 */
+.post-content > p:first-of-type {
+  overflow: hidden;
+}
+
+/* ---------- 键盘按键 <kbd> ----------
+   技术博客里 Ctrl+C / ⌘K / Tab 这类按键出现频率极高，默认样式是
+   一个灰框、字迹模糊。给一个轻浮雕的键帽感，和代码块同一套灰阶。 */
+.post-content kbd {
+  display: inline-block;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.8em;
+  line-height: 1.4;
+  padding: 0.08em 0.5em;
+  margin: 0 0.12em;
+  color: var(--text);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  box-shadow: inset 0 -1px 0 var(--border);
+  white-space: nowrap;
+}
+
+/* ---------- 列表标记符与间距 ----------
+   默认列表的圆点 / 数字跟正文挤在一起，长文扫读时层次糊。
+   把标记符染上主题色、加一点缩进和行距，让「列点」真正读得出结构。 */
+.post-content ul,
+.post-content ol {
+  padding-left: 1.4em;
+  margin: 1.1em 0;
+}
+
+.post-content li {
+  margin: 0.35em 0;
+  line-height: 1.85;
+}
+
+.post-content li::marker {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.post-content ul ul,
+.post-content ol ol,
+.post-content ul ol,
+.post-content ol ul {
+  margin: 0.2em 0;
+}
+
+/* ---------- 引用块增强 ----------
+   原来只有一条左边线 + 淡底色。补一个前置「引号」装饰和
+   更明确的分层，让「这是引用 / 提示」一眼可辨。 */
+.post-content blockquote {
+  position: relative;
+  padding: 0.8em 1.3em 0.8em 1.6em;
+}
+
+.post-content blockquote::before {
+  content: "\201C";          /* 左双引号 */
+  position: absolute;
+  left: 0.55em;
+  top: -0.15em;
+  font-family: var(--font-heading);
+  font-size: 1.9em;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.55;
+}
+
+/* ---------- 正文图片：克制的悬停反馈 ----------
+   有交互反馈的图片比死图更有「活」的感觉，但只在支持 hover 的
+   设备上做，触屏不受影响。 */
+@media (hover: hover) {
+  .post-content img {
+    transition: transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .post-content img:hover {
+    transform: scale(1.015);
+    box-shadow: 0 8px 28px rgba(44, 44, 42, 0.16);
+  }
+}
+
+/* ---------- 代码块：语言标签装饰 + 悬停抬升 ----------
+   语言名前面加一个小圆点，和复制按钮在一条信息带上更成体系；
+   hover 时整块轻轻抬起、阴影加深，给代码区一点层级。 */
+.code-block .code-lang::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.7;
+  margin-right: 0.5em;
+  vertical-align: 0.05em;
+}
+
+@media (hover: hover) {
+  .post-content .highlight {
+    transition: box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .post-content .highlight:hover {
+    box-shadow: 0 6px 22px rgba(44, 44, 42, 0.12);
+  }
+}
+
+/* 尊重「减少动态效果」：下沉首字、图片缩放等一律关掉 */
+@media (prefers-reduced-motion: reduce) {
+  .post-content img,
+  .post-content .highlight { transition: none !important; transform: none !important; }
+}
