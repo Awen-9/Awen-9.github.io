@@ -1,0 +1,13 @@
+# robots.txt —— 搜索引擎爬虫约定文件
+# 作用：告诉搜索引擎哪些页面可以抓、哪些不要抓
+# 说明：https://developers.google.com/search/docs/crawling-indexing/robots/intro
+
+# 对全部爬虫生效
+User-agent: *
+# 允许抓取全站
+Allow: /
+# 404 页面对收录没有意义，禁止抓取
+Disallow: /404.html
+
+# 站点地图地址，方便搜索引擎发现全部文章
+Sitemap: https://awen-9.github.io/sitemap.xml
