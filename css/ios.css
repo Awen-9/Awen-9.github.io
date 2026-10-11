@@ -1984,6 +1984,30 @@ html { background: #05070c; }
 
   .ab-actions { flex: none; display: flex; align-items: center; gap: 8px; }
 
+  /* 站内导航：从原站点 header 并进顶栏的一排文字链接。
+     中间放（flex:1 由 .ab-title 撑开后再跟），窄一点的桌面窗口藏起来，
+     返回键 + 标题 + 右侧按钮仍然是完整可用的最小集合 */
+  .ab-nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-left: 14px;
+    flex: none;
+  }
+
+  .ab-nav a {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+
+  .ab-nav a:hover { color: #fff; }
+
+  @media (max-width: 1279px) {
+    .ab-nav { display: none; }
+  }
+
   /* ---------- 播放器就住在应用栏里 ----------
      文档页的胶囊播放器由 ios.js 搬进 .ab-actions（≥1024px 才搬）。
      放在应用栏里有两个好处：不遮挡正文（"文档太小"的抱怨就出在这种浮层上），
@@ -2085,13 +2109,7 @@ html { background: #05070c; }
      于是正文链接失去了悬停反馈 —— 这里把 hover 补回来。 */
   .ios-doc .ios-screen a:hover { color: var(--accent); }
 
-  .ios-doc .site-header {
-    position: static;
-    background: none;
-    border-bottom-color: var(--border);
-  }
-
-  .ios-doc .header-inner { max-width: 900px; padding: 22px 34px 16px; }
+  /* 站点 header 已并入应用栏（.ab-nav），文档页不再渲染第二条导航 */
 
   .ios-doc .container {
     max-width: 820px;
@@ -2143,38 +2161,19 @@ html { background: #05070c; }
 
   .page-doc .back-to-top:hover { color: #fff; border-color: rgba(255, 255, 255, 0.34); }
 
-  /* ---------- 阅读模式：整屏都是文档 ----------
-     这是"担心文档显示太小"的解法：一键把平板放大到铺满窗口，
-     正文列也跟着放宽。 */
-
-  .page-ios.is-reading { padding: 0; }
-
-  .page-ios.is-reading .stage {
-    width: 100vw;
-    height: 100vh;
-    aspect-ratio: auto;
-    margin: 0;
+  /* ---------- 文章页：地球放大 + 模糊成正文背景 ----------
+     .ios-wall 自带 transform/filter 的过渡（0.8~0.9s），这里只要换状态值，
+     地球 toDoc 拉近放大 + 壁纸虚化就一起平滑发生；返回列表时类被摘掉，
+     镜头退远、模糊散去，回到「退远慢转」的背景态。 */
+  .ios.ios-doc.is-post .ios-wall {
+    filter: blur(22px) brightness(0.72) saturate(1.25);
+    transform: scale(1.18);   /* 放大盖住 blur 撑出来的透明软边 */
   }
 
-  .page-ios.is-reading .ios {
-    border-radius: 0;
-    box-shadow: none;
-    transform: none;
-  }
-
-  .page-ios.is-reading .ios-statusbar { display: none; }
-  /* 阅读模式没有状态栏行，合并栏退回单行操作栏 */
-  .page-ios.is-reading .ios-appbar { top: 0; height: 48px; padding-top: 0; }
-  .page-ios.is-reading .ios-screen { top: 48px; }
-  .page-ios.is-reading .read-progress { top: 48px; }
-
-  /* 阅读模式的意义是「只留正文」。应用栏上已经有返回 / 退出阅读 / 回主屏
-     三个按钮了，里面再铺一条站内导航纯属重复，还白吃掉 85px 的高度。 */
-  .page-ios.is-reading .ios-doc .site-header { display: none; }
-
-  .page-ios.is-reading .ios-doc .container {
-    max-width: 900px;
-    padding: 46px 40px 64px;
+  /* 文章页正文纸更透一点：模糊地球就是这张纸的「天文纹理」，
+   星云渐变那套反而多余，直接让壁纸透出来 */
+  .ios.ios-doc.is-post .ios-screen {
+    background: color-mix(in srgb, var(--bg) 74%, transparent);
   }
 }
 /* <<< 桌面端（≥1024px）：iPad 横屏 */

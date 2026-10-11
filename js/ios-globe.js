@@ -494,6 +494,12 @@
         targetDist = baseDist;          // 拉回：恢复锁屏的近距离
         speedTarget = 1;                // 恢复自转
       };
+      // 文章页：镜头拉近把地球「放大」，配合 .ios-doc.is-post .ios-wall 的
+      // CSS 模糊，让球面虚化成正文的氛围背景 —— 返回列表时 toHome 再退回去。
+      api.toDoc = function () {
+        targetDist = baseDist * 0.6;    // 拉近：地球放大铺满背景
+        speedTarget = 0.25;             // 贴脸之后转得更慢，不然晃眼
+      };
 
       api.placeMarker(state.lat, state.lon);
       api.setWall(state.wall, function () {
@@ -501,9 +507,9 @@
         // 文档页：星空兜底就是壁纸本身（地球退远慢转铺在它上面），不摘。
         if (!ctx.isDoc) root.classList.remove('ios-noglobe');
       });
-      // 文档页没有锁屏，地球直接落「主屏态」（退远 + 慢转）当内容背景；
-      // 首页则保持锁屏近景，等用户解锁再退远。
-      if (ctx.isDoc) api.toHome();
+      // 文档页没有锁屏：文章页落「放大贴近」态（配 CSS 模糊当正文背景），
+      // 列表页落「主屏态」（退远 + 慢转）；首页保持锁屏近景，解锁再退远。
+      if (ctx.isDoc) { if (ctx.isPost) api.toDoc(); else api.toHome(); }
       return api;
     }
 

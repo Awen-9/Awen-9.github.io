@@ -578,20 +578,11 @@
   // ------------------------------------------------------------
   function initDocShell() {
     var screen = $('ios-screen');
-    var READING_KEY = 'awen-ios-reading';
 
     // 入场过渡：点 App 进来时（awenDocEnter 标记）播一次淡入上移；
     // 后退 / 站内翻页 / 直接甩链接过来都不播 —— 那是「回内容」，不该再闪。
     if (!window.awenDocEnter) root.classList.add('no-doc-enter');
     window.awenDocEnter = false;
-
-    function setReading(on) {
-      document.body.classList.toggle('is-reading', on);
-      var btn = $('ab-reading');
-      if (btn) btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-      try { sessionStorage.setItem(READING_KEY, on ? '1' : '0'); } catch (err) {}
-      if (on && screen) screen.scrollTop = 0;
-    }
 
     var back = $('ab-back');
     if (back) {
@@ -604,28 +595,6 @@
         else go(root.dataset.home || '/');
       });
     }
-
-    var rbtn = $('ab-reading');
-    if (rbtn) rbtn.addEventListener('click', function () {
-      setReading(!document.body.classList.contains('is-reading'));
-    });
-
-    // 上次进过阅读模式就接着用（刷新不该把它抖回去）
-    var remembered = false;
-    try { remembered = sessionStorage.getItem(READING_KEY) === '1'; } catch (err) {}
-    if (remembered) setReading(true);
-
-    on(document, 'keydown', function (e) {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      var t = e.target;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      if (e.key === 'f' || e.key === 'F') {
-        e.preventDefault();
-        setReading(!document.body.classList.contains('is-reading'));
-      } else if (e.key === 'Escape' && document.body.classList.contains('is-reading')) {
-        setReading(false);
-      }
-    });
 
     // 点状态栏 = 回到顶部（iPadOS 的老习惯）
     var sb = root.querySelector('.ios-statusbar');
@@ -722,7 +691,7 @@
   function runModule(name) {
     for (var i = 0; i < A.modules.length; i++) {
       if (A.modules[i].name === name) {
-        try { A.modules[i].boot({ root: root, state: state, gen: gen, isDoc: isDoc }); }
+        try { A.modules[i].boot({ root: root, state: state, gen: gen, isDoc: isDoc, isPost: root.dataset.post === '1' }); }
         catch (e) { }
         return;
       }
@@ -762,6 +731,10 @@
   on(document, 'visibilitychange', function () { if (!document.hidden) tick(); });
 
   if (isDoc) {
+    // 文章页：地球「放大贴近 + 壁纸模糊」，化作正文的氛围背景；
+    // 列表页（归档/标签/分类…）维持退远慢转。pjax 在文章 ↔ 列表之间
+    // 切换时整轮 boot 重跑，地球跟着 toDoc/toHome 缩放，CSS 模糊同步过渡。
+    if (root.dataset.post === '1') root.classList.add('is-post');
     initDocShell();
     initDocMusic();
     runModule('globe');      // 文档页也拉地球：退远慢转，当内容的天文背景
