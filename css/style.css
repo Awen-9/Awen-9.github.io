@@ -217,6 +217,51 @@ html { scroll-behavior: smooth; }
   font-weight: 500;
   color: var(--accent);
   margin: 2rem 0 0.4rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6em;
+}
+
+/* 年份右侧的小注脚：「2026 · 6 篇」——一眼看出这一年的产量 */
+.ay-count {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+/* 列表页副标题：归档/标签/分类 h1 下面那句规模说明 */
+.page-sub {
+  margin: -0.9rem 0 1.4rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* 列表条目的元信息：分类 + 阅读时长，排在标题后面，弱化处理 */
+.post-item-meta {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45em;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pim-dot { opacity: 0.55; }
+
+.pim-cat {
+  color: var(--text-muted);
+  border-bottom: 1px dashed var(--border);
+  transition: color 0.18s var(--ease), border-color 0.18s var(--ease);
+}
+
+.pim-cat:hover { color: var(--accent); border-color: var(--accent); }
+
+/* 手机上列表条目换行堆叠（堆叠规则在下面的移动端断点里），
+   meta 里的分类/时长别 nowrap 撑破窄屏 */
+@media (max-width: 640px) {
+  .post-item-meta { white-space: normal; }
 }
 
 /* ---------- 分页（列表页超过每页 10 篇时出现在底部）---------- */

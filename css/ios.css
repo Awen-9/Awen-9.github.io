@@ -578,6 +578,33 @@ html { background: #05070c; }
 
 .w-foot span { color: var(--ios-accent-soft); }
 
+/* 统计卡底行改成「左天数 · 右随便看看」：同一行放两件事，不加卡片高度。
+   随机按钮是细字 + 小箭头，hover 时点亮并右移，像 iOS 里的「查看全部」 */
+.w-foot {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.w-random {
+  color: rgba(255, 255, 255, 0.72);
+  transition: color 0.18s var(--ease);
+}
+
+.w-random i {
+  display: inline-block;
+  font-style: normal;
+  margin-left: 2px;
+  transition: transform 0.18s var(--ease);
+}
+
+.w-random:hover {
+  color: #fff;
+}
+
+.w-random:hover i { transform: translateX(2px); }
+
 /* App 图标 */
 
 .home-apps {
