@@ -242,9 +242,8 @@
         root.classList.add('is-opening');
         // 走 pjax 的通道：不然这里 window.location.href 一赋值，
         // 整个文档重新加载，音乐就断了 —— 打开动画白做。
-        // 遮罩 0.3s 铺满，这里 260ms 就切 —— 在铺开中段交棒给入场动画，
-        // 不会让人干等到「糊满一屏」。
-        after(260, function () { go(a.href); });
+        // 遮罩 0.26s 铺满，这里 280ms 切 —— 盖严了再交棒，切换瞬间不露底。
+        after(280, function () { go(a.href); });
       });
     });
   }

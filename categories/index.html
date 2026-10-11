@@ -88,7 +88,9 @@
 
   <!-- ===== 平板里的文档 App ===== -->
   
-  <div class="ios ios-doc" id="ios" data-home="/"
+  <!-- ios-noglobe：先显示兜底星空，地球贴图就绪后由 ios.js 摘掉这个 class 淡出
+       —— 文档页也走同一套流程，不然星空底一直盖着 canvas 上的地球 -->
+  <div class="ios ios-doc ios-noglobe" id="ios" data-home="/"
     data-post="0"
     data-lat="39.9042" data-lon=""
     data-wall="night"
@@ -172,22 +174,22 @@
   </li>
   
   <li>
-    <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
-    <span class="cat-count">1 篇</span>
-  </li>
-  
-  <li>
     <a href="/categories/%E4%B8%AD%E9%97%B4%E4%BB%B6/">中间件</a>
     <span class="cat-count">1 篇</span>
   </li>
   
   <li>
-    <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a>
+    <a href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
     <span class="cat-count">1 篇</span>
   </li>
   
   <li>
     <a href="/categories/%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/">读书笔记</a>
+    <span class="cat-count">1 篇</span>
+  </li>
+  
+  <li>
+    <a href="/categories/%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA/">博客搭建</a>
     <span class="cat-count">1 篇</span>
   </li>
   

@@ -1090,8 +1090,8 @@ html { background: #05070c; }
 .ios.is-opening .ios-open-veil {
   transform: scale(1);
   opacity: 1;
-  /* 加速：0.3s 就铺满，避免「糊住」那一拍；缓出收尾 */
-  transition: transform 0.3s var(--ios-ease-out), opacity 0.28s ease-out;
+  /* 0.26s 就铺满，跳转（280ms）发生在盖严之后 —— 切页瞬间没有露底硬切 */
+  transition: transform 0.26s var(--ios-ease-out), opacity 0.24s ease-out;
 }
 
 .ios.is-opening .ios-home { transition: none; opacity: 0.2; }
@@ -1114,13 +1114,20 @@ html { background: #05070c; }
 
 @keyframes doc-enter {
   from {
-    opacity: 0;
-    transform: translateY(10px);
+    /* 从 0.35 起而不是全透明：遮罩揭开的瞬间内容已经隐约在，
+       「盖严→揭开」是连续的明度变化，不会闪一下 */
+    opacity: 0.35;
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: none;
   }
+}
+
+.ios-doc .ios-appbar,
+.ios-doc .ios-screen {
+  animation-duration: 0.36s;
 }
 
 /* 从站内返回（后退 / 回主屏）不播入场，直接落在内容上。
@@ -1131,6 +1138,12 @@ html { background: #05070c; }
 
 /* 主屏点状态栏 → 打开控制中心 */
 .ios.is-home .ios-statusbar { pointer-events: auto; cursor: pointer; }
+
+/* 锁屏态隐藏状态栏的时间/日期 —— 锁屏中央本来就有大时钟，两处时间重复；
+   真机 iOS 锁屏状态栏也不显示时间。解锁后随主屏一起淡入。
+   只限首页外壳：文档页没有 is-home 态，状态栏时间得一直显示 */
+.ios-statusbar .sb-left { transition: opacity 0.45s ease; }
+.ios:not(.is-home):not(.ios-doc) .ios-statusbar .sb-left { opacity: 0; }
 
 /* 从站内返回时不播开场动画 */
 .ios.no-anim, .ios.no-anim * { transition: none !important; animation: none !important; }
@@ -2056,15 +2069,13 @@ html { background: #05070c; }
     z-index: 0;
   }
 
-  .ios-doc .ios-wall .ios-fallback {
-    /* 文档页没有锁屏的「先兜底再淡出」，星空兜底就是壁纸本身，常显 */
-    opacity: 1;
-  }
+  /* 兜底星空只负责 three.js / 贴图没就绪时的空窗（.ios-noglobe 时显示），
+     贴图就绪后统一淡出露出地球 —— 之前这里强制 opacity:1 常显，
+     那张深色星空底把 canvas 上的地球整个盖住了，文档页才一直「没有地球」 */
 
-  /* 地球退远慢转当背景，再压暗一点别抢正文 */
-  .ios-doc .ios-wall .ios-vignette {
-    opacity: 0.9;
-  }
+  /* 上下压暗的暗角：列表页保留，文章页放轻让放大的地球透出来 */
+  .ios-doc .ios-wall .ios-vignette { opacity: 0.9; }
+  .ios.ios-doc.is-post .ios-wall .ios-vignette { opacity: 0.5; }
 
   /* 屏幕内容区：文档在平板里滚，而不是窗口滚。
      底色跟着站点主题走（浅色主题下就是"深色机身里的一块纸"）。
@@ -2164,16 +2175,21 @@ html { background: #05070c; }
   /* ---------- 文章页：地球放大 + 模糊成正文背景 ----------
      .ios-wall 自带 transform/filter 的过渡（0.8~0.9s），这里只要换状态值，
      地球 toDoc 拉近放大 + 壁纸虚化就一起平滑发生；返回列表时类被摘掉，
-     镜头退远、模糊散去，回到「退远慢转」的背景态。 */
+     镜头退远、模糊散去，回到「退远慢转」的背景态。
+     模糊只取 16px（再大就糊成一片色块认不出是地球），亮度不压反提 ——
+     夜景地球靠自发光，压暗就什么都看不见了。 */
   .ios.ios-doc.is-post .ios-wall {
-    filter: blur(22px) brightness(0.72) saturate(1.25);
-    transform: scale(1.18);   /* 放大盖住 blur 撑出来的透明软边 */
+    filter: blur(16px) brightness(1.12) saturate(1.35);
+    transform: scale(1.14);   /* 放大盖住 blur 撑出来的透明软边 */
   }
 
-  /* 文章页正文纸更透一点：模糊地球就是这张纸的「天文纹理」，
-   星云渐变那套反而多余，直接让壁纸透出来 */
+  /* 正文纸改成「上透下实」的纵向渐变：标题区让模糊地球的光晕透出来，
+     正文深处渐渐压实保证可读 —— 天文氛围和阅读体验各拿一半 */
   .ios.ios-doc.is-post .ios-screen {
-    background: color-mix(in srgb, var(--bg) 74%, transparent);
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--bg) 55%, transparent) 0%,
+      color-mix(in srgb, var(--bg) 82%, transparent) 34%,
+      color-mix(in srgb, var(--bg) 92%, transparent) 70%);
   }
 }
 /* <<< 桌面端（≥1024px）：iPad 横屏 */

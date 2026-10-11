@@ -503,9 +503,9 @@
 
       api.placeMarker(state.lat, state.lon);
       api.setWall(state.wall, function () {
-        // 首页：贴图就绪、也画过一帧了，这时才摘掉兜底星空让它淡出，不会看到白球或黑球。
-        // 文档页：星空兜底就是壁纸本身（地球退远慢转铺在它上面），不摘。
-        if (!ctx.isDoc) root.classList.remove('ios-noglobe');
+        // 贴图就绪、也画过一帧了，才摘掉兜底星空让它淡出露出地球 ——
+        // 首页和文档页现在走同一套流程（文档页之前星空常显，把地球盖死了）
+        root.classList.remove('ios-noglobe');
       });
       // 文档页没有锁屏：文章页落「放大贴近」态（配 CSS 模糊当正文背景），
       // 列表页落「主屏态」（退远 + 慢转）；首页保持锁屏近景，解锁再退远。

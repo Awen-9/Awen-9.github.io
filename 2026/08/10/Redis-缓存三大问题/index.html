@@ -95,7 +95,9 @@
 
   <!-- ===== 平板里的文档 App ===== -->
   
-  <div class="ios ios-doc" id="ios" data-home="/"
+  <!-- ios-noglobe：先显示兜底星空，地球贴图就绪后由 ios.js 摘掉这个 class 淡出
+       —— 文档页也走同一套流程，不然星空底一直盖着 canvas 上的地球 -->
+  <div class="ios ios-doc ios-noglobe" id="ios" data-home="/"
     data-post="1"
     data-lat="39.9042" data-lon=""
     data-wall="night"
