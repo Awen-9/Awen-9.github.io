@@ -243,6 +243,10 @@
     // ios.js 用它判断「这次是从站内翻过来的」，决定首页要不要直接进主屏
     window.awenPjaxed = true;
 
+    // 前进（pushState）进入文档页时播入场动画；后退（noPush）直接落内容。
+    // 这样无论从主屏 App 图标还是小组件（widget）点进来，都有统一的「进入」过渡。
+    if (!opts.noPush) window.awenDocEnter = true;
+
     showBar();
     fetchPage(url).then(function (html) {
       var doc = new DOMParser().parseFromString(html, 'text/html');

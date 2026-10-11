@@ -1059,7 +1059,12 @@ html { background: #05070c; }
   box-shadow: none;
 }
 
-/* ---------- App 打开动画遮罩 ---------- */
+/* ---------- App 打开动画遮罩 ----------
+   参考 iOS「图标放大成应用卡片」+ Material 的 shared element：
+   点击的瞬间图标先「弹」一下（.home-app.is-pressed 里的 scale），
+   遮罩几乎同步从图标中心开始展开 —— 起手式跟手，不做「干等」。
+   展开分两段：前半段快速铺开（0.18s）给人「已经进去了」的确认，
+   后半段缓出收尾到全屏；跳转发生在铺开中段，不是等它彻底盖满。 */
 
 .ios-open-veil {
   position: absolute;
@@ -1070,8 +1075,7 @@ html { background: #05070c; }
   top: var(--oy, 70%);
   margin: -1000px 0 0 -1000px;
   border-radius: 50%;
-  /* 不再是一整块纯色糊上全屏（土星环的黄褐图标会炸出一屏橙）。
-     用径向渐进色：中心保留一点图标色温，往外平滑沉进深空底色 ——
+  /* 径向渐进色：中心保留一点图标色温，往外平滑沉进深空底色 ——
      像光晕散开，而不是颜料桶倒下来 */
   background: radial-gradient(circle at 50% 50%,
     var(--oc, #3a7ca5) 0%,
@@ -1086,11 +1090,44 @@ html { background: #05070c; }
 .ios.is-opening .ios-open-veil {
   transform: scale(1);
   opacity: 1;
-  /* 比原来慢一点、缓出收尾，颜色是"漫上来"的而不是"拍上来"的 */
-  transition: transform 0.42s var(--ios-ease-out), opacity 0.4s ease-out;
+  /* 加速：0.3s 就铺满，避免「糊住」那一拍；缓出收尾 */
+  transition: transform 0.3s var(--ios-ease-out), opacity 0.28s ease-out;
 }
 
-.ios.is-opening .ios-home { transition: none; opacity: 0.25; }
+.ios.is-opening .ios-home { transition: none; opacity: 0.2; }
+
+/* 点击 App 的瞬间：图标先下沉 + 微缩，跟遮罩同步，给「按下去」的即时反馈。
+   用 transform（GPU 合成）不碰 layout，掉帧最少 */
+.home-app.is-pressed .app-icon,
+.dock-app.is-pressed .app-icon {
+  transform: scale(0.86);
+  transition: transform 0.12s var(--ios-ease);
+}
+
+/* ---------- 文档 App 入场：pjax 换页后平滑浮现 ----------
+   遮罩是「图标放大」这一拍，新页面得有对应的「进入」这一拍，
+   两者接上才是一条完整的转场；否则遮罩一消失文章页「啪」地硬切。 */
+.ios-doc .ios-appbar,
+.ios-doc .ios-screen {
+  animation: doc-enter 0.42s var(--ios-ease-out) both;
+}
+
+@keyframes doc-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 从站内返回（后退 / 回主屏）不播入场，直接落在内容上。
+   单独用一个类，别复用 .no-anim —— 后者的 animation:none !important
+   摘掉后会让动画从头重播一次，返回文章页会闪一下。 */
+.ios-doc.no-doc-enter .ios-appbar,
+.ios-doc.no-doc-enter .ios-screen { animation: none; }
 
 /* 主屏点状态栏 → 打开控制中心 */
 .ios.is-home .ios-statusbar { pointer-events: auto; cursor: pointer; }

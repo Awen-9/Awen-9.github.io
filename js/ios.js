@@ -231,6 +231,9 @@
 
         e.preventDefault();
         var icon = a.querySelector('.app-icon') || a;
+        // 点击瞬间先「按」一下图标，跟遮罩同步起手，反馈不滞后
+        a.classList.add('is-pressed');
+        after(150, function () { a.classList.remove('is-pressed'); });
         var ir = icon.getBoundingClientRect();
         var hr = root.getBoundingClientRect();
         root.style.setProperty('--ox', (ir.left + ir.width / 2 - hr.left) + 'px');
@@ -238,8 +241,10 @@
         root.style.setProperty('--oc', a.dataset.color || '#3a7ca5');
         root.classList.add('is-opening');
         // 走 pjax 的通道：不然这里 window.location.href 一赋值，
-        // 整个文档重新加载，音乐就断了 —— 打开动画白做
-        after(360, function () { go(a.href); });
+        // 整个文档重新加载，音乐就断了 —— 打开动画白做。
+        // 遮罩 0.3s 铺满，这里 260ms 就切 —— 在铺开中段交棒给入场动画，
+        // 不会让人干等到「糊满一屏」。
+        after(260, function () { go(a.href); });
       });
     });
   }
@@ -574,6 +579,11 @@
   function initDocShell() {
     var screen = $('ios-screen');
     var READING_KEY = 'awen-ios-reading';
+
+    // 入场过渡：点 App 进来时（awenDocEnter 标记）播一次淡入上移；
+    // 后退 / 站内翻页 / 直接甩链接过来都不播 —— 那是「回内容」，不该再闪。
+    if (!window.awenDocEnter) root.classList.add('no-doc-enter');
+    window.awenDocEnter = false;
 
     function setReading(on) {
       document.body.classList.toggle('is-reading', on);
