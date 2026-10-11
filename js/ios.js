@@ -239,7 +239,7 @@
         root.classList.add('is-opening');
         // 走 pjax 的通道：不然这里 window.location.href 一赋值，
         // 整个文档重新加载，音乐就断了 —— 打开动画白做
-        after(280, function () { go(a.href); });
+        after(360, function () { go(a.href); });
       });
     });
   }
