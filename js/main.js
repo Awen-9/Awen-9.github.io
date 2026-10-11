@@ -322,39 +322,31 @@ function initUptime() {
   if (isNaN(start)) return;
 
   var days = Math.floor((Date.now() - start) / 86400000) + 1;
-  el.textContent = (days > 0 ? days : 1) + ' 天';
+  // 只填数字不带单位 —— 单位「天」在模板的单元格里，
+  // 移动端窄列才不会把「3 天 已运行」挤成三行
+  el.textContent = String(days > 0 ? days : 1);
 }
 
-// ---------- 首页「访问统计」小组件：计数器哑了就退回本站数字 ----------
-// 浏览/访客数是 vercount / 不蒜子 这类第三方脚本异步填的，
-// 本地预览、接口抽风或被浏览器拦掉时它会一直停在模板里的占位符「—」，
-// 首页上就成了「— 次浏览 / — 位访客」，看着像坏了。
-// 给 6 秒宽限，还没填上就整套换成站点自己一定有的数字（文章 / 标签），
-// 并把小组件的标题从「访问统计」改成「本站数据」—— 数字永远是真的。
+// ---------- 首页「本站数据」小组件：访客计数答上来才亮底行 ----------
+// 卡片主体（文章/标签/分类/运行天数）是构建期算好的本地数字，永远有值；
+// 只有底行的「N 次浏览 · N 位访客」依赖 vercount / 不蒜子这类第三方脚本。
+// 本地预览、接口抽风或被浏览器拦掉时它会一直停在占位符「—」——
+// 给 6 秒宽限，答上来了才显示底行，答不上来保持隐藏：
+// 首页永远不会摆着「— 次浏览」这种像坏掉的占位符，数字永远是真的。
 function initStatsWidget() {
-  var box = document.getElementById('widget-stats');
-  if (!box) return;
+  var live = document.getElementById('stats-live');
+  if (!live) return;
 
-  var live = box.querySelectorAll('[data-stats="live"]');
-  var local = box.querySelectorAll('[data-stats="local"]');
-  if (!live.length || !local.length) return;
-
-  var label = document.getElementById('stats-label');
-
-  function answered() {
-    for (var i = 0; i < live.length; i++) {
-      var b = live[i].querySelector('b');
-      var txt = (b ? b.textContent : '').trim();
-      if (!txt || txt === '—') return false;
-    }
-    return true;
+  function ok(el) {
+    var t = el ? el.textContent.trim() : '';
+    return t && t !== '—';
   }
 
   setTimeout(function () {
-    if (answered()) return;               // 计数器答了，真实数据留着
-    for (var i = 0; i < live.length; i++) live[i].hidden = true;
-    for (var j = 0; j < local.length; j++) local[j].hidden = false;
-    if (label) label.textContent = '本站数据';
+    if (ok(document.getElementById('busuanzi_value_site_pv')) &&
+        ok(document.getElementById('busuanzi_value_site_uv'))) {
+      live.hidden = false;
+    }
   }, 6000);
 }
 

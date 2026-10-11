@@ -540,30 +540,41 @@ html { background: #05070c; }
   overflow: hidden;
 }
 
-.w-stat-row { display: flex; align-items: baseline; gap: 5px; }
+/* 统计卡的 2×2 信息网格：四个数字全是构建期算出的本地数据
+   （文章 / 标签 / 分类 / 已运行），永远有值 —— 不再依赖第三方
+   计数器撑场面，第三方答上来的浏览/访客数放在底行小字里 */
+.w-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px 6px;
+  margin: 4px 0 2px;
+}
 
-/* 统计卡有「真实计数 / 本站数字」两套行，靠 hidden 互切。
-   但这条 display: flex 会盖过 UA 给 [hidden] 的 display: none
-   （跟 .mp-cover-img[hidden] 是同一个坑），必须显式补一条。 */
-.w-stat-row[hidden] { display: none; }
+.w-cell { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
 
-.w-stat-row b {
-  font-size: 22px;
+.w-cell b {
+  font-size: 21px;
   font-weight: 300;
   color: #fff;
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.75);
   font-variant-numeric: tabular-nums;
 }
 
-/* 只认直接子元素：数字外面还套着一层 span，别被这条规则压小。
-   补投影 —— 数字有、单位没有，于是「次浏览 / 位访客」正好压在月亮的
-   亮面上，白 0.7 的半透明小字基本看不见 */
-.w-stat-row > span {
+/* 数字有投影、单位没有，单位正好压在月亮的亮面上会看不清，
+   所以单位也要补投影 */
+.w-cell > span {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.7);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
 }
-.w-stat-row.sub b { font-size: 17px; }
+
+/* 底行左侧的访客计数（busuanzi 答上来才由 JS 摘掉 hidden）：
+   数字染一点主题色，跟「随便看看」拉开层次，又不抢主体网格 */
+.w-live b {
+  font-weight: 400;
+  color: var(--ios-accent-soft);
+  font-variant-numeric: tabular-nums;
+}
 
 /* 「已运行」并进统计卡底部，占一行小字 */
 .w-foot {
@@ -869,7 +880,30 @@ html { background: #05070c; }
   animation: none;
 }
 
-.ios .music-root[data-mode="ios"] .mp-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ios .music-root[data-mode="ios"] .mp-cover-img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; }
+/* style.css 里的 .mp-cover-img[hidden]{display:none} 特异性比上面低，
+   不补这条的话封面兜底会失效（坏图盖住音符占位） */
+.ios .music-root[data-mode="ios"] .mp-cover-img[hidden] { display: none; }
+
+/* 封面空态：图没加载出来（未播放 / 镜像全挂）时，露出一个
+   音符占位 —— 渐变底纹 + 居中 ♪，不再是一块像坏掉的灰疙瘩。
+   ::after 垫在 img 下面（img 有 z-index:1），图一到就盖住它 */
+.ios .music-root[data-mode="ios"] .mp-cover::after {
+  content: '♪';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.45);
+  background:
+    radial-gradient(120% 120% at 30% 22%,
+      rgba(255, 255, 255, 0.22) 0%,
+      rgba(255, 255, 255, 0.06) 46%,
+      rgba(255, 255, 255, 0) 100%),
+    linear-gradient(160deg, #3d4b66 0%, #232c40 58%, #171d2c 100%);
+}
 
 .ios.is-home .music-root[data-mode="ios"] .mp-cover { width: 42px; height: 42px; border-radius: 11px; }
 
@@ -1659,9 +1693,8 @@ html { background: #05070c; }
   .widget-wide .w-title { font-size: 1.65cqw; }
   .w-excerpt { font-size: 1.02cqw; }
   .w-date { font-size: 1.02cqw; }
-  .w-stat-row b { font-size: 2.2cqw; }
-  .w-stat-row > span { font-size: 1.02cqw; }
-  .w-stat-row.sub b { font-size: 1.7cqw; }
+  .w-stat-grid b { font-size: 2.2cqw; }
+  .w-stat-grid > span { font-size: 1.02cqw; }
   .w-foot { font-size: 1cqw; }
   .w-tag { font-size: 1cqw; padding: 0.18cqw 0.6cqw; gap: 0.3cqw; }
 
@@ -2185,10 +2218,14 @@ html { background: #05070c; }
   .w-title { -webkit-line-clamp: 2; font-size: 13px; line-height: 1.45; }
   .widget-wide .w-title { -webkit-line-clamp: 1; font-size: 15px; }
   .w-excerpt { -webkit-line-clamp: 1; }
-  /* 正文 1.85 的行高会把统计卡两行数字撑到 30px+/行 —— 收紧 */
-  .w-head, .w-stat-row, .w-foot { line-height: 1.4; }
-  .w-stat-row b { font-size: 19px; }
-  .w-stat-row.sub b { font-size: 15px; }
+  /* 正文 1.85 的行高会把统计卡的数字行撑到 30px+/行 —— 收紧 */
+  .w-head, .w-stat-grid, .w-foot { line-height: 1.4; }
+  .w-stat-grid { gap: 7px 5px; }
+  .w-stat-grid b { font-size: 17px; }
+  .w-stat-grid > span { font-size: 10px; }
+  /* 技能药丸行是桌面端的点缀，矮屏上省掉这 ~26px，
+     不挤占上一轮修好的「内容完整可见」布局 */
+  .w-skills { display: none; }
   /* 矮屏标签也只留 4 个（两行封顶） */
   .w-tag-row .w-tag:nth-child(n + 5) { display: none; }
   .home-apps { gap: 12px 8px; }
@@ -2232,7 +2269,9 @@ html { background: #05070c; }
   .w-bio { -webkit-line-clamp: 1; }
   /* 「已运行 xx 天」挪到统计卡底部那一行，极窄屏上省掉这 20px */
   .w-foot { display: none; }
-  .w-head, .w-stat-row, .w-foot { line-height: 1.4; }
+  .w-head, .w-stat-grid, .w-foot { line-height: 1.4; }
+  /* 320 宽的卡片内边距只有 ~11px，2×2 网格的列距也要跟着收 */
+  .w-stat-grid { gap: 6px 4px; }
   .widget { min-height: 78px; padding: 9px 11px; }
   .widget-wide { min-height: 74px; padding: 9px 12px; }
   .w-title { font-size: 12.5px; }
