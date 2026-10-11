@@ -305,6 +305,13 @@
         if (texCache[url]) { onOk(texCache[url]); return; }
         new THREE.TextureLoader().load(url, function (tex) {
           tex.colorSpace = THREE.SRGBColorSpace;
+          // 各向异性过滤：贴图斜对镜头 / 被放大（全屏铺满后地球直径变大）时，
+          // 采样方向性更强，不开的话球面边缘和掠射角处会明显发糊。
+          // 取 GPU 支持的上限，但封顶 8 —— 再往上收益趋近于零、还烧显存带宽。
+          tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+          tex.minFilter = THREE.LinearMipmapLinearFilter;
+          tex.magFilter = THREE.LinearFilter;
+          tex.needsUpdate = true;
           texCache[url] = tex;
           onOk(tex);
         }, undefined, function () {
@@ -405,10 +412,17 @@
       var speedMul = 1;             // 实际自转速度倍率，逐帧向 speedTarget 靠拢
 
       // 自适应：让地球直径约占画面宽度的 78%
+      // 尺寸来源优先读容器（.ios-wall，inset:0 铺满 .ios），而不是 canvas 自身 ——
+      // canvas 的 CSS 是 width/height:100%，在容器布局尚未完成时 clientWidth
+      // 会停留在浏览器给 canvas 的默认 300×150，用它算出来的 buffer 就糊了。
       var sizing = function () {
-        var w = canvas.clientWidth || root.clientWidth;
-        var h = canvas.clientHeight || root.clientHeight;
+        var holder = canvas.parentNode || canvas;
+        var w = holder.clientWidth || root.clientWidth || canvas.clientWidth;
+        var h = holder.clientHeight || root.clientHeight || canvas.clientHeight;
         if (!w || !h) return;
+        // 第三个参数 false：只更新内部 buffer，不碰 canvas 的 CSS 尺寸 ——
+        // canvas 的显示尺寸由 CSS 的 width/height:100% 决定，写内联 style
+        // 反而会跟 CSS 打架。buffer 跟着 DPR 走，保证高清屏下地球不发虚。
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         var k = 0.78;
@@ -421,6 +435,18 @@
       };
       sizing();
       A.on(window, 'resize', sizing);
+      // 兜底：three.js（656KB）异步下载，回来时容器可能还没完成布局，
+      // 上面那次 sizing 会因 clientWidth 为 0 而提前返回、拿不到真实尺寸。
+      // 用 ResizeObserver 盯着容器，一旦它有尺寸就立刻校正 —— 这是唯一
+      // 可靠不依赖时机猜谜的做法。
+      if (window.ResizeObserver) {
+        var holder = canvas.parentNode;
+        var ro = new ResizeObserver(function () { sizing(); });
+        if (holder) ro.observe(holder);
+        A.cleanup.push(function () { ro.disconnect(); });
+      } else if (window.requestAnimationFrame) {
+        requestAnimationFrame(function () { requestAnimationFrame(sizing); });
+      }
 
       var running = true;
       var dead = false;              // 换页后置位：既停渲染循环，也释放 WebGL 上下文
