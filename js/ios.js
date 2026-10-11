@@ -129,8 +129,9 @@
     if (!isLocked()) return;
     root.classList.add('is-home');
     root.classList.remove('is-cc', 'is-search');
-    // 主屏壁纸是压暗 + 模糊的，地球继续每帧渲染纯属白烧电，直接停
-    if (state.globe) state.globe.pause();
+    // 解锁后地球缓缓「退远 + 慢转」，而不是整颗球冻住 —— 像 iPhone 天文主题
+    // 那样解锁的瞬间壁纸仍有生命感（配合 CSS 的 scale/blur 一起出纵深）
+    if (state.globe) state.globe.toHome();
     try { sessionStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
     // 先把主屏从 inert 里放出来，下面那句 focus 才落得下去
     //（观察器是异步的，等它跑完再 focus 就晚了）
@@ -147,7 +148,7 @@
     document.dispatchEvent(new CustomEvent('awen:lock'));
     // is-game 也在这里收掉：小游戏面板不该跟着回锁屏
     root.classList.remove('is-opening', 'is-cc', 'is-search', 'is-game');
-    if (state.globe) state.globe.resume();
+    if (state.globe) state.globe.toLock();
     if (instant) {
       root.classList.add('no-anim');
       root.classList.remove('is-home');

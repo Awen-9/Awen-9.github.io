@@ -193,7 +193,8 @@ html { scroll-behavior: smooth; }
   flex-wrap: wrap;
 }
 
-.post-title { font-size: 1.02rem; }
+/* 列表项标题：只作用于 .post-item 内部，避免污染文章详情页的 .post-title */
+.post-item .post-title { font-size: 1.02rem; }
 
 .tag {
   color: var(--text-muted);

@@ -730,6 +730,57 @@ function mountMusic(root, tracks, cfg, prev) {
     document.dispatchEvent(new CustomEvent('awen:track', {
       detail: { name: t.name, artist: t.artist, playing: !audio.paused, pic: t.cover || '' }
     }));
+    syncMediaSession();
+  }
+
+  // ---------- MediaSession：系统级媒体控制 ----------
+  // 让浏览器的系统媒体面板（系统通知、耳机线控、键盘/遥控的播放键、
+  // 手机锁屏）能认出这台播放器 —— 显示歌名 + 封面，还能上一首 / 下一首 /
+  // 播放暂停。不支持 MediaSession 的老浏览器（Safari 14 之前等）静默跳过，
+  // 播放器本身的功能一点不受影响。
+  var MS = null;
+  function mediaSessionAPI() {
+    if (MS === null) {
+      MS = ('mediaSession' in navigator) ? navigator.mediaSession : false;
+    }
+    return MS;
+  }
+
+  function syncMediaSession() {
+    var ms = mediaSessionAPI();
+    if (!ms || !ms.metadata) return;
+    var t = current();
+    if (!t) return;
+    // 封面走当前显示的那张（封面失败兜底后 currentSrc 可能是空，用配置里的原始地址）
+    var img = covers[0];
+    var pic = (img && (img.currentSrc || img.src)) || t.cover || '';
+    var artwork = [];
+    if (pic) artwork = [{ src: pic, sizes: '512x512', type: 'image/jpeg' }];
+    try {
+      ms.metadata = new MediaMetadata({
+        title: t.name,
+        artist: t.artist,
+        album: 'Awen\'s Blog',
+        artwork: artwork
+      });
+    } catch (e) { /* MediaMetadata 构造失败不影响播放 */ }
+  }
+
+  function bindMediaSession() {
+    var ms = mediaSessionAPI();
+    if (!ms || !ms.setActionHandler) return;
+    try {
+      ms.setActionHandler('play', function () { play(); });
+      ms.setActionHandler('pause', function () { audio.pause(); });
+      ms.setActionHandler('previoustrack', function () { step(-1, true); });
+      ms.setActionHandler('nexttrack', function () { step(1, true); });
+      ms.setActionHandler('seekto', function (d) {
+        if (d && isFinite(d.seekTime) && isFinite(audio.duration)) {
+          audio.currentTime = Math.min(Math.max(d.seekTime, 0), audio.duration);
+          renderProgress();
+        }
+      });
+    } catch (e) { /* 老浏览器 setActionHandler 抛错就放弃系统集成 */ }
   }
 
   function setProgress(ratio) {
@@ -747,6 +798,8 @@ function mountMusic(root, tracks, cfg, prev) {
     }
     if (audio.readyState >= 1) return once();
     audio.addEventListener('loadedmetadata', once, { once: true });
+    // 兜底超时：万一 loadedmetadata 一直不来（音频头拉不下来），3 秒后也照常执行。
+    // done 守卫保证它和上面的 once 只生效一次，晚触发的那次是空操作。
     setTimeout(once, 3000);
   }
 
@@ -1043,12 +1096,17 @@ function mountMusic(root, tracks, cfg, prev) {
     setIcon(true);
     emitTrack();
     saveState(true);
+    // 同步系统媒体面板的播放态（锁屏 / 通知栏的播放按钮据此切换）
+    var ms = mediaSessionAPI();
+    if (ms && ms.playbackState) { try { ms.playbackState = 'playing'; } catch (e) {} }
   });
   bind(audio, 'pause', function () {
     root.classList.remove('is-playing');
     setIcon(false);
     emitTrack();
     saveState(true);
+    var ms = mediaSessionAPI();
+    if (ms && ms.playbackState) { try { ms.playbackState = 'paused'; } catch (e) {} }
   });
   bind(audio, 'loadedmetadata', function () {
     totalEl.textContent = fmt(audio.duration);
@@ -1107,11 +1165,15 @@ function mountMusic(root, tracks, cfg, prev) {
         bound[i][0].removeEventListener(bound[i][1], bound[i][2], bound[i][3]);
       }
       bound.length = 0;
+      // 换壳时清掉封面「卡住检测」的定时器 —— 旧 <img> 随 DOM 一起丢了，
+      // 但那个 10s 的 setTimeout 还挂着，到期会对一张已不存在的图再操作一次。
+      covers.forEach(function (img) { clearTimeout(img.__timer); });
     }
   };
 
   // ---------- 启动 ----------
   applyLoop();
+  bindMediaSession();          // 系统媒体键（耳机线控 / 键盘播放键 / 锁屏）接管播放器
   if (prev) {
     // 接力：音量条 / 播放键 / 进度 / 歌词按音频现状重画，音频一动不动
     syncVolume();

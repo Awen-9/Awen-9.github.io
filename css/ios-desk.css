@@ -1,1 +1,566 @@
-.desk,.stage-front{display:none}@media (min-width:1024px){.desk{display:block;position:fixed;inset:0;z-index:auto;overflow:hidden;pointer-events:none;background:#05070c;transition:opacity .45s}.desk-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(46% 40% at 74% 2%,rgba(255,206,142,.14),transparent 72%),linear-gradient(180deg,#18222f 0,#111a26 52%,#0b111b 100%)}.desk-lampglow{position:absolute;left:-10%;right:-10%;top:-12%;height:76%;z-index:0;background:radial-gradient(28% 42% at 74% 0,rgba(255,205,138,.34),rgba(255,192,122,.07) 46%,transparent 74%)}.desk-top{position:absolute;left:-30%;right:-30%;top:60%;height:520px;z-index:0;overflow:hidden;transform:perspective(1400px) rotateX(45deg);transform-origin:50% 0;background:linear-gradient(180deg,#8d603e 0,#6f4a2e 22%,#4e3220 60%,#33200f 100%);box-shadow:inset 0 2px 0 rgba(255,224,182,.42),inset 0 -80px 140px rgba(0,0,0,.55)}.desk-wood{position:absolute;inset:0;opacity:.9;background:repeating-linear-gradient(90deg,rgba(255,226,190,.05) 0 1px,rgba(0,0,0,0) 1px 210px),repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 1px,rgba(0,0,0,0) 1px 137px),repeating-linear-gradient(1.1deg,rgba(0,0,0,.095) 0 2px,rgba(0,0,0,0) 2px 13px),repeating-linear-gradient(-.7deg,rgba(255,226,190,.04) 0 1px,rgba(0,0,0,0) 1px 31px)}.desk-pool{position:absolute;inset:0;background:radial-gradient(38% 30% at 74% 4%,rgba(255,216,156,.26),transparent 72%),linear-gradient(180deg,rgba(0,0,0,0) 0,rgba(0,0,0,.34) 100%)}.desk-props{position:absolute;inset:0}.prop{position:absolute;display:block}.prop-clock svg{display:block;width:100%;height:auto;overflow:visible;filter:drop-shadow(0 20px 24px rgba(0, 0, 0, .55))}.prop-cup{left:max(14px,2.2vw);top:56%;width:clamp(84px,7.6vw,118px)}.prop-plant{right:max(14px,2.2vw);top:52%;width:clamp(88px,8vw,124px)}.cup-steam{opacity:.55}.cup-steam path{animation:4.6s ease-in-out infinite cup-steam}.cup-steam path:last-child{animation-delay:1.3s;animation-duration:5.2s}.plant-leaves{transform-box:view-box;transform-origin:68px 98px;animation:7.5s ease-in-out infinite alternate plant-sway}.page-ios{display:flex;align-items:flex-start;justify-content:center;min-height:100vh}.ios{margin:0;transition:transform .5s var(--ios-ease),box-shadow .5s ease,border-radius .4s ease;box-shadow:0 0 0 9px #0b0e14,0 0 0 10.5px #343b48,0 0 0 12px #10141b,0 22px 34px -12px rgba(0,0,0,.9),0 54px 96px -26px rgba(0,0,0,.78),0 30px 110px -14px rgba(74,150,220,.34),0 0 90px rgba(70,150,220,.14)}.ios::after{content:"";position:absolute;inset:0;z-index:45;border-radius:inherit;pointer-events:none;background:linear-gradient(124deg,rgba(255,255,255,.1) 0 16%,rgba(255,255,255,0) 32%,rgba(255,255,255,0) 64%,rgba(255,255,255,.055) 100%);mix-blend-mode:screen}.page-ios.is-reading .ios{transition:transform .4s,box-shadow .4s,border-radius .4s}.stage-front{display:block;position:fixed;inset:0;z-index:8;pointer-events:none;transition:opacity .35s}.prop-clock{left:max(16px,1.8vw);bottom:1.4%;width:clamp(116px,9.4vw,158px)}.prop-vinyl{right:max(16px,1.8vw);bottom:1.6%;width:clamp(136px,10.8vw,182px);display:flex;flex-direction:column;align-items:flex-end;gap:7px;pointer-events:auto}.v-meta{display:flex;align-items:center;gap:7px;max-width:100%;padding:6px 12px 6px 9px;border:1px solid rgba(255,255,255,.11);border-radius:999px;background:rgba(11,15,23,.68);-webkit-backdrop-filter:blur(14px) saturate(150%);backdrop-filter:blur(14px) saturate(150%);box-shadow:0 10px 22px rgba(0,0,0,.42);opacity:0;transform:translateY(6px);transition:opacity .3s,transform .3s}.prop-vinyl.has-track .v-meta,.prop-vinyl:focus-within .v-meta,.prop-vinyl:hover .v-meta{opacity:1;transform:none}.v-dot{flex:none;width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.28);transition:background .3s,box-shadow .3s}.prop-vinyl.is-playing .v-dot{background:#57d98a;box-shadow:0 0 8px rgba(87,217,138,.8);animation:2.4s ease-in-out infinite v-dot}.v-text{display:flex;flex-direction:column;min-width:0}.v-title{font-size:12px;font-weight:600;letter-spacing:.2px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.v-artist{font-size:10.5px;color:rgba(255,255,255,.58)}.v-prog{position:absolute;left:11px;right:11px;bottom:3px;height:2px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden}.v-prog i{display:block;height:100%;width:0;border-radius:inherit;background:rgba(255,255,255,.78);transition:width .9s linear}.v-hero{position:relative;display:block;width:100%;aspect-ratio:1/0.94;padding:0;border:0;background:0 0;cursor:pointer;-webkit-tap-highlight-color:transparent}.v-plinth{position:absolute;left:0;right:0;bottom:0;height:82%;border-radius:15px;background:linear-gradient(180deg,#c1a888 0,#9c8263 46%,#6f583e 100%);box-shadow:inset 0 1px 0 rgba(255,246,228,.6),inset 0 -16px 30px rgba(48,32,16,.42),0 22px 34px -12px rgba(0,0,0,.78)}.v-plinth::after{content:"";position:absolute;left:8%;right:8%;bottom:7%;height:1px;background:rgba(72,52,30,.34)}.v-led{position:absolute;right:10.5%;bottom:21%;width:4%;aspect-ratio:1;border-radius:50%;background:#59322c;box-shadow:inset 0 0 0 1px rgba(0,0,0,.45);transition:background .35s,box-shadow .35s}.prop-vinyl.is-playing .v-led{background:#57d98a;box-shadow:0 0 9px rgba(87,217,138,.85),0 0 20px rgba(87,217,138,.35),inset 0 0 0 1px rgba(255,255,255,.35)}.v-knob{position:absolute;right:6.5%;bottom:6.5%;width:10%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 36% 30%,#746a5d,#40382d 68%,#2c261e 100%);box-shadow:0 2px 5px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.22)}.v-knob::after{content:"";position:absolute;left:50%;top:9%;width:8%;height:34%;margin-left:-4%;border-radius:2px;background:rgba(255,255,255,.55)}.v-disc{position:absolute;left:6%;bottom:15%;width:72%;aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:repeating-radial-gradient(circle at 50% 50%,rgba(255,255,255,.055) 0 1px,rgba(0,0,0,0) 1px 3.2px),radial-gradient(circle at 34% 27%,#3d4049 0,#181a20 44%,#0a0b0f 100%);box-shadow:0 0 0 1px rgba(255,255,255,.09),0 14px 26px -6px rgba(0,0,0,.72);animation:5.6s linear infinite paused v-spin}.prop-vinyl.is-playing .v-disc{animation-play-state:running}.v-sheen{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 220deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.13) 20deg,rgba(255,255,255,.13) 58deg,rgba(255,255,255,0) 88deg,rgba(255,255,255,0) 196deg,rgba(255,255,255,.08) 224deg,rgba(255,255,255,.08) 258deg,rgba(255,255,255,0) 286deg,rgba(255,255,255,0) 360deg)}.v-label{width:36%;aspect-ratio:1;border-radius:50%;background:center/cover #b35a70;box-shadow:inset 0 0 0 1px rgba(255,255,255,.2)}.v-hole{width:7%;aspect-ratio:1;border-radius:50%;background:#0b0d11;box-shadow:inset 0 0 0 1px rgba(255,255,255,.14)}.prop-vinyl .v-arm{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;filter:drop-shadow(0 6px 9px rgba(0, 0, 0, .5))}.v-arm-g{transform-box:view-box;transform-origin:84px 12px;transform:rotate(2deg);transition:transform .8s var(--ios-ease)}.prop-vinyl.is-playing .v-arm-g{transform:rotate(30deg)}.v-hero:active .v-plinth{transform:translateY(1px)}.desk .prop,.stage-front .prop{pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;transform-origin:50% 92%;transform:translate3d(var(--dx,0),var(--dy,0),0) rotate(var(--tilt,0deg)) scale(var(--lift,1));transition:transform .5s var(--ios-ease);will-change:transform}.prop-vinyl{transform-origin:50% 100%}.desk .prop:focus-visible,.stage-front .prop:focus-visible{outline:2px solid var(--ios-accent-soft,#9fd0f5);outline-offset:6px;border-radius:14px}.prop.is-dragging{transition:none;cursor:grabbing;filter:drop-shadow(0 30px 32px rgba(0, 0, 0, .6))}.prop.is-dragging .prop-ground{opacity:0}.prop-ground{transition:opacity .22s}.prop-clock.is-dragging svg{filter:none}.stage-front .prop.is-dragging{z-index:9}.prop.no-anim{transition:none!important}}@keyframes cup-steam{0%{transform:translateY(5px);opacity:0}32%{opacity:.85}100%{transform:translateY(-15px);opacity:0}}@keyframes plant-sway{from{transform:rotate(-.9deg)}to{transform:rotate(1.1deg)}}@keyframes v-spin{to{transform:rotate(360deg)}}@keyframes v-dot{0%,100%{opacity:1}50%{opacity:.45}}@media (prefers-reduced-motion:reduce){.cup-steam path{animation:none!important;opacity:.4}.plant-leaves,.v-disc{animation:none!important}.v-arm-g{transition:none!important}.prop-vinyl.is-playing .v-dot{animation:none!important}.desk,.ios,.stage-front{transition:none!important}}
+/* ============================================================
+   Awen — 首页「书桌」场景（仅桌面端 ≥1024px）
+   平板像放在一张木桌上：墙面 + 台灯光池 + 透视木桌 + 桌面小物件
+   前景（压在平板前面）的闹钟与唱片在 .stage-front 里，定位走视口坐标
+   只在首页 / 文章页加载（见 themes/awen/layout/partial/head.ejs）
+   ============================================================ */
+
+.desk { display: none; }
+.stage-front { display: none; }
+
+@media (min-width: 1024px) {
+  .desk {
+    display: block;
+    position: fixed;
+    inset: 0;
+    /* 故意不建层叠上下文（z-index: auto）：
+       木桌留在平板后面，前景物件用更高的 z-index 压到平板前面 */
+    z-index: auto;
+    overflow: hidden;
+    pointer-events: none;
+    background: #05070c;
+    transition: opacity 0.45s ease;
+  }
+
+  /* ---------- 墙面 ---------- */
+
+  .desk-wall {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(46% 40% at 74% 2%, rgba(255, 206, 142, 0.14), transparent 72%),
+      linear-gradient(180deg, #18222f 0%, #111a26 52%, #0b111b 100%);
+  }
+
+  /* 台灯打下来的光晕 */
+  .desk-lampglow {
+    position: absolute;
+    left: -10%;
+    right: -10%;
+    top: -12%;
+    height: 76%;
+    z-index: 0;
+    background: radial-gradient(28% 42% at 74% 0%, rgba(255, 205, 138, 0.34), rgba(255, 192, 122, 0.07) 46%, transparent 74%);
+  }
+
+  /* ---------- 桌面（透视地板） ----------
+     平面从窗口 60% 处开始向后倒下去：那条边就是"桌面最远处"，
+     平板压在它上面，看上去像立在桌上。45° + 1400px 透视是算过的，
+     保证平面最远端的 z 不会越过视点（越过就会翻面/炸开）。 */
+
+  .desk-top {
+    position: absolute;
+    left: -30%;
+    right: -30%;
+    top: 60%;
+    height: 520px;
+    z-index: 0;
+    overflow: hidden;
+    transform: perspective(1400px) rotateX(45deg);
+    transform-origin: 50% 0;
+    background: linear-gradient(180deg, #8d603e 0%, #6f4a2e 22%, #4e3220 60%, #33200f 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 224, 182, 0.42), inset 0 -80px 140px rgba(0, 0, 0, 0.55);
+  }
+
+  /* 木纹走向必须是「横」的（平行桌面外沿）。
+     原来写的是 90deg，条纹在平面里是竖直的；竖线一旦过 perspective，
+     会被近大远小拉成放射状斜纹 —— 看上去像灯芯绒，不像木头。
+     横纹在透视下只会近疏远密，正是实木桌面的样子。 */
+  .desk-wood {
+    position: absolute;
+    inset: 0;
+    opacity: 0.9;
+    background:
+      /* 板材色差：沿桌宽方向的低频明暗，打断均匀纹路 */
+      repeating-linear-gradient(90deg, rgba(255, 226, 190, 0.05) 0 1px, rgba(0, 0, 0, 0) 1px 210px),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.05) 0 1px, rgba(0, 0, 0, 0) 1px 137px),
+      /* 主纹：两条略微反向倾斜的横线，交叠出自然的深浅变化 */
+      repeating-linear-gradient(1.1deg, rgba(0, 0, 0, 0.095) 0 2px, rgba(0, 0, 0, 0) 2px 13px),
+      repeating-linear-gradient(-0.7deg, rgba(255, 226, 190, 0.04) 0 1px, rgba(0, 0, 0, 0) 1px 31px);
+  }
+
+  .desk-pool {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(38% 30% at 74% 4%, rgba(255, 216, 156, 0.26), transparent 72%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.34) 100%);
+  }
+
+  /* ---------- 桌面上靠后的小物件（在平板后面，只在两侧留白里露出来） ---------- */
+
+  .desk-props { position: absolute; inset: 0; }
+
+  .prop {
+    position: absolute;
+    display: block;
+  }
+
+  /* 只约束闹钟那张 svg。唱片机里的 .v-arm 自带 100% × 100% 的定位规则，
+     被这条 width:100% 抢过去会撑成整个转盘那么大，旋转后直接甩出屏幕。 */
+  .prop-clock svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* 两件小物都往前挪一点：原来卡在桌面最远的那条边线上，
+     接触阴影正好落在墙面上，看着像浮在半空 */
+  .prop-cup {
+    left: max(14px, 2.2vw);
+    top: 56%;
+    width: clamp(84px, 7.6vw, 118px);
+  }
+
+  .prop-plant {
+    right: max(14px, 2.2vw);
+    top: 52%;
+    width: clamp(88px, 8vw, 124px);
+  }
+
+  /* 咖啡杯的热气 */
+  .cup-steam { opacity: 0.55; }
+  .cup-steam path { animation: cup-steam 4.6s ease-in-out infinite; }
+  .cup-steam path:last-child { animation-delay: 1.3s; animation-duration: 5.2s; }
+
+  /* 绿植的叶子：整组以盆口为轴心极慢地摇，像窗缝里漏进来的风。
+     幅度压在 ±1° 内 —— 是"活着"，不是"招手"。 */
+  .plant-leaves {
+    transform-box: view-box;
+    transform-origin: 68px 98px;
+    animation: plant-sway 7.5s ease-in-out infinite alternate;
+  }
+
+  /* ---------- 平板：放在桌上的立体感 ---------- */
+
+  .page-ios {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    min-height: 100vh;
+  }
+
+  /* 尺寸（宽 / 比例 / 下留白）在 ios.css 的 iPad 一节里定，
+     这里只负责"摆在桌上"的观感：轻微倾斜 + 接触阴影 + 屏幕反光 */
+
+  .ios {
+    margin: 0;
+    transition: transform 0.5s var(--ios-ease), box-shadow 0.5s ease, border-radius 0.4s ease;
+    box-shadow:
+      0 0 0 9px #0b0e14,
+      0 0 0 10.5px #343b48,
+      0 0 0 12px #10141b,
+      0 22px 34px -12px rgba(0, 0, 0, 0.9),
+      0 54px 96px -26px rgba(0, 0, 0, 0.78),
+      0 30px 110px -14px rgba(74, 150, 220, 0.34),
+      0 0 90px rgba(70, 150, 220, 0.14);
+  }
+
+  /* 玻璃屏幕反光 */
+  .ios::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 45;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(124deg, rgba(255, 255, 255, 0.10) 0 16%, rgba(255, 255, 255, 0) 32%, rgba(255, 255, 255, 0) 64%, rgba(255, 255, 255, 0.055) 100%);
+    mix-blend-mode: screen;
+  }
+
+  /* 阅读模式：整屏都是文档，机身与桌上物件一起让位 */
+  .page-ios.is-reading .ios { transition: transform 0.4s ease, box-shadow 0.4s ease, border-radius 0.4s ease; }
+
+  /* ---------- 前景：闹钟 + 唱片 ----------
+     固定铺满窗口（不跟着 .stage 走）：它们要贴着窗口左右边缘，
+     跟居中那台平板拉开层次。两者都完整落在视口里 ——
+     之前 bottom 取负值，闹钟的底座和唱臂被窗口下沿切掉了一截。 */
+
+  .stage-front {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+
+  /* ===== 闹钟 ===== */
+
+  .prop-clock {
+    left: max(16px, 1.8vw);
+    bottom: 1.4%;
+    width: clamp(116px, 9.4vw, 158px);
+  }
+
+  .prop-clock svg {
+    filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.55));
+  }
+
+  /* ===== 唱片机 ===== */
+
+  .prop-vinyl {
+    right: max(16px, 1.8vw);
+    bottom: 1.6%;
+    width: clamp(136px, 10.8vw, 182px);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 7px;
+    pointer-events: auto;
+  }
+
+  .v-meta {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    max-width: 100%;
+    padding: 6px 12px 6px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 999px;
+    background: rgba(11, 15, 23, 0.68);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    backdrop-filter: blur(14px) saturate(150%);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.42);
+    /* 没放唱片时不挂着这块空药丸 —— 它本来会一直悬在桌角、
+       还被窗口右沿裁掉一截。鼠标移上去或真有曲目了再淡入。 */
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .prop-vinyl:hover .v-meta,
+  .prop-vinyl:focus-within .v-meta,
+  .prop-vinyl.has-track .v-meta {
+    opacity: 1;
+    transform: none;
+  }
+
+  .v-dot {
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.28);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .prop-vinyl.is-playing .v-dot {
+    background: #57d98a;
+    box-shadow: 0 0 8px rgba(87, 217, 138, 0.8);
+    animation: v-dot 2.4s ease-in-out infinite;
+  }
+
+  .v-text { display: flex; flex-direction: column; min-width: 0; }
+
+  .v-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .v-artist { font-size: 10.5px; color: rgba(255, 255, 255, 0.58); }
+
+  /* 药丸底边的迷你进度线：歌曲进度一秒一格地爬，
+     播放器离得远时不用凑近也能看到"还剩多少" */
+  .v-prog {
+    position: absolute;
+    left: 11px;
+    right: 11px;
+    bottom: 3px;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+  }
+
+  .v-prog i {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.78);
+    transition: width 0.9s linear;
+  }
+
+  .v-hero {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 1 / 0.94;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* 机身：刻意用偏暖的浅木色 —— 深胡桃色跟深色木桌糊在一起，
+     黑胶盘也压不出形状；浅一号的盘座才能把黑胶托出来。 */
+  .v-plinth {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 82%;
+    border-radius: 15px;
+    background: linear-gradient(180deg, #c1a888 0%, #9c8263 46%, #6f583e 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 246, 228, 0.6),
+      inset 0 -16px 30px rgba(48, 32, 16, 0.42),
+      0 22px 34px -12px rgba(0, 0, 0, 0.78);
+  }
+
+  .v-plinth::after {
+    content: "";
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 7%;
+    height: 1px;
+    background: rgba(72, 52, 30, 0.34);
+  }
+
+  /* 播放指示灯 + 转速旋钮：机身上一点"电器感"的小细节。
+     没在放歌时灯是熄的暗红，播放时亮绿并带一圈光晕 ——
+     隔着屏幕就知道桌上那台机器在转。 */
+  .v-led {
+    position: absolute;
+    right: 10.5%;
+    bottom: 21%;
+    width: 4%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #59322c;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+    transition: background 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .prop-vinyl.is-playing .v-led {
+    background: #57d98a;
+    box-shadow:
+      0 0 9px rgba(87, 217, 138, 0.85),
+      0 0 20px rgba(87, 217, 138, 0.35),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  }
+
+  .v-knob {
+    position: absolute;
+    right: 6.5%;
+    bottom: 6.5%;
+    width: 10%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, #746a5d, #40382d 68%, #2c261e 100%);
+    box-shadow:
+      0 2px 5px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  }
+
+  /* 旋钮上的指示刻度：一条小白线，读得出"这是个能拧的东西" */
+  .v-knob::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 9%;
+    width: 8%;
+    height: 34%;
+    margin-left: -4%;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  /* 黑胶 */
+  .v-disc {
+    position: absolute;
+    left: 6%;
+    bottom: 15%;
+    width: 72%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background:
+      repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.055) 0 1px, rgba(0, 0, 0, 0) 1px 3.2px),
+      radial-gradient(circle at 34% 27%, #3d4049 0%, #181a20 44%, #0a0b0f 100%);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.09),
+      0 14px 26px -6px rgba(0, 0, 0, 0.72);
+    animation: v-spin 5.6s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .prop-vinyl.is-playing .v-disc { animation-play-state: running; }
+
+  /* 盘面高光：原来是 conic-gradient 扇形，首尾亮度对不上，
+     在底部接缝处留出一道径向硬边 —— 远看像盘面上贴了片深色楔子。
+     换成首尾都归零的柔和扇形，边缘全部渐变过渡。 */
+  .v-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(from 220deg,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0.13) 20deg,
+      rgba(255, 255, 255, 0.13) 58deg,
+      rgba(255, 255, 255, 0) 88deg,
+      rgba(255, 255, 255, 0) 196deg,
+      rgba(255, 255, 255, 0.08) 224deg,
+      rgba(255, 255, 255, 0.08) 258deg,
+      rgba(255, 255, 255, 0) 286deg,
+      rgba(255, 255, 255, 0) 360deg);
+  }
+
+  .v-label {
+    width: 36%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #b35a70;
+    background-size: cover;
+    background-position: center;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .v-hole {
+    width: 7%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #0b0d11;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14);
+  }
+
+  /* 唱臂：整张 SVG 铺满转盘区，viewBox 100×94 与 .v-hero 的 1:0.94 对齐，
+     所以里面的坐标就是"转盘的百分之几"，平板/桌面缩放都不会跑位。
+     轴心固定在右上 (84,12)，静止时臂尖停在盘外，播放时转过去落到纹槽上。
+     选择器写成 .prop-vinyl .v-arm（0,2,0）而不是 .v-arm，避免被上面
+     `.prop-clock svg` 那类规则按元素选中后撑开。 */
+  .prop-vinyl .v-arm {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    filter: drop-shadow(0 6px 9px rgba(0, 0, 0, 0.5));
+  }
+
+  .v-arm-g {
+    transform-box: view-box;
+    transform-origin: 84px 12px;
+    transform: rotate(2deg);
+    transition: transform 0.8s var(--ios-ease);
+  }
+
+  .prop-vinyl.is-playing .v-arm-g { transform: rotate(30deg); }
+
+  .v-hero:active .v-plinth { transform: translateY(1px); }
+}
+
+/* ============================================================
+   可拖动的桌面道具
+   ------------------------------------------------------------
+   桌上这四件东西（闹钟 / 咖啡 / 绿植 / 唱片机）都能随手挪位置：
+   拖起来会「拎」起一点（放大 + 影子拉远 + 跟着速度歪），松手带惯性
+   滑一段、撞到窗口边缘弹回来；双击归位，双击空白桌面全部归位。
+   位置存在 localStorage，刷新和翻页之后还在老地方。
+
+   位移不写进 left / top —— 那会把每个道具原本的定位方式（左边靠、
+   右边靠、底边靠、顶边靠）全部推倒重来，改一个错一个。
+   改成叠一层 transform 偏移：没动过的道具连样式都没变。
+   逻辑在 ios-desk.js 的 bootDesk()。
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  /* 桌面这层是「纯背景」，默认不吃鼠标事件；只有道具自己要接住指针 */
+  .desk .prop,
+  .stage-front .prop {
+    pointer-events: auto;
+    /* 按住道具时别顺手把页面滚起来 */
+    touch-action: none;
+    cursor: grab;
+    /* 拖的时候不要顺手把页面文字选蓝，也别触发图片的原生拖拽 */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+    /* 轴心放低（贴近桌面的那条接触线）：缩放和倾斜看起来才像
+       「从桌上把东西拎起来」，而不是从中心涨大 */
+    transform-origin: 50% 92%;
+    transform:
+      translate3d(var(--dx, 0px), var(--dy, 0px), 0)
+      rotate(var(--tilt, 0deg))
+      scale(var(--lift, 1));
+    /* 归位、松手回正走这条过渡；拖动过程中会临时摘掉 */
+    transition: transform 0.5s var(--ios-ease);
+    will-change: transform;
+  }
+
+  /* 唱片机是个立着的家伙：轴心落在它自己的底边上 */
+  .prop-vinyl { transform-origin: 50% 100%; }
+
+  /* 键盘用户在首页可以把道具聚焦起来用方向键挪（文章页不进 Tab 序列，
+     免得读正文时先撞上四个摆件） */
+  .desk .prop:focus-visible,
+  .stage-front .prop:focus-visible {
+    outline: 2px solid var(--ios-accent-soft, #9fd0f5);
+    outline-offset: 6px;
+    border-radius: 14px;
+  }
+
+  /* 拖动中：跟手 —— 过渡必须摘掉，不然道具会慢半拍地追鼠标 */
+  .prop.is-dragging {
+    transition: none;
+    cursor: grabbing;
+    filter: drop-shadow(0 30px 32px rgba(0, 0, 0, 0.6));
+  }
+
+  /* 东西拎起来了，地上不该还压着一块接触阴影 */
+  .prop.is-dragging .prop-ground { opacity: 0; }
+  .prop-ground { transition: opacity 0.22s ease; }
+
+  /* 闹钟的 svg 自带一层 drop-shadow，拖动时会和上面那条叠成两道影子 */
+  .prop-clock.is-dragging svg { filter: none; }
+
+  /* 前景两件（闹钟 / 唱片机）本来就在平板前面，拖起来时抬到同层最上面；
+     桌上那两件（咖啡 / 绿植）压在平板后面，抬也不能抬出来 ——
+     真把它们挪到平板底下，看着就像被电脑挡住了，反而是对的 */
+  .stage-front .prop.is-dragging { z-index: 9; }
+
+  /* 量基准位置时临时挂上去，把过渡关掉（不然"先归零再恢复"会看到抖动） */
+  .prop.no-anim { transition: none !important; }
+}
+
+@keyframes cup-steam {
+  0% { transform: translateY(5px); opacity: 0; }
+  32% { opacity: 0.85; }
+  100% { transform: translateY(-15px); opacity: 0; }
+}
+
+@keyframes plant-sway {
+  from { transform: rotate(-0.9deg); }
+  to { transform: rotate(1.1deg); }
+}
+
+@keyframes v-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes v-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* 尊重「减少动态效果」：热气、叶子摇曳、唱片转动、唱臂摆动全部停下 */
+@media (prefers-reduced-motion: reduce) {
+  .cup-steam path { animation: none !important; opacity: 0.4; }
+  .plant-leaves { animation: none !important; }
+  .v-disc { animation: none !important; }
+  .v-arm-g { transition: none !important; }
+  .prop-vinyl.is-playing .v-dot { animation: none !important; }
+  .ios, .desk, .stage-front { transition: none !important; }
+}

@@ -394,6 +394,16 @@
         }
       };
 
+      // 相机缓动：解锁后把地球「推远」一点、自转放慢，像从锁屏的专注景深退进
+      // 内容层；回锁屏再缓缓拉回来。baseDist 由 sizing() 按视口算，targetDist 是
+      // 当前要缓动去到的目标，curDist 是实际渲染值 —— 逐帧向 targetDist 逼近，
+      // 就有了「解锁时地球缓缓退后」那种连续的运动感，而不是 CSS 一帧硬切。
+      var baseDist = 0;
+      var targetDist = 0;
+      var curDist = null;
+      var speedTarget = 1;          // 自转速度的缓动目标（锁屏 1 → 解锁 0.3）
+      var speedMul = 1;             // 实际自转速度倍率，逐帧向 speedTarget 靠拢
+
       // 自适应：让地球直径约占画面宽度的 78%
       var sizing = function () {
         var w = canvas.clientWidth || root.clientWidth;
@@ -402,8 +412,10 @@
         renderer.setSize(w, h, false);
         camera.aspect = w / h;
         var k = 0.78;
-        var dist = 1 / (k * Math.tan((camera.fov * Math.PI / 180) / 2) * camera.aspect);
-        camera.position.set(0, 0, dist);
+        baseDist = 1 / (k * Math.tan((camera.fov * Math.PI / 180) / 2) * camera.aspect);
+        if (!targetDist) targetDist = baseDist;      // 首帧直接落位，别从 0 开始跳
+        if (curDist === null) curDist = baseDist;
+        camera.position.z = curDist;
         camera.lookAt(0, 0, 0);
         camera.updateProjectionMatrix();
       };
@@ -421,11 +433,41 @@
         if (!running || document.hidden) { last = now; return; }
         var dt = Math.min((now - last) / 1000, 0.1);
         last = now;
-        if (!state.dragging && !reduceMotion && speed) earth.rotation.y += speed * dt;
+
+        // 自转速度：锁屏正常、解锁后降到 0.3 倍（远处缓缓转，仍有生命感，
+        // 不会像现在这样整颗球冻住）。用 speedMul 这个缓动量平滑过渡。
+        speedMul += (speedTarget - speedMul) * Math.min(dt * 4, 1);
+        if (!state.dragging && !reduceMotion && speed) {
+          earth.rotation.y += speed * speedMul * dt;
+        }
+
+        // 相机缓动：curDist 逐帧向 targetDist 靠拢，解锁/回锁才有纵深位移
+        if (curDist !== null && Math.abs(targetDist - curDist) > 1e-4) {
+          curDist += (targetDist - curDist) * Math.min(dt * 3.2, 1);
+          camera.position.z = curDist;
+          camera.lookAt(0, 0, 0);
+        }
+
         stars.rotation.y += dt * 0.004;
         renderer.render(scene, camera);
       }
       requestAnimationFrame(frame);
+
+      // 解锁后地球「退远 + 慢转」，回锁屏再「拉近 + 恢复」。这是天文主题最显眼的
+      // 动态变化：不是整颗球静止，而是让镜头本身动起来，主屏壁纸也因此带上了
+      // 一层持续的呼吸感（配合 .ios-wall 的 CSS 模糊一起出效果）。
+      api.toHome = function () {
+        targetDist = baseDist * 1.34;   // 拉远：地球变小退进背景
+        speedTarget = 0.3;              // 慢转
+        if (!running) {                 // 之前被 pause 冻结的，解锁时先唤回来接着画
+          running = true;
+          last = performance.now();
+        }
+      };
+      api.toLock = function () {
+        targetDist = baseDist;          // 拉回：恢复锁屏的近距离
+        speedTarget = 1;                // 恢复自转
+      };
 
       api.placeMarker(state.lat, state.lon);
       api.setWall(state.wall, function () {
@@ -466,8 +508,9 @@
           return;
         }
         state.globe = api;
-        // 地球加载得慢、用户已经解锁进主屏了：那就别再空转渲染
-        if (!root.classList.contains('is-home')) api.pause();
+        // 地球加载得慢、用户已经解锁进主屏了：直接落到主屏的「退远慢转」状态，
+        // 不用先冻结再从锁屏状态硬切过去 —— 首帧就贴着主屏应有的样子
+        if (root.classList.contains('is-home')) api.toHome();
       }).catch(function () {
         root.classList.add('ios-noglobe');   // 文件不可用时退回 CSS 星空
       });
