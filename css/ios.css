@@ -1446,53 +1446,40 @@ html { background: #05070c; }
 .sb-date { display: none; }
 
 /* ============================================================
-   >>> 桌面端（≥1024px）：iPad 横屏
+   >>> 桌面端（≥1024px）：全屏嵌入
    ------------------------------------------------------------
-   为什么换：手机外框 392×812 在 1440 的窗口里只占四分之一宽，
-   两侧全空，怎么都不算"适配"。换成 iPad Pro 11" 横屏（1194×834）后
-   几乎铺满窗口，主屏也能按 iPadOS 的真实排布来：
+   去掉书桌场景后，iPad 屏幕直接铺满整个视口 —— 像全屏 App
+   一样完全嵌在网页里，不带外框、圆角和阴影。主屏仍按
+   iPadOS 的真实排布来：
 
      · 小组件在左上角占 4 列宽（4×2 与 2×2 混排），右边 2 列是 App
      · Dock 只跟内容一样宽、居中（iPadOS 就是这样，不像 iPhone 撑满整条）
      · 锁屏时钟靠左（屏幕大，时钟不在中间），而且没有灵动岛
      · 控制中心是从右上角浮出来的一块面板；Spotlight 居中限宽
 
-   外框宽度取三者最小：设计宽度 / 窗口宽 / 窗口高×比例 —— 保证永远完整
-   可见。同时 .ios 是 size container，内部尺寸用 cqw（容器宽度的 1%），
-   所以窗口小一点时外框整体等比缩小，图标、间距会跟着一起缩，
-   不会像写死 px 那样挤成一团。
-
-   想改 iPad 竖屏：把 --pad-ar 与 aspect-ratio 的 1194/834 换成 834/1194，
-   再把 .ios-home 的 grid-template-columns 换成单列、
-   .home-widgets / .home-apps 的 grid-column 改回 auto 即可。
+   .ios 是 size container，内部尺寸用 cqw（容器宽度的 1%），
+   所以窗口变化时图标、间距会跟着等比缩放，不会挤成一团。
    ============================================================ */
 
 @media (min-width: 1024px) {
   /* ---------- 背景 + 外框 ---------- */
 
-  /* 整站居中铺满屏幕：去掉书桌后，iPad 就是唯一的视觉主体，
-     直接让外框吃到「窗口宽 / 窗口高」里更大的那个，尽量铺满、
-     只在四周留一圈极窄的呼吸边距（让阴影和边框能透出来）。 */
+  /* 完全嵌入网页：iPad 屏幕就是整个页面，铺满视口、
+     不留边距、不带外框阴影和圆角 —— 像全屏 App 一样。 */
   .page-ios {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     min-height: 100vh;
     padding: 0;
     overflow: hidden;
-    background: radial-gradient(circle at 50% -10%, #1a2740 0%, #080b12 58%, #04060a 100%);
+    background: #05070e;
   }
 
-  /* .stage 是"平板占位盒"：外框尺寸在这里定。（.ios 只是铺满它的一块屏幕） */
+  /* .stage 是"平板占位盒"：现在直接占满整块视口 */
   .stage {
-    --pad-ar: 1.43165;          /* iPad Pro 11" 横屏：1194 × 834 */
     position: relative;
     display: block;
-    /* 三者取最小：设计宽 / 窗口宽 / 可用高×比例 —— 永远完整可见。
-       边距收到极窄（24px 横向、3vh 纵向），iPad 基本吃满整块视口，
-       只留一点缝隙让外框阴影和星空背景能呼吸。 */
-    width: min(1194px, calc(100vw - 24px), calc(97vh * var(--pad-ar)));
-    aspect-ratio: 1194 / 834;
+    width: 100vw;
+    height: 100vh;
     margin: 0;
   }
 
@@ -1503,31 +1490,11 @@ html { background: #05070c; }
     width: auto;
     height: auto;
     margin: 0;
-    border-radius: 26px;
+    border-radius: 0;
     overflow: hidden;
     background: #05070e;
     /* 变成「尺寸容器」：里面的 cqw / cqh 全按这块屏幕算 */
     container-type: size;
-    box-shadow:
-      0 0 0 9px #0b0e14,
-      0 0 0 10.5px #343b48,
-      0 0 0 12px #10141b,
-      0 26px 70px -20px rgba(0, 0, 0, 0.85);
-  }
-
-  /* 屏幕反光：一条很淡的斜向高光，让"设备模型"更像实物
-     （只在桌面端加 —— 手机上整屏都是它，会把内容压灰） */
-  .ios::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 90;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(152deg,
-      rgba(255, 255, 255, 0.055) 0%,
-      rgba(255, 255, 255, 0.018) 26%,
-      rgba(255, 255, 255, 0) 48%);
   }
 
   /* ---------- 状态栏：iPadOS 版式 ---------- */
