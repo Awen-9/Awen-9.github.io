@@ -444,8 +444,9 @@ html { background: #05070c; }
   object-position: center;
   transform: scale(1.015);
   /* 四张天体图原本色温差挺大（蓝地球 / 灰月球 / 紫星云 / 暖银河），
-     统一压一点饱和、提一点对比，让它们看起来像"一套"而不是四张素材 */
-  filter: saturate(0.86) contrast(1.04) brightness(0.93);
+     统一压饱和、提对比，再整体往青蓝偏一点 —— 暖灰的地球和暖色的银河
+     收进同一套「深空」色相里，看起来才是"一套"而不是四张凑来的素材 */
+  filter: saturate(0.82) contrast(1.06) brightness(0.9) hue-rotate(-6deg);
   transition: transform 0.7s var(--ios-ease-out);
 }
 

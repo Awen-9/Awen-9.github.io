@@ -387,9 +387,43 @@ html { scroll-behavior: smooth; }
 }
 
 .post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
   color: var(--text-muted);
   font-size: 0.88rem;
   margin: 0;
+}
+
+/* 日期：唯一一个稍强调的元信息，作为标题下第一眼的「时间锚点」 */
+.meta-date {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 分类：一个小胶囊，和正文里的标签呼应，一眼知道这篇文章归在哪 */
+.meta-cat {
+  padding: 0.1em 0.6em;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.78rem;
+  color: var(--accent);
+}
+
+/* 字数 / 阅读时长：篇幅信息，弱化处理，别抢日期和分类的注意力 */
+.meta-read {
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 两组信息之间的分隔：一个细圆点，比原来的「·」更有节奏 */
+.meta-sep {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--border);
+  display: inline-block;
 }
 
 /* ---------- 正文标题里被漏掉的两档 ----------
@@ -708,7 +742,7 @@ html { scroll-behavior: smooth; }
   color: var(--text-muted);
   opacity: 0;
   font-weight: 400;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.18s var(--ease), color 0.18s var(--ease);
 }
 
 .post-content h2:hover .heading-anchor,
@@ -890,15 +924,23 @@ html { scroll-behavior: smooth; }
 
 .footer-sub {
   font-family: var(--font-heading);
-  opacity: 0.75;
+  font-size: 1.05rem;
+  opacity: 0.85;
+  margin: 0 0 0.5rem;
+}
+
+/* 签名行之外的版权 / 统计 / 运行时长，统一收成一行细小的「辅助文字」，
+   跟在醒目的签名后面，信息层级从「平铺」变成「落款 + 附注」 */
+.footer-line {
+  font-size: 0.78rem;
+  opacity: 0.62;
 }
 
 .footer-stats {
   font-variant-numeric: tabular-nums;
-  opacity: 0.85;
 }
 
-.footer-uptime { opacity: 0.85; }
+.footer-uptime { opacity: 0.62; }
 
 /* ---------- 音乐播放器 ---------- */
 
