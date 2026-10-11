@@ -1470,34 +1470,35 @@ html { background: #05070c; }
 @media (min-width: 1024px) {
   /* ---------- 背景 + 外框 ---------- */
 
-  /* 整站居中铺在书桌上：竖着留出上方一点空隙、下方一条桌面 */
+  /* 整站居中铺满屏幕：去掉书桌后，iPad 就是唯一的视觉主体，
+     直接让外框吃到「窗口宽 / 窗口高」里更大的那个，尽量铺满、
+     只在四周留一圈极窄的呼吸边距（让阴影和边框能透出来）。 */
   .page-ios {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 3.6vh 0 0;
+    padding: 0;
     overflow: hidden;
     background: radial-gradient(circle at 50% -10%, #1a2740 0%, #080b12 58%, #04060a 100%);
   }
 
-  /* .stage 是"平板占位盒"：外框尺寸在这里定，前景的闹钟 / 唱片按它定位，
-     所以它才是整个场景的尺寸基准。（.ios 只是铺满它的一块屏幕） */
+  /* .stage 是"平板占位盒"：外框尺寸在这里定。（.ios 只是铺满它的一块屏幕） */
   .stage {
     --pad-ar: 1.43165;          /* iPad Pro 11" 横屏：1194 × 834 */
     position: relative;
     display: block;
     /* 三者取最小：设计宽 / 窗口宽 / 可用高×比例 —— 永远完整可见。
-       留白比之前收得更紧（108→44、150→17vh），平板本身能吃到 1194 的设计尺寸。 */
-    width: min(1194px, calc(100vw - 44px), calc(83vh * var(--pad-ar)));
+       边距收到极窄（24px 横向、3vh 纵向），iPad 基本吃满整块视口，
+       只留一点缝隙让外框阴影和星空背景能呼吸。 */
+    width: min(1194px, calc(100vw - 24px), calc(97vh * var(--pad-ar)));
     aspect-ratio: 1194 / 834;
-    margin-bottom: 12vh;
+    margin: 0;
   }
 
   .ios {
     position: absolute;
     inset: 0;
-    /* 高于书桌、低于前景的闹钟 / 唱片（它们要压在平板前面） */
     z-index: 2;
     width: auto;
     height: auto;
@@ -1507,7 +1508,6 @@ html { background: #05070c; }
     background: #05070e;
     /* 变成「尺寸容器」：里面的 cqw / cqh 全按这块屏幕算 */
     container-type: size;
-    transform: rotate(-0.5deg);
     box-shadow:
       0 0 0 9px #0b0e14,
       0 0 0 10.5px #343b48,
