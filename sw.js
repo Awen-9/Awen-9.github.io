@@ -10,20 +10,16 @@
  *
  * 版本号变了才会重装 SW 并清旧缓存；改了静态资源记得 bump。
  * ============================================================ */
-var VERSION = 'awen-sw-v1';
+var VERSION = 'awen-sw-v2';
 
 var PRECACHE = [
   '/css/style.css',
   '/css/ios.css',
-  '/css/ios-desk.css',
-  '/css/ios-game.css',
   '/js/main.js',
   '/js/pjax.js',
   '/js/ios-core.js',
   '/js/ios-globe.js',
-  '/js/ios-desk.js',
   '/js/ios.js',
-  '/js/games.js',
   '/img/favicon.svg',
   '/manifest.json'
 ];

@@ -471,9 +471,13 @@
 
       api.placeMarker(state.lat, state.lon);
       api.setWall(state.wall, function () {
-        // 贴图就绪、也画过一帧了，这时才摘掉兜底星空让它淡出，不会看到白球或黑球
-        root.classList.remove('ios-noglobe');
+        // 首页：贴图就绪、也画过一帧了，这时才摘掉兜底星空让它淡出，不会看到白球或黑球。
+        // 文档页：星空兜底就是壁纸本身（地球退远慢转铺在它上面），不摘。
+        if (!ctx.isDoc) root.classList.remove('ios-noglobe');
       });
+      // 文档页没有锁屏，地球直接落「主屏态」（退远 + 慢转）当内容背景；
+      // 首页则保持锁屏近景，等用户解锁再退远。
+      if (ctx.isDoc) api.toHome();
       return api;
     }
 

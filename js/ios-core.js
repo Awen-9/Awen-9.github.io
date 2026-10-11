@@ -11,11 +11,10 @@
 //   · 登记收尾的三个包装：on / every / after（配 onMQ / makeObserver）
 //   · 常用小工具：$ / setText / pad / go
 //   · 贴图 webp 判定：WEBP_OK / texURL
-//   · 跨模块共享的一份拖动守卫 dragGuard
 //
 // 加载顺序（都是 defer，按出现顺序执行）：
-//   ios-core.js → ios-globe.js → ios-desk.js → ios.js
-// 前三个里的后两个只负责「注册自己的 boot 函数」，真正的调用时机由
+//   ios-core.js → ios-globe.js → ios.js
+// 中间那个只负责「注册自己的 boot 函数」，真正的调用时机由
 // ios.js 的 boot() 掌握 —— 这样翻页时能按同一套顺序收尾、再重来一遍。
 // ============================================================
 window.AWEN = (function () {
@@ -85,11 +84,6 @@ window.AWEN = (function () {
     on: on, every: every, after: after, onMQ: onMQ, makeObserver: makeObserver,
     $: $, setText: setText, pad: pad, go: go,
     WEBP_OK: WEBP_OK, texURL: texURL,
-
-    // 刚拖过桌面道具的时间戳。拖动收尾时记一下，用来吃掉紧跟着那一次
-    // click / dblclick —— 不然「把杯子甩到角落」会顺手把唱片机的播放
-    // 暂停也切了（松手之后浏览器照样会补一个 click）。
-    dragGuard: { ts: 0 },
 
     // 模块登记表：每个模块 push 一个 { name, boot }
     modules: [],

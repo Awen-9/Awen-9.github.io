@@ -54,9 +54,6 @@
   <link rel="stylesheet" href="/css/style.css">
   
   <link rel="stylesheet" href="/css/ios.css">
-  <link rel="stylesheet" href="/css/ios-desk.css">
-  
-  <link rel="stylesheet" href="/css/ios-game.css">
   
   
   <link rel="preload" as="image" type="image/webp" href="/img/earth-night-small.webp">
@@ -75,7 +72,6 @@
     .home-dock, .home-indicator { opacity: 1 !important; }
     .home-dock { pointer-events: auto !important; }
     .ios-statusbar { pointer-events: auto !important; }
-    .cat-paw, .paw-ripples { display: none !important; }
     /* iPad 模式下底部留白按容器宽算，否则 120px 会让内容压到 Dock */
     @media (min-width: 1024px) { .ios-home { padding-bottom: 13.6cqw !important; } }
   </style></noscript>
@@ -106,95 +102,6 @@
 <body class="page-ios page-home">
 
 
-<!-- ============================================================
-     书桌场景（整站共用，仅桌面端 ≥1024px 显示）
-     墙面 + 台灯光池 + 透视木桌 + 桌面上靠后的小物件（杯子 / 绿植）
-     靠前、会压在平板前面的闹钟与唱片在 stage-front 里
-
-     桌面这几件东西都能随手挪位置（拖 / 甩 / 双击归位），
-     玩法见 ios-desk.js，样式见 ios-desk.css。
-     所以这层不能再挂 aria-hidden="true" —— 那是「纯装饰，读屏别看」
-     的意思，挂上就把道具的键盘操作一起屏蔽了。改成只给几个纯背景层标。
-     ============================================================ -->
-<div class="desk">
-  <div class="desk-wall" aria-hidden="true"></div>
-  <div class="desk-lampglow" aria-hidden="true"></div>
-  <div class="desk-top" aria-hidden="true">
-    <div class="desk-wood"></div>
-    <div class="desk-pool"></div>
-  </div>
-
-  <div class="desk-props">
-
-    <span class="prop prop-cup" id="prop-cup" role="button"
-          aria-label="咖啡杯，可以拖着挪位置，双击放回原处">
-      <svg viewBox="0 0 150 132" aria-hidden="true">
-        <defs>
-          <linearGradient id="dkCup" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#fbfcff"/><stop offset=".55" stop-color="#e1e7f0"/><stop offset="1" stop-color="#bfc9d8"/>
-          </linearGradient>
-          <linearGradient id="dkCoff" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#6d4726"/><stop offset="1" stop-color="#3f2d1c"/>
-          </linearGradient>
-          <linearGradient id="dkSaucer" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#f2f5fa"/><stop offset="1" stop-color="#c3cddc"/>
-          </linearGradient>
-        </defs>
-        <g class="cup-steam" stroke="rgba(255,255,255,.34)" stroke-width="3.4" stroke-linecap="round" fill="none">
-          <path d="M56 34c-6-8 4-13-2-21"/><path d="M74 30c-6-9 4-14-2-22"/>
-        </g>
-        
-        <ellipse class="prop-ground" cx="72" cy="123" rx="62" ry="10" fill="rgba(0,0,0,.34)"/>
-        
-        <ellipse cx="72" cy="110.5" rx="57" ry="12.5" fill="#eef2f8"/>
-        <ellipse cx="72" cy="112" rx="57" ry="12.5" fill="url(#dkSaucer)"/>
-        
-        <path d="M110 59a18 18 0 011.6 34" fill="none" stroke="#c7d0de" stroke-width="10" stroke-linecap="round"/>
-        <path d="M111.5 62.5a14 14 0 011.2 27" fill="none" stroke="#f0f3f9" stroke-width="3.4" stroke-linecap="round"/>
-        <path d="M26 54v46a46 15 0 0092 0V54z" fill="url(#dkCup)"/>
-        <ellipse cx="72" cy="54" rx="46" ry="14.5" fill="#f2f5fa"/>
-        <ellipse cx="72" cy="55" rx="38.5" ry="11.4" fill="url(#dkCoff)"/>
-        <ellipse cx="60" cy="52" rx="11" ry="4.4" fill="#ab7440" opacity=".45"/>
-        
-        <path d="M115.5 62c3.4 12 4.2 25 1.8 36" fill="none" stroke="rgba(255,210,150,.32)" stroke-width="2.4" stroke-linecap="round"/>
-      </svg>
-    </span>
-
-    <span class="prop prop-plant" id="prop-plant" role="button"
-          aria-label="小绿植，可以拖着挪位置，双击放回原处">
-      <svg viewBox="0 0 140 158" aria-hidden="true">
-        <ellipse class="prop-ground" cx="68" cy="148" rx="40" ry="9" fill="rgba(0,0,0,.36)"/>
-        
-        <g class="plant-leaves">
-          <g stroke="rgba(0,0,0,.16)" stroke-width="1.2">
-            <path d="M68 100C44 88 28 60 36 36c24 8 38 36 32 64z" fill="#3a8b5c"/>
-            <path d="M70 100c26-10 44-38 38-62-26 8-42 36-38 62z" fill="#4ea774"/>
-            <path d="M69 94c-3-32 5-62 22-78 11 22 3 58-22 78z" fill="#5cba7d"/>
-            <path d="M66 96C48 74 30 62 16 60c4 22 24 36 50 36z" fill="#33794d"/>
-          </g>
-          <g fill="none" stroke="rgba(255,255,255,.20)" stroke-width="1.5" stroke-linecap="round">
-            <path d="M66 94C52 82 42 62 40 44"/>
-            <path d="M71 94c18-8 30-26 34-46"/>
-            <path d="M70 90c0-26 6-50 16-64"/>
-            <path d="M62 94C50 80 36 70 22 66"/>
-          </g>
-        </g>
-        <path d="M38 98h60l-7 42a7 7 0 01-7 6H52a7 7 0 01-7-6z" fill="#c56f4b"/>
-        <path d="M38 98h60l-2 11H40z" fill="#a95c3b"/>
-        <ellipse cx="68" cy="98" rx="30" ry="7" fill="#8c4a2e"/>
-        <ellipse cx="68" cy="97" rx="26" ry="5.4" fill="#3b2a20"/>
-        
-        <ellipse cx="58" cy="96.5" rx="3" ry="1.4" fill="rgba(255,255,255,.10)"/>
-        <ellipse cx="77" cy="96" rx="2.4" ry="1.1" fill="rgba(255,255,255,.08)"/>
-        
-        <path d="M96 112c1.8 10 1.2 20-1.6 30" fill="none" stroke="rgba(255,205,145,.30)" stroke-width="2.4" stroke-linecap="round"/>
-        <ellipse cx="54" cy="88" rx="9" ry="3.4" fill="rgba(255,255,255,.1)"/>
-      </svg>
-    </span>
-
-  </div>
-</div>
-
 <div class="stage">
 
 
@@ -211,8 +118,6 @@
   data-rotate="0.012"
   data-wall="night"
   data-relock="1"
-  data-paw="1"
-  data-paw-idle="1"
   data-search="/search.json"
   data-music-page="/music/"
   data-three="/js/vendor/three.module.min.js"
@@ -297,7 +202,7 @@
         </span>
       </a>
 
-      <div class="widget widget-stats" id="widget-stats" data-pool="/2026/06/18/Docker-%E9%83%A8%E7%BD%B2-Spring-Boot/|/2025/12/30/2025-%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/|/2026/09/26/HashMap-%E6%89%A9%E5%AE%B9%E4%B8%8E%E7%BA%A2%E9%BB%91%E6%A0%91/|/2026/07/05/Maven-%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81%E6%8E%92%E6%9F%A5/|/2026/08/28/MySQL-%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF/|/2026/08/10/Redis-%E7%BC%93%E5%AD%98%E4%B8%89%E5%A4%A7%E9%97%AE%E9%A2%98/|/2026/10/10/Spring-Boot-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86/|/2026/05/29/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-JVM-%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/|/2026/10/09/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%8A%E7%BA%BF%EF%BC%9A%E6%88%91%E7%9A%84-Hexo-%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E5%85%A8%E8%AE%B0%E5%BD%95/|/2026/09/12/%E7%BA%BF%E4%B8%8A-OOM-%E6%8E%92%E6%9F%A5%E8%AE%B0%E5%BD%95/|/2026/07/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E6%80%8E%E4%B9%88%E8%AE%BE/">
+      <div class="widget widget-stats" id="widget-stats" data-pool="/2025/12/30/2025-%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/|/2026/06/18/Docker-%E9%83%A8%E7%BD%B2-Spring-Boot/|/2026/09/26/HashMap-%E6%89%A9%E5%AE%B9%E4%B8%8E%E7%BA%A2%E9%BB%91%E6%A0%91/|/2026/08/10/Redis-%E7%BC%93%E5%AD%98%E4%B8%89%E5%A4%A7%E9%97%AE%E9%A2%98/|/2026/07/05/Maven-%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81%E6%8E%92%E6%9F%A5/|/2026/08/28/MySQL-%E7%B4%A2%E5%BC%95%E5%A4%B1%E6%95%88%E5%9C%BA%E6%99%AF/|/2026/10/10/Spring-Boot-%E8%87%AA%E5%8A%A8%E9%85%8D%E7%BD%AE%E5%8E%9F%E7%90%86/|/2026/10/09/%E4%BB%8E%E9%9B%B6%E5%88%B0%E4%B8%8A%E7%BA%BF%EF%BC%9A%E6%88%91%E7%9A%84-Hexo-%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E5%85%A8%E8%AE%B0%E5%BD%95/|/2026/05/29/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3-JVM-%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/|/2026/09/12/%E7%BA%BF%E4%B8%8A-OOM-%E6%8E%92%E6%9F%A5%E8%AE%B0%E5%BD%95/|/2026/07/22/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8F%82%E6%95%B0%E6%80%8E%E4%B9%88%E8%AE%BE/">
         <picture>
           <source srcset="/img/w/moon.webp" type="image/webp">
           <img class="w-bg" src="/img/w/moon.jpg" alt="" loading="lazy" decoding="async">
@@ -319,7 +224,7 @@
           
           <span class="w-foot">
             <span class="w-live" id="stats-live" hidden><b id="busuanzi_container_site_pv"><span id="busuanzi_value_site_pv">—</span></b> 次浏览 · <b id="busuanzi_container_site_uv"><span id="busuanzi_value_site_uv">—</span></b> 位访客</span>
-            <a class="w-random" id="w-random" href="/2026/06/18/Docker-%E9%83%A8%E7%BD%B2-Spring-Boot/" aria-label="随机打开一篇文章">随便看看<i>→</i></a>
+            <a class="w-random" id="w-random" href="/2025/12/30/2025-%E5%B9%B4%E7%BB%88%E6%80%BB%E7%BB%93/" aria-label="随机打开一篇文章">随便看看<i>→</i></a>
           </span>
         </span>
       </div>
@@ -343,9 +248,9 @@
             
             <span class="w-tag">JVM<i>2</i></span>
             
-            <span class="w-tag">Docker<i>1</i></span>
+            <span class="w-tag">年终总结<i>1</i></span>
             
-            <span class="w-tag">部署<i>1</i></span>
+            <span class="w-tag">成长<i>1</i></span>
             
           </span>
           
@@ -470,16 +375,6 @@
       <span class="app-name">锁屏</span>
     </a>
     
-    <a class="dock-app" data-app="逗猫"
-       data-color="linear-gradient(170deg, #dcb980, #9a7443)"
-       href="/"
-       data-action="game"
-       data-game="cat"
-       >
-      <span class="app-icon" style="background:linear-gradient(170deg, #dcb980, #9a7443)"><svg viewBox="0 0 24 24" fill="currentColor"><ellipse cx="7.1" cy="8.2" rx="2.2" ry="2.8" transform="rotate(-18 7.1 8.2)"/><ellipse cx="11.4" cy="6.3" rx="2.2" ry="2.9"/><ellipse cx="15.9" cy="6.9" rx="2.2" ry="2.9" transform="rotate(14 15.9 6.9)"/><ellipse cx="19.5" cy="9.6" rx="2" ry="2.6" transform="rotate(30 19.5 9.6)"/><path d="M12 11.2c3.5 0 6.2 2.1 6.2 4.7 0 2.2-1.8 3.6-4.2 3.6-1 0-1.6-.4-2-.4s-1 .4-2 .4c-2.4 0-4.2-1.4-4.2-3.6 0-2.6 2.7-4.7 6.2-4.7z"/></svg></span>
-      <span class="app-name">逗猫</span>
-    </a>
-    
   </div>
 
   <span class="home-indicator" aria-hidden="true"></span>
@@ -529,242 +424,6 @@
   </div>
   
 
-  <!-- ===== 小游戏（主屏那个 data-action="game" 的 App 打开它） ===== -->
-  <!-- ============================================================
-     主屏小游戏（只在首页渲染）
-     入口是主屏上那个 data-action="game" 的 App 图标（见 _config.yml 的 ios.apps）
-     显示 / 隐藏由 #ios 上的 is-game 类控制 —— 跟控制中心、搜索同一套路，
-     所以 ios.js 的 syncA11y() 顺手就把 inert 分层一起管了
-     玩法在 /js/games.js，样式在 /css/ios-game.css
-     ============================================================ -->
-<div class="ios-game" id="ios-game" role="dialog" aria-modal="true" aria-label="小游戏">
-
-  
-  <svg class="g-defs" width="0" height="0" aria-hidden="true" focusable="false">
-    <defs>
-      <linearGradient id="gArmG" x1="0.1" y1="0" x2="0.9" y2="1">
-        <stop offset="0" stop-color="#f8e7cd"/><stop offset="1" stop-color="#cfa87c"/>
-      </linearGradient>
-      <radialGradient id="gFurG" cx="0.36" cy="0.3" r="0.86">
-        <stop offset="0" stop-color="#fffaf1"/>
-        <stop offset="0.6" stop-color="#f4e0c4"/>
-        <stop offset="1" stop-color="#d8bb94"/>
-      </radialGradient>
-      <radialGradient id="gBeanG" cx="0.38" cy="0.3" r="0.82">
-        <stop offset="0" stop-color="#fbc3ca"/><stop offset="1" stop-color="#db7b86"/>
-      </radialGradient>
-    </defs>
-  </svg>
-
-  <header class="g-bar">
-    <button class="g-btn" type="button" id="g-close" aria-label="关闭游戏">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6.6 6.6l10.8 10.8M17.4 6.6L6.6 17.4"/></svg>
-    </button>
-    <span class="g-title" id="g-title">逗猫</span>
-    <span class="g-chip" aria-label="本局得分"><b id="g-score">0</b><i>分</i></span>
-    <span class="g-chip g-chip-time" aria-label="剩余时间"><b id="g-time">30</b><i>秒</i></span>
-  </header>
-
-  <div class="g-stage">
-    
-    <canvas class="g-fx" id="g-fx" aria-hidden="true"></canvas>
-    <div class="g-cat" id="g-cat">
-      
-      <button class="g-hole" type="button" data-i="0" aria-label="第 1 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="1" aria-label="第 2 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="2" aria-label="第 3 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="3" aria-label="第 4 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="4" aria-label="第 5 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="5" aria-label="第 6 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="6" aria-label="第 7 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="7" aria-label="第 8 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-      <button class="g-hole" type="button" data-i="8" aria-label="第 9 个洞口">
-        <span class="g-paw" aria-hidden="true">
-          <svg viewBox="0 0 120 124">
-            
-            <rect x="45" y="88" width="30" height="42" rx="15" fill="url(#gArmG)"/>
-            <ellipse cx="60" cy="76" rx="33" ry="30" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="42" rx="12.5" ry="15.5" transform="rotate(-24 27 42)" fill="url(#gFurG)"/>
-            <ellipse cx="51" cy="31" rx="12.5" ry="16" fill="url(#gFurG)"/>
-            <ellipse cx="76" cy="32" rx="12.5" ry="16" transform="rotate(14 76 32)" fill="url(#gFurG)"/>
-            <ellipse cx="98" cy="46" rx="11.5" ry="14.5" transform="rotate(32 98 46)" fill="url(#gFurG)"/>
-            <ellipse cx="27" cy="45" rx="6.2" ry="7.6" transform="rotate(-24 27 45)" fill="url(#gBeanG)"/>
-            <ellipse cx="51" cy="35" rx="6.2" ry="7.6" fill="url(#gBeanG)"/>
-            <ellipse cx="76" cy="36" rx="6.2" ry="7.6" transform="rotate(14 76 36)" fill="url(#gBeanG)"/>
-            <ellipse cx="96" cy="48" rx="5.8" ry="7.2" transform="rotate(32 96 48)" fill="url(#gBeanG)"/>
-            <ellipse cx="60" cy="79" rx="17.5" ry="15.5" fill="url(#gBeanG)"/>
-            <ellipse cx="50" cy="70" rx="9" ry="5.6" fill="rgba(255,255,255,.4)"/>
-          </svg>
-        </span>
-      </button>
-      
-    </div>
-  </div>
-
-  <p class="g-tip">点猫爪得分 · 连着中加成越高 · 键盘 1–9 也行</p>
-
-  <div class="g-over" id="g-over" hidden>
-    <div class="g-card">
-      <p class="g-over-score"><b id="g-final">0</b><i>分</i></p>
-      <p class="g-over-best">最高纪录 <b id="g-best">0</b></p>
-      <button class="g-again" type="button" id="g-again">再来一局</button>
-    </div>
-  </div>
-</div>
-
-
   <!-- ===== 音乐（iOS 组件形态，锁屏 / 主屏共用一套） ===== -->
   
   <div class="music-root" data-mode="ios"
@@ -777,177 +436,12 @@
     data-order="list"
     data-lrc="0" hidden></div>
 
-  <!-- ===== 小猫爪：点击屏幕时伸出来按一下 ===== -->
-  
-  <div class="paw-ripples" id="paw-ripples" aria-hidden="true"></div>
-  <div class="cat-paw" id="cat-paw" aria-hidden="true">
-    <div class="paw-inner">
-      <svg viewBox="0 0 260 260">
-        <defs>
-          <linearGradient id="pawArmG" x1="0.1" y1="0" x2="0.9" y2="1">
-            <stop offset="0" stop-color="#f7e4c8"/><stop offset="1" stop-color="#d5ad80"/>
-          </linearGradient>
-          <radialGradient id="pawFurG" cx="0.36" cy="0.3" r="0.86">
-            <stop offset="0" stop-color="#fff7ea"/><stop offset="0.62" stop-color="#f4dfc2"/><stop offset="1" stop-color="#dbc09b"/>
-          </radialGradient>
-          <radialGradient id="pawBeanG" cx="0.38" cy="0.3" r="0.82">
-            <stop offset="0" stop-color="#f9bec5"/><stop offset="1" stop-color="#dc7c87"/>
-          </radialGradient>
-        </defs>
-        <path d="M128 152C168 182 214 208 252 225" fill="none" stroke="url(#pawArmG)" stroke-width="48" stroke-linecap="round"/>
-        <path d="M126 148C164 178 208 202 244 219" fill="none" stroke="rgba(255,255,255,.26)" stroke-width="11" stroke-linecap="round"/>
-        <ellipse cx="124" cy="122" rx="57" ry="51" fill="url(#pawFurG)"/>
-        <ellipse cx="66" cy="74" rx="20" ry="25" transform="rotate(-26 66 74)" fill="url(#pawFurG)"/>
-        <ellipse cx="101" cy="58" rx="20" ry="26" fill="url(#pawFurG)"/>
-        <ellipse cx="138" cy="60" rx="20" ry="26" transform="rotate(15 138 60)" fill="url(#pawFurG)"/>
-        <ellipse cx="172" cy="80" rx="19" ry="24" transform="rotate(34 172 80)" fill="url(#pawFurG)"/>
-        <ellipse cx="66" cy="78" rx="10.5" ry="13" transform="rotate(-26 66 78)" fill="url(#pawBeanG)"/>
-        <ellipse cx="101" cy="63" rx="10.5" ry="13.5" fill="url(#pawBeanG)"/>
-        <ellipse cx="138" cy="65" rx="10.5" ry="13.5" transform="rotate(15 138 65)" fill="url(#pawBeanG)"/>
-        <ellipse cx="169" cy="84" rx="10" ry="12.5" transform="rotate(34 169 84)" fill="url(#pawBeanG)"/>
-        <path d="M96 116c0-15 15-22 34-19 23 3 36 15 33 33-3 20-19 31-39 28-20-3-28-22-28-42z" fill="url(#pawBeanG)"/>
-      </svg>
-    </div>
-  </div>
-  
-
   <div class="ios-open-veil" id="ios-open-veil" aria-hidden="true"></div>
 </div>
 
 
 
 
-
-
-  <!-- ===== 桌面上的前景物件：压在平板前面 ===== -->
-  <div class="stage-front">
-    <!-- ============================================================
-     桌面闹钟（前景，压在平板前面）
-     模拟表盘走时（秒针每秒跳一下），表盘上带一个日期窗
-     指针由 ios.js 的 tickClock() 设置 transform，不做 CSS 动画
-     ============================================================ -->
-
-<div class="prop prop-clock" id="prop-clock" role="button"
-     aria-label="桌面闹钟，可以拖着挪位置，双击放回原处">
-  <svg viewBox="0 0 140 158" aria-hidden="true">
-    <defs>
-      <radialGradient id="pcMetal" cx="0.34" cy="0.28" r="0.86">
-        <stop offset="0" stop-color="#6d747f"/><stop offset="0.55" stop-color="#4a5058"/><stop offset="1" stop-color="#2b3037"/>
-      </radialGradient>
-      <radialGradient id="pcDial" cx="0.36" cy="0.24" r="0.9">
-        <stop offset="0" stop-color="#fdfaf1"/><stop offset="0.72" stop-color="#f3eee1"/><stop offset="1" stop-color="#dcd5c4"/>
-      </radialGradient>
-      <linearGradient id="pcGlass" x1="0" y1="0" x2="0.6" y2="1">
-        <stop offset="0" stop-color="rgba(255,255,255,.5)"/><stop offset="0.42" stop-color="rgba(255,255,255,0)"/>
-      </linearGradient>
-    </defs>
-
-    <ellipse class="prop-ground" cx="70" cy="150" rx="46" ry="8" fill="rgba(0,0,0,.42)"/>
-
-    <!-- 提手 + 双铃 + 小锤 -->
-    <path d="M50 24a22 22 0 0140 0" fill="none" stroke="#4c525b" stroke-width="5" stroke-linecap="round"/>
-    <circle cx="38" cy="32" r="15.5" fill="url(#pcMetal)"/>
-    <circle cx="38" cy="32" r="8" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.2"/>
-    <circle cx="102" cy="32" r="15.5" fill="url(#pcMetal)"/>
-    <circle cx="102" cy="32" r="8" fill="none" stroke="rgba(255,255,255,.16)" stroke-width="1.2"/>
-    
-    <line x1="70" y1="12" x2="70" y2="22" stroke="#4c525b" stroke-width="4" stroke-linecap="round"/>
-    <circle cx="70" cy="25.5" r="3.4" fill="#5a616b"/>
-    <circle cx="69" cy="24.5" r="1.1" fill="rgba(255,255,255,.28)"/>
-
-    <!-- 底座 -->
-    <path d="M36 128l-6 14a4 4 0 004 5h8l4-19z" fill="#3b4149"/>
-    <path d="M104 128l6 14a4 4 0 01-4 5h-8l-4-19z" fill="#3b4149"/>
-
-    <!-- 表身 + 表盘 -->
-    <circle cx="70" cy="86" r="53" fill="url(#pcMetal)"/>
-    <circle cx="70" cy="86" r="49" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="1.4"/>
-    <circle cx="70" cy="86" r="45.5" fill="url(#pcDial)"/>
-    <line x1="70.0" y1="50.5" x2="70.0" y2="43.0" stroke="#39404b" stroke-width="3" stroke-linecap="round"/><line x1="89.3" y1="52.7" x2="91.5" y2="48.8" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="103.3" y1="66.8" x2="107.2" y2="64.5" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="105.5" y1="86.0" x2="113.0" y2="86.0" stroke="#39404b" stroke-width="3" stroke-linecap="round"/><line x1="103.3" y1="105.3" x2="107.2" y2="107.5" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="89.3" y1="119.3" x2="91.5" y2="123.2" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="70.0" y1="121.5" x2="70.0" y2="129.0" stroke="#39404b" stroke-width="3" stroke-linecap="round"/><line x1="50.8" y1="119.3" x2="48.5" y2="123.2" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="36.7" y1="105.3" x2="32.8" y2="107.5" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="34.5" y1="86.0" x2="27.0" y2="86.0" stroke="#39404b" stroke-width="3" stroke-linecap="round"/><line x1="36.7" y1="66.8" x2="32.8" y2="64.5" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/><line x1="50.7" y1="52.7" x2="48.5" y2="48.8" stroke="#9ba1ac" stroke-width="1.6" stroke-linecap="round"/>
-
-    <!-- 指针 -->
-    <line id="pc-h" x1="70" y1="90" x2="70" y2="64" stroke="#2f333c" stroke-width="5.6" stroke-linecap="round"/>
-    <line id="pc-m" x1="70" y1="90" x2="70" y2="55" stroke="#2f333c" stroke-width="3.6" stroke-linecap="round"/>
-    <line id="pc-s" x1="70" y1="86" x2="70" y2="50" stroke="#c0563f" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="70" cy="86" r="3.8" fill="#2f333c"/>
-    <circle cx="70" cy="86" r="1.5" fill="#f7f3e8"/>
-
-    <!-- 日期窗：画在指针之后。真闹钟这里是一块压在表盘上的小盖板，
-         秒针扫过 6 点方向时会从它下面走过去，而不是从字上穿过去。
-         原来是一大块黑底亮字，远看像贴了张黑色贴纸；
-         改成米色嵌板 + 内凹描边，字用深色，跟表盘是一体的。 -->
-    <g class="pc-window">
-      <rect x="47.5" y="98.5" width="45" height="24" rx="4.5" fill="#efe8d5"/>
-      <rect x="47.5" y="98.5" width="45" height="24" rx="4.5" fill="none" stroke="rgba(74,62,44,.35)" stroke-width="1"/>
-      <rect x="48.9" y="99.9" width="42.2" height="21.2" rx="3.4" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1"/>
-      <text id="pc-week" x="70" y="107.8" text-anchor="middle" font-size="6.4" font-family="inherit" fill="#93896f">星期六</text>
-      <text id="pc-date" x="70" y="118.8" text-anchor="middle" font-size="9.4" font-family="inherit" fill="#453e30">10月10日</text>
-    </g>
-
-    <!-- 暖光描边：台灯在右上，表壳右上沿接一道暖色高光，跟场景光源对上
-         （起点压在 -42° 以下，别搭到右铃铛的底沿上） -->
-    <path d="M109.4 50.5A53 53 0 01122.7 80.5" fill="none" stroke="rgba(255,206,146,.22)" stroke-width="2.4" stroke-linecap="round"/>
-
-    <!-- 玻璃反光 -->
-    <path d="M35 62a45.5 45.5 0 0136-20 45.5 45.5 0 0133 14" fill="none" stroke="url(#pcGlass)" stroke-width="14" stroke-linecap="round" opacity=".5"/>
-  </svg>
-</div>
-
-    <!-- ============================================================
-     桌面唱片机（前景，压在平板前面）
-     点一下播放/暂停；播放时黑胶转动、唱臂落到盘面上
-     曲名/封面/播放态来自 main.js 派发的 awen:track 事件
-     整台机器也能拖着挪位置（双击归位）—— 所以这里不用
-     aria-hidden 把整块藏掉，只把纯装饰的子层标上
-     ============================================================ -->
-
-<div class="prop prop-vinyl" id="prop-vinyl" role="group"
-     aria-label="唱片机，拖动能挪位置，双击放回原处">
-  <div class="v-meta" aria-hidden="true">
-    <span class="v-dot"></span>
-    <span class="v-text">
-      <span class="v-title" id="vinyl-title">还没放唱片</span>
-      <span class="v-artist" id="vinyl-artist"></span>
-    </span>
-    
-    <span class="v-prog"><i id="vinyl-prog"></i></span>
-  </div>
-
-  <button class="v-hero" type="button" id="vinyl-toggle" aria-label="播放或暂停音乐" aria-pressed="false">
-    <span class="v-plinth" aria-hidden="true"></span>
-
-    
-    <span class="v-led" aria-hidden="true"></span>
-    <span class="v-knob" aria-hidden="true"></span>
-
-    <span class="v-disc" id="vinyl-disc" aria-hidden="true">
-      <span class="v-sheen"></span>
-      <span class="v-label" id="vinyl-label"></span>
-      <span class="v-hole"></span>
-    </span>
-
-    <!-- 唱臂：viewBox 100×94 跟 .v-hero 的 1:0.94 完全对齐，
-         里面的 (84,12) 就是轴心，臂长 37.6 —— 刚好够从轴心够到黑胶的纹槽。
-         旋转组只包住臂管+唱头，轴心的两个圆画在组外，所以底座不跟着转。 -->
-    <svg class="v-arm" viewBox="0 0 100 94" aria-hidden="true">
-      <defs>
-        <linearGradient id="vArmG" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#e6ebf2"/><stop offset="0.5" stop-color="#aab2be"/><stop offset="1" stop-color="#7d858f"/>
-        </linearGradient>
-      </defs>
-      <g class="v-arm-g">
-        <rect x="81.5" y="13" width="5" height="25" rx="2.5" fill="url(#vArmG)"/>
-        <path d="M79.8 36h8.4l1.2 8.4h-10.8z" fill="#cfd5de"/>
-        <rect x="77.8" y="43.2" width="12.4" height="4.4" rx="1.4" fill="#2f343c"/>
-        <circle cx="85" cy="49.6" r="1.5" fill="#a9b1bb"/>
-      </g>
-      <circle cx="84" cy="12" r="7.6" fill="#3c424b"/>
-      <circle cx="84" cy="12" r="4.2" fill="url(#vArmG)"/>
-    </svg>
-  </button>
-</div>
-
-  </div>
 
 </div>
 
@@ -969,12 +463,9 @@
 
   <script src="/js/main.js"></script>
   
-  <script src="/js/games.js" defer></script>
-  
   
   <script src="/js/ios-core.js" defer></script>
   <script src="/js/ios-globe.js" defer></script>
-  <script src="/js/ios-desk.js" defer></script>
   <script src="/js/ios.js" defer></script>
   
   

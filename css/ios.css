@@ -43,8 +43,7 @@ html { background: #05070c; }
   /* 变成「尺寸容器」：里面的 cqw / cqh 全按这块屏幕算。
      桌面端那节里还会再写一遍（那边 .ios 是 .stage 里的一张绝对定位屏幕），
      这里补的是手机端 —— 手机上 #ios 就是整块视口，
-     两种情况下它的尺寸都不由内容决定，加 size containment 是安全的。
-     小游戏面板（ios-game.css）整套尺寸都建立在这上面。 */
+     两种情况下它的尺寸都不由内容决定，加 size containment 是安全的。 */
   container-type: size;
 }
 
@@ -1134,9 +1133,11 @@ html { background: #05070c; }
   .ios-doc .ios-appbar,
   .ios-doc .home-indicator { display: none; }
 
-  /* 「一台平板放在桌上」这件事只在桌面端成立 */
+  /* 窄屏文档页退回普通博客版式，天文壁纸（星空地球）一并收起 */
+  .ios-doc .ios-wall { display: none; }
+
+  /* 「一台 iPad」这件事只在桌面端成立 */
   .stage { display: contents; }
-  .stage-front { display: none; }
 }
 
 /* ---------- 小屏适配 ---------- */
@@ -1238,77 +1239,6 @@ html { background: #05070c; }
 
 .cc-ico > span { display: block; width: 100%; height: 100%; }
 .cc-ico svg { display: block; width: 100%; height: 100%; }
-
-/* ---------- 小猫爪：点击屏幕时伸出来按一下 ---------- */
-
-.paw-ripples {
-  position: absolute;
-  inset: 0;
-  z-index: 68;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.paw-ripple {
-  position: absolute;
-  width: 26px;
-  height: 26px;
-  margin: -13px 0 0 -13px;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0.4);
-}
-
-.paw-ripple.go { animation: paw-ripple 0.46s var(--ios-ease-out) forwards; }
-
-@keyframes paw-ripple {
-  0% { transform: scale(0.45); opacity: 0.85; }
-  100% { transform: scale(3.2); opacity: 0; }
-}
-
-.cat-paw {
-  position: absolute;
-  left: 74%;
-  top: 82%;
-  z-index: 70;
-  width: 36%;
-  aspect-ratio: 1 / 1;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.paw-inner {
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  transform-origin: 50% 50%;
-  transform: translate(var(--pdx, 200px), var(--pdy, 200px)) rotate(var(--prot, 0deg)) scale(0.42);
-  transition: transform 0.2s cubic-bezier(0.18, 1.12, 0.3, 1), opacity 0.15s ease-out;
-}
-
-.cat-paw.is-in .paw-inner {
-  opacity: 1;
-  transform: translate(0, 0) rotate(var(--prot, 0deg)) scale(1);
-}
-
-.cat-paw.is-press .paw-inner {
-  transform: translate(0, 0) rotate(var(--prot, 0deg)) scale(0.87);
-  transition-duration: 0.1s;
-}
-
-.paw-inner svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.45));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .paw-inner { transition-duration: 0.01ms !important; }
-  .paw-ripple.go { animation-duration: 0.01ms !important; }
-}
 
 /* 控制中心：深色模式的太阳/月亮图标靠 data-theme 切换 */
 .cc-ico .ico-sun { display: none; }
@@ -2070,8 +2000,26 @@ html { background: #05070c; }
     .ab-btn:hover { background: rgba(255, 255, 255, 0.18); }
   }
 
+  /* 文档页的天文壁纸（星空 + 地球退远慢转）铺满整块平板，在内容区后面。
+     应用栏是毛玻璃（星空直接透出来），正文区用一层半透明底色压着，
+     星空地球只作为边缘的氛围透出 —— 既跟首页统一了主题，又不牺牲可读性。 */
+  .ios-doc .ios-wall {
+    z-index: 0;
+  }
+
+  .ios-doc .ios-wall .ios-fallback {
+    /* 文档页没有锁屏的「先兜底再淡出」，星空兜底就是壁纸本身，常显 */
+    opacity: 1;
+  }
+
+  /* 地球退远慢转当背景，再压暗一点别抢正文 */
+  .ios-doc .ios-wall .ios-vignette {
+    opacity: 0.9;
+  }
+
   /* 屏幕内容区：文档在平板里滚，而不是窗口滚。
-     底色跟着站点主题走（浅色主题下就是"深色机身里的一块纸"）。 */
+     底色跟着站点主题走（浅色主题下就是"深色机身里的一块纸"）。
+     这里改成半透明 —— 星空地球作为氛围从底下透出来，但正文仍可读。 */
   .ios-screen {
     position: absolute;
     left: 0;
@@ -2087,7 +2035,10 @@ html { background: #05070c; }
        在平板里没用（100vh 是窗口高，不是屏幕高），所以这里用 flex 兜。 */
     display: flex;
     flex-direction: column;
+    /* 半透明：约 92% 的底色，星空地球从底下透出 8% 作氛围。
+       color-mix 不支持时退回纯色（正文可读性不受影响，只是少了点氛围）。 */
     background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
     /* 机身是深色的（.page-ios 的 color:#fff 是给锁屏/主屏用的），
        但 App 内容区是"深色机身里的一块纸"，必须换回博客正文的配色，
        否则就是白字白底 —— 整篇文章一个字都读不出来。 */
@@ -2162,10 +2113,9 @@ html { background: #05070c; }
 
   /* ---------- 阅读模式：整屏都是文档 ----------
      这是"担心文档显示太小"的解法：一键把平板放大到铺满窗口，
-     书桌和桌上物件淡出，正文列也跟着放宽。 */
+     正文列也跟着放宽。 */
 
   .page-ios.is-reading { padding: 0; }
-  .page-ios.is-reading .desk { opacity: 0; }
 
   .page-ios.is-reading .stage {
     width: 100vw;
@@ -2180,7 +2130,6 @@ html { background: #05070c; }
     transform: none;
   }
 
-  .page-ios.is-reading .stage-front { opacity: 0; pointer-events: none; }
   .page-ios.is-reading .ios-statusbar { display: none; }
   .page-ios.is-reading .ios-appbar { top: 0; }
   .page-ios.is-reading .ios-screen { top: 48px; }

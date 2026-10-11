@@ -8,13 +8,12 @@
 // 所以这里不是「跑一遍就完事」的 IIFE，而是一个可以被反复调用的
 // boot()：每轮开跑前先让内核收尾上一轮，再按同一套顺序重新拉起。
 //
-// 外壳拆成四个文件（都是 defer，按下面的顺序加载）：
+// 外壳拆成三个文件（都是 defer，按下面的顺序加载）：
 //   ios-core.js   内核：收尾登记簿、on / every / after、$、拖动守卫
-//   ios-globe.js  地球与定位（锁屏背后那颗 WebGL 地球 + IP 定位）
-//   ios-desk.js   桌面道具拖拽（闹钟 / 咖啡杯 / 绿植 / 唱片机）
+//   ios-globe.js  地球与定位（锁屏背后那颗 WebGL 地球 + IP 定位，
+//                 文档页也复用它当背景）
 //   ios.js        本文件：外壳编排 —— 锁屏解锁、主屏 App、主题切换、
-//                 控制中心、音乐桥、小猫伸爪、搜索面板、唱片机点击、
-//                 文档壳、无障碍分层、启动时序
+//                 控制中心、音乐桥、搜索面板、文档壳、无障碍分层、启动时序
 //
 // 挂在 #ios 内部节点上的监听不用登记收尾 —— 那些节点随旧 DOM 一起
 // 被丢掉了；只有挂在 document / window / matchMedia 上的才需要。
@@ -27,7 +26,6 @@
   var cleanup = A.cleanup;
   var on = A.on, every = A.every, after = A.after, onMQ = A.onMQ, makeObserver = A.makeObserver;
   var $ = A.$, setText = A.setText, pad = A.pad, go = A.go;
-  var dragGuard = A.dragGuard;
 
   function boot() {
     // ① 先收尾上一轮。翻页时这里清掉的就是「上一页」留下的东西 ——
@@ -59,9 +57,6 @@
   if (isNaN(state.lat)) state.lat = 39.9042;   // 兜底：中国北京
   if (isNaN(state.lon)) state.lon = 116.4074;
 
-  // 由 initCatPaw 填上，供搜索面板在打开时把爪子收回去
-  var pawApi = null;
-
   // 翻页收尾：地球（真建起来了的话）要连 WebGL 上下文一起放掉，
   // 不然翻一次页漏一个，攒够十几个整站的地球就全黑
   cleanup.push(function () {
@@ -79,43 +74,6 @@
     setText($('lock-date'), (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + WEEK[d.getDay()]);
     // iPad 模式的状态栏还会在时间右边带一个日期（窄屏这条不显示）
     setText($('sb-date'), (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + WEEK[d.getDay()]);
-    tickClock(d);
-  }
-
-  // ------------------------------------------------------------
-  // 桌上的闹钟：秒针每秒跳一下（机械钟本来就该一格一格走）
-  // 用 SVG 的 transform 属性而不是 CSS transform —— 属性不会补间
-  // ------------------------------------------------------------
-  var CLOCK_C = ' 70 86';   // 表盘圆心，跟 prop-clock.ejs 里的坐标一致
-
-  function tickClock(d) {
-    var h = d.getHours() % 12, m = d.getMinutes(), s = d.getSeconds();
-
-    var eh = $('pc-h');
-    if (eh) eh.setAttribute('transform', 'rotate(' + ((h + m / 60) * 30).toFixed(2) + CLOCK_C + ')');
-
-    var em = $('pc-m');
-    if (em) em.setAttribute('transform', 'rotate(' + ((m + s / 60) * 6).toFixed(2) + CLOCK_C + ')');
-
-    var es = $('pc-s');
-    if (es) es.setAttribute('transform', 'rotate(' + (s * 6).toFixed(2) + CLOCK_C + ')');
-
-    setText($('pc-date'), (d.getMonth() + 1) + '月' + d.getDate() + '日');
-    setText($('pc-week'), WEEK[d.getDay()]);
-  }
-
-  // 闹钟只在桌面端露出来（窄屏 .stage-front 是 display:none），
-  // 所以每秒醒来一次之前先看一眼它到底在不在
-  function clockOnScreen() {
-    var el = $('prop-clock');
-    return !!el && el.offsetParent !== null;
-  }
-
-  function initClock() {
-    tickClock(new Date());
-    every(1000, function () {
-      if (clockOnScreen()) tickClock(new Date());
-    });
   }
 
   // ------------------------------------------------------------
@@ -146,8 +104,7 @@
     // 先让搜索面板清掉自己的状态（input / 结果列表），再统一收层。
     // 漏掉 is-search 的话，锁屏上会残留一块搜索面板。
     document.dispatchEvent(new CustomEvent('awen:lock'));
-    // is-game 也在这里收掉：小游戏面板不该跟着回锁屏
-    root.classList.remove('is-opening', 'is-cc', 'is-search', 'is-game');
+    root.classList.remove('is-opening', 'is-cc', 'is-search');
     if (state.globe) state.globe.toLock();
     if (instant) {
       root.classList.add('no-anim');
@@ -269,12 +226,6 @@
           toggleTheme();
           return;
         }
-        // 小游戏：不跳页面，就地开一块全屏面板（玩法在 /js/games.js）
-        if (a.dataset.action === 'game') {
-          e.preventDefault();
-          if (window.awenGameOpen) window.awenGameOpen(a.dataset.game || 'cat');
-          return;
-        }
         if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || reduceMotion) return;
         if (!a.href) return;
 
@@ -392,125 +343,6 @@
   }
 
   // ------------------------------------------------------------
-  // 小猫爪：每次点击屏幕，小猫伸爪从右下角按过来
-  // 爪子落在触点位置（带一点随位移的旋转），按一下再缩回去
-  // ------------------------------------------------------------
-  function initCatPaw() {
-    var paw = $('cat-paw');
-    var layer = $('paw-ripples');
-    if (!paw || !layer) return;
-
-    var IN_MS = 170;     // 伸进来
-    var TAP_MS = 300;    // 按住
-    var inTimer = null, pressTimer = null, outTimer = null;
-
-    function retract() {
-      clearTimeout(inTimer);
-      clearTimeout(pressTimer);
-      clearTimeout(outTimer);
-      paw.classList.remove('is-in', 'is-press');
-    }
-
-    function ripple(x, y) {
-      while (layer.childElementCount > 4) layer.removeChild(layer.firstChild);
-      var r = document.createElement('span');
-      r.className = 'paw-ripple';
-      r.style.left = x + 'px';
-      r.style.top = y + 'px';
-      layer.appendChild(r);
-      void r.offsetWidth;
-      r.classList.add('go');
-      r.addEventListener('animationend', function () { r.remove(); });
-    }
-
-    function tapAt(x, y) {
-      var w = root.clientWidth || root.offsetWidth;
-      var h = root.clientHeight || root.offsetHeight;
-      if (!w || !h) return;
-
-      // 触点留一点边距，别让爪子贴边
-      var px = Math.max(w * 0.08, Math.min(x, w * 0.92));
-      var py = Math.max(h * 0.05, Math.min(y, h * 0.95));
-      var dx = (w + 90) - px;     // 收纳位置：屏幕右下角外面
-      var dy = (h + 90) - py;
-      var rot = Math.max(-15, Math.min(15, (px - w / 2) / w * 26));
-
-      paw.style.left = px + 'px';
-      paw.style.top = py + 'px';
-      paw.style.setProperty('--pdx', Math.round(dx) + 'px');
-      paw.style.setProperty('--pdy', Math.round(dy) + 'px');
-      paw.style.setProperty('--prot', rot.toFixed(1) + 'deg');
-
-      clearTimeout(inTimer);
-      clearTimeout(pressTimer);
-      clearTimeout(outTimer);
-      paw.classList.remove('is-in', 'is-press');
-      void paw.offsetWidth;                 // 强制重排，让过渡从头播一遍
-      paw.classList.add('is-in');
-      inTimer = setTimeout(function () { paw.classList.add('is-press'); }, IN_MS);
-      outTimer = setTimeout(function () { paw.classList.remove('is-in', 'is-press'); }, TAP_MS);
-      ripple(px, py);
-    }
-
-    function pointTo(rootRect, clientX, clientY) {
-      return {
-        x: clientX - rootRect.left,
-        y: clientY - rootRect.top,
-        inside: clientX >= rootRect.left && clientX <= rootRect.right &&
-                clientY >= rootRect.top && clientY <= rootRect.bottom
-      };
-    }
-
-    // 只对「点」伸爪：手指一移动（滚主屏、拖进度条、熄屏手势）就立刻收回去
-    var MOVE_LIMIT = 10;   // px
-    var tapId = null, fromX = 0, fromY = 0;
-
-    // 拖进度条 / 调音量 / 拉亮度时别伸爪（这些是要拖的，不是「点」）
-    var NO_PAW = '.mp-bar, .mp-vol, input[type="range"], .cc-slider';
-
-    root.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;   // 只认左键
-      if (e.target.closest && e.target.closest(NO_PAW)) return;
-      var p = pointTo(root.getBoundingClientRect(), e.clientX, e.clientY);
-      if (!p.inside) return;
-      tapId = e.pointerId;
-      fromX = e.clientX;
-      fromY = e.clientY;
-      tapAt(p.x, p.y);
-    }, true);
-
-    root.addEventListener('pointermove', function (e) {
-      if (tapId === null || e.pointerId !== tapId) return;
-      if (Math.abs(e.clientX - fromX) > MOVE_LIMIT || Math.abs(e.clientY - fromY) > MOVE_LIMIT) {
-        tapId = null;
-        retract();
-      }
-    }, true);
-
-    on(window, 'pointerup', function () { tapId = null; }, true);
-    on(window, 'pointercancel', function () { tapId = null; retract(); }, true);
-
-    // 锁屏放着不动，小猫会自己伸爪拍一下（每页只来一次，别烦人）
-    if (root.dataset.pawIdle !== '0' && !reduceMotion) {
-      after(15000, function () {
-        if (document.hidden || !isLocked()) return;
-        var w = root.clientWidth || root.offsetWidth;
-        var h = root.clientHeight || root.offsetHeight;
-        tapAt(w * (0.42 + Math.random() * 0.22), h * (0.34 + Math.random() * 0.1));
-      }, 15000);
-    }
-
-    // 供外部（比如键盘操作）主动逗一下猫
-    on(document, 'awen:paw', function () {
-      var w = root.clientWidth || root.offsetWidth;
-      var h = root.clientHeight || root.offsetHeight;
-      tapAt(w * 0.5, h * 0.45);
-    });
-
-    pawApi = { retract: retract };
-  }
-
-  // ------------------------------------------------------------
   // Spotlight 搜索：主屏向下拉 / ⌘K / Ctrl+K / 斜杠 唤出
   // 索引来自 hexo-generator-searchdb 生成的 search.json（首页才请求）
   // ------------------------------------------------------------
@@ -538,7 +370,6 @@
       if (root.classList.contains('is-search')) return;
       root.classList.remove('is-cc');
       root.classList.add('is-search');
-      if (pawApi) pawApi.retract();
       loadIndex(function () { render(input.value.trim()); });
       after(80, function () { try { input.focus(); } catch (e) {} });
     }
@@ -738,74 +569,6 @@
   }
 
   // ------------------------------------------------------------
-  // 桌上那台唱片机
-  // 曲名 / 封面 / 播放态全来自 main.js 派发的 awen:track；
-  // 点一下则把 awen:music-toggle 丢回去，跟控制中心走同一条路
-  // ------------------------------------------------------------
-  function initVinyl() {
-    var prop = $('prop-vinyl');
-    if (!prop) return;
-
-    var toggle = $('vinyl-toggle');
-    var label = $('vinyl-label');
-    var title = $('vinyl-title');
-    var artist = $('vinyl-artist');
-    var prog = $('vinyl-prog');
-
-    if (toggle) {
-      var clickTimer = null;
-      cleanup.push(function () { if (clickTimer) clearTimeout(clickTimer); });
-      // 这个按钮身兼两职：单击 = 播放 / 暂停，双击 = 把整台机器放回原位。
-      // 双击的第二下带 detail === 2，靠它把第一下排下的「切换」撤销掉；
-      // 也正是因为要等这一下，切换本身往后推 230ms —— 对一台本来就要
-      // 花 0.8 秒把唱臂挪过去的机器来说，这点延迟反而更像真的。
-      toggle.addEventListener('click', function (e) {
-        if (Date.now() - dragGuard.ts < 420) return;   // 刚拖完，这一下不算点击
-        clearTimeout(clickTimer);
-        clickTimer = null;
-        if (e.detail > 1) return;                      // 双击的第二下
-        clickTimer = setTimeout(function () {
-          clickTimer = null;
-          document.dispatchEvent(new CustomEvent('awen:music-toggle'));
-        }, 230);
-      });
-    }
-
-    // 药丸底边那条 2px 的进度线：main.js 只在 play/pause 时广播 awen:track，
-    // 不会每个 timeupdate 都喊一嗓子，所以这里自己每秒看一眼那台全局 <audio>。
-    // 拿不到（接口还没回、翻页重建中）就归零，不报错。
-    if (prog) {
-      every(1000, function () {
-        var a = window.MUSIC && window.MUSIC.audio;
-        if (!a || !isFinite(a.duration) || a.duration <= 0) {
-          if (prog.style.width !== '0%') prog.style.width = '0%';
-          return;
-        }
-        prog.style.width = (a.currentTime / a.duration * 100).toFixed(2) + '%';
-      });
-    }
-
-    on(document, 'awen:track', function (e) {
-      var d = e.detail || {};
-      var playing = !!d.playing;
-
-      prop.classList.toggle('is-playing', playing);
-      if (toggle) toggle.setAttribute('aria-pressed', playing ? 'true' : 'false');
-
-      // 有曲目了才让那块「曲名 / 歌手」药丸常驻（没曲目时只在悬停时露脸）
-      if (d.name) {
-        setText(title, d.name);
-        setText(artist, d.artist || '');
-        prop.classList.add('has-track');
-      }
-
-      // 封面走 CSS 背景图：播放器那张 <img> 是 loading="lazy" 且容器 hidden，
-      // 很可能永远不加载，所以直接用事件里带过来的地址
-      if (label && d.pic) label.style.backgroundImage = 'url("' + d.pic + '")';
-    });
-  }
-
-  // ------------------------------------------------------------
   // 文档 App 外壳：返回 / 阅读模式 / 点状态栏回顶部
   // ------------------------------------------------------------
   function initDocShell() {
@@ -909,29 +672,25 @@
     var home = root.classList.contains('is-home');
     var cc = root.classList.contains('is-cc');
     var search = root.classList.contains('is-search');
-    var game = root.classList.contains('is-game');
-    var busy = cc || search || game;                     // 有浮层压在主屏上
+    var busy = cc || search;                             // 有浮层压在主屏上
 
     var lock = $('ios-lock');
     var homeEl = $('ios-home');
     var dock = root.querySelector('.home-dock');
     var ccEl = $('ios-cc');
     var searchEl = $('ios-search');
-    var gameEl = $('ios-game');
 
     setInert(lock, home);                                // 解锁后，锁屏整层屏蔽
     setInert(homeEl, !home || busy);                     // 没解锁 / 有浮层时，主屏屏蔽
     setInert(dock, !home || busy);                       // Dock 跟着主屏走
     setInert(ccEl, !cc);
     setInert(searchEl, !search);
-    setInert(gameEl, !game);
 
     // 同时给读屏一个明确的可见性信号（inert 已覆盖，显式声明更保险）
     if (lock) lock.setAttribute('aria-hidden', home ? 'true' : 'false');
     if (homeEl) homeEl.setAttribute('aria-hidden', (home && !busy) ? 'false' : 'true');
     if (ccEl) ccEl.setAttribute('aria-hidden', cc ? 'false' : 'true');
     if (searchEl) searchEl.setAttribute('aria-hidden', search ? 'false' : 'true');
-    if (gameEl) gameEl.setAttribute('aria-hidden', game ? 'false' : 'true');
 
     var ccBtn = $('cc-open');
     if (ccBtn) ccBtn.setAttribute('aria-expanded', cc ? 'true' : 'false');
@@ -995,6 +754,7 @@
   if (isDoc) {
     initDocShell();
     initDocMusic();
+    runModule('globe');      // 文档页也拉地球：退远慢转，当内容的天文背景
   } else {
     initStartState();
     initA11y();
@@ -1015,12 +775,8 @@
     });
   }
 
-  // 这几样桌面上一直有：闹钟要走时、唱片要能点、四件道具都能拖着挪
-  initCatPaw();
-  initClock();
-  runModule('desk');       // 桌面道具（拖得动的那几件，ios-desk.js）
-  initVinyl();
-
+  // 时间走时在 tick() 里已经挂了每秒的 every（见上方 scheduleTick），
+  // 这里不再有闹钟 / 唱片机 / 小猫爪这些桌面道具要单独初始化。
   }   // ← boot() 结束
 
   window.awenIOSBoot = boot;   // 供 pjax.js 翻页后重新初始化

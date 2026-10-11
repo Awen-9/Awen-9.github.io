@@ -4,7 +4,7 @@
 // 这里管的是「平板里显示的那一页」：正文目录、代码块、标题锚点、
 // 返回顶部、阅读进度、页脚统计、文章阅读次数……
 // 那台平板本身（锁屏 / 主屏 / 桌面道具 / 地球 / 系统浮层）在 ios.js
-// 那一套里（ios-core / ios-globe / ios-desk / ios）。
+// 那一套里（ios-core / ios-globe / ios）。
 //
 // 两边只有一处搭界：音乐播放器。它被提成全局单例放在本文件（见
 // initMusic 与 window.MUSIC）—— 因为无刷翻页换掉 <body> 时，它必须
@@ -51,11 +51,9 @@ function initKeyboardNav() {
     if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' ||
               t.tagName === 'SELECT' || t.isContentEditable)) return;
 
-    // iOS 外壳的搜索 / 游戏面板开着时不劫持方向键（小游戏要用）
+    // iOS 外壳的搜索面板开着时不劫持方向键
     var search = document.getElementById('ios-search');
-    var game = document.getElementById('ios-game');
-    if ((search && search.getAttribute('aria-hidden') === 'false') ||
-        (game && game.getAttribute('aria-hidden') === 'false')) return;
+    if (search && search.getAttribute('aria-hidden') === 'false') return;
 
     var el = nav.querySelector(e.key === 'ArrowLeft' ? '.post-nav-item.prev' : '.post-nav-item.next');
     if (el) el.click();   // click 会被 pjax 接住，走无刷翻页
