@@ -211,21 +211,20 @@
 
   // ------------------------------------------------------------
   // 主屏台前调度（Stage Manager）：
-  // 左边调度栏收着没在台前的卡片，台前舞台放当前聚焦的那张。
-  // 解锁后默认把「最近更新」推上台前；点背景把它收回栏里、露出地球；
-  // 点栏里的卡片把它推上台前 —— 跨容器移动用 FLIP 补间，位置尺寸连续变化。
+  // 每张卡是独立的一扇窗口。缩略时躺在左侧栏自己的槽位里；点它，它放大成
+  // 台前窗口（其它窗口继续躺在栏里，互不顶替）；点背景把当前前台窗口收回。
+  // 不移动 DOM —— 用 class 在「缩略态 / 前台态」间切，FLIP 补间位置与缩放。
   // ------------------------------------------------------------
   function initStage() {
     var rail = $('sm-rail');
     var stage = $('sm-stage');
     if (!rail || !stage) return;
     var cards = {};          // key → 卡片节点
-    var slots = {};          // key → 栏里的槽位（卡片缩略时住的地方）
+    var slots = {};          // key → 栏里的槽位
     var active = null;
-    var THUMB = 0.34;        // 缩略比例，与 .sm-slot .widget 的 scale 保持一致
+    var THUMB = 0.34;        // 缩略比例，与 .sm-slot .widget 的 scale 一致
 
-    // 把栏里的卡片包进槽位：槽位定缩略后的占位尺寸，卡片在槽内
-    // transform 等比缩小 —— 内容原样的「窗口缩略图」，不是重新排版
+    // 把栏里的卡片包进槽位：槽位定缩略占位，卡片在槽内 transform 等比缩小
     Array.prototype.forEach.call(Array.prototype.slice.call(rail.children), function (card) {
       if (!card.classList.contains('widget')) return;
       var slot = document.createElement('div');
@@ -237,14 +236,14 @@
       cards[key] = card;
     });
 
-    // 量卡片自然高度，把槽位撑到缩略后的高度（transform 不改变布局，
-    // 槽高得手动写；图片/字体就绪后再量一次才准）
+    // 量卡片自然高度，把槽位撑到缩略后的高度（transform 不改变布局，槽高手动写）
     function sizeSlots() {
       Object.keys(slots).forEach(function (key) {
         var slot = slots[key];
-        if (slot.style.display === 'none') return;
         var card = slot.firstElementChild;
-        if (card) slot.style.height = Math.round(card.offsetHeight * THUMB) + 'px';
+        if (card && !card.classList.contains('is-front')) {
+          slot.style.height = Math.round(card.offsetHeight * THUMB) + 'px';
+        }
       });
     }
     sizeSlots();
@@ -253,7 +252,7 @@
     on(window, 'resize', sizeSlots);
     on(document, 'awen:unlock', sizeSlots);
 
-    // 「当前浏览」卡回显：上次读的文章（读的是本机 localStorage，构建期拿不到）
+    // 「当前浏览」卡回显
     try {
       var lastRead = JSON.parse(localStorage.getItem('awen-last-read') || 'null');
       var bt = $('browse-title'), bd = $('browse-date'), bw = $('widget-browse');
@@ -265,8 +264,8 @@
       }
     } catch (err) {}
 
-    // FLIP：先量起点，搬完量终点，倒放一次 transform 再松手 ——
-    // 缩略(0.34)↔台前(1) 的整窗缩放就成了连续动画，而不是瞬移
+    // FLIP：先量起点，切完态量终点，倒放一次 transform 再松手——
+    // 缩略(0.34)↔台前(1) 的整窗缩放就成了连续动画
     function flip(card, mutate) {
       if (reduceMotion) { mutate(); return; }
       var a = card.getBoundingClientRect();
@@ -276,21 +275,27 @@
       card.style.transformOrigin = 'top left';
       card.style.transform = 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ',' + (a.height / b.height) + ')';
       void card.offsetWidth;
-      // 摘掉倒放的 transform，靠内联过渡滑回终点态（槽里是 CSS 的 0.34，
-      // 台前是 1）。过渡要写成内联而不能清成 '' 交给样式表 ——
-      // 否则入场规则的 transition-delay 会拖着这次补间晚半拍才动
       card.style.transform = '';
-      card.style.transition = 'transform 0.48s var(--ios-ease-out)';
-      after(520, function () { card.style.transition = ''; card.style.transformOrigin = ''; });
+      card.style.transition = 'transform 0.46s var(--ios-ease-out)';
+      after(500, function () { card.style.transition = ''; card.style.transformOrigin = ''; });
     }
 
+    // 卡上台前：卡自己变成前台窗口（占满舞台），槽位留空但不消失
     function promote(key, animate) {
       var card = cards[key];
       var slot = slots[key];
-      if (!card || !slot || card.parentElement === stage) return;
+      if (!card || !slot) return;
+      if (active && active !== key) {
+        // 另一张卡还在前台，先把它收回自己的槽位
+        var prev = cards[active];
+        var prevSlot = slots[active];
+        prev.classList.remove('is-front');
+        if (prevSlot) prevSlot.appendChild(prev);
+        sizeSlots();
+      }
       var run = function () {
+        card.classList.add('is-front');
         stage.appendChild(card);
-        slot.style.display = 'none';   // 上台前后槽位让位，栏里不留空洞
       };
       if (animate) flip(card, run);
       else run();
@@ -298,36 +303,35 @@
       active = key;
     }
 
+    // 当前前台窗口收回栏里自己的槽位
     function collapse(animate) {
       if (!active) return;
       var card = cards[active];
       var slot = slots[active];
-      if (card && slot && card.parentElement === stage) {
-        var run = function () {
-          slot.style.display = '';
-          slot.appendChild(card);
-        };
-        if (animate) flip(card, run);
-        else run();
-      }
+      if (!card || !slot) return;
+      var run = function () {
+        card.classList.remove('is-front');
+        slot.appendChild(card);
+        sizeSlots();
+      };
+      if (animate) flip(card, run);
+      else run();
       root.dataset.stage = '';
       active = null;
     }
 
-    // 解锁后默认聚焦「最近更新」——boot 里静默推上去（不动画），
-    // pjax 回首页整轮 boot 重跑时，parentElement 判断会挡掉重复推
+    // 解锁后默认把「最近更新」作为前台窗口（不动画）
     promote('latest', false);
 
-    // 点栏里的缩略图 → 整窗放大上台前（拦掉它自带的跳转，
-    // 上台前再点里面的链接才走）
+    // 点栏里的缩略图 → 那张卡自己放大成前台窗口（拦掉自带的跳转）
     rail.addEventListener('click', function (e) {
       var card = e.target.closest('.widget');
-      if (!card || !card.parentElement.classList.contains('sm-slot')) return;
+      if (!card || card.classList.contains('is-front')) return;
       e.preventDefault();
       promote(card.dataset.stageKey, true);
     });
 
-    // 点背景（桌面空白处）→ 台前的窗口缩回栏里
+    // 点背景（桌面空白处）→ 当前前台窗口收回左侧栏
     var homeEl = $('ios-home');
     if (homeEl) {
       homeEl.addEventListener('click', function (e) {
