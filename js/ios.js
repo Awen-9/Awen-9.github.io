@@ -104,7 +104,7 @@
     // 先让搜索面板清掉自己的状态（input / 结果列表），再统一收层。
     // 漏掉 is-search 的话，锁屏上会残留一块搜索面板。
     document.dispatchEvent(new CustomEvent('awen:lock'));
-    root.classList.remove('is-opening', 'is-cc', 'is-search');
+    root.classList.remove('is-cc', 'is-search');
     if (state.globe) state.globe.toLock();
     if (instant) {
       root.classList.add('no-anim');
@@ -210,42 +210,93 @@
   }
 
   // ------------------------------------------------------------
-  // App 图标：打开动画 + 锁屏动作
+  // 主屏台前调度（Stage Manager）：
+  // 左边调度栏收着没在台前的卡片，台前舞台放当前聚焦的那张。
+  // 解锁后默认把「最近更新」推上台前；点背景把它收回栏里、露出地球；
+  // 点栏里的卡片把它推上台前 —— 跨容器移动用 FLIP 补间，位置尺寸连续变化。
   // ------------------------------------------------------------
-  function initApps() {
-    var apps = root.querySelectorAll('.home-app, .dock-app');
-    Array.prototype.forEach.call(apps, function (a) {
-      a.addEventListener('click', function (e) {
-        if (a.dataset.action === 'lock') {
-          e.preventDefault();
-          lock();
-          return;
-        }
-        if (a.dataset.action === 'theme') {
-          e.preventDefault();
-          toggleTheme();
-          return;
-        }
-        if (a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey || reduceMotion) return;
-        if (!a.href) return;
-
-        e.preventDefault();
-        var icon = a.querySelector('.app-icon') || a;
-        // 点击瞬间先「按」一下图标，跟遮罩同步起手，反馈不滞后
-        a.classList.add('is-pressed');
-        after(150, function () { a.classList.remove('is-pressed'); });
-        var ir = icon.getBoundingClientRect();
-        var hr = root.getBoundingClientRect();
-        root.style.setProperty('--ox', (ir.left + ir.width / 2 - hr.left) + 'px');
-        root.style.setProperty('--oy', (ir.top + ir.height / 2 - hr.top) + 'px');
-        root.style.setProperty('--oc', a.dataset.color || '#3a7ca5');
-        root.classList.add('is-opening');
-        // 走 pjax 的通道：不然这里 window.location.href 一赋值，
-        // 整个文档重新加载，音乐就断了 —— 打开动画白做。
-        // 遮罩 0.26s 铺满，这里 280ms 切 —— 盖严了再交棒，切换瞬间不露底。
-        after(280, function () { go(a.href); });
-      });
+  function initStage() {
+    var rail = $('sm-rail');
+    var stage = $('sm-stage');
+    if (!rail || !stage) return;
+    var cards = {};
+    var active = null;
+    Array.prototype.forEach.call(rail.querySelectorAll('.widget'), function (w) {
+      cards[w.dataset.stageKey] = w;
     });
+
+    // 「当前浏览」卡回显：上次读的文章（读的是本机 localStorage，构建期拿不到）
+    try {
+      var lastRead = JSON.parse(localStorage.getItem('awen-last-read') || 'null');
+      var bt = $('browse-title'), bd = $('browse-date'), bw = $('widget-browse');
+      if (lastRead && lastRead.h && bt && bt.textContent === '还没开始浏览') {
+        bt.textContent = lastRead.t || '上次读的文章';
+        var days = Math.floor((Date.now() - (lastRead.d || 0)) / 86400000);
+        bd.textContent = days <= 0 ? '就是刚刚' : (days === 1 ? '昨天读过' : days + ' 天前读过');
+        if (bw) bw.setAttribute('href', lastRead.h);
+      }
+    } catch (err) {}
+
+    // FLIP：先量起点，搬完量终点，倒放一次 transform 再松手 ——
+    // 换父容器的位置/尺寸变化就成了一段连续动画，而不是瞬移
+    function flip(card, mutate) {
+      if (reduceMotion) { mutate(); return; }
+      var a = card.getBoundingClientRect();
+      mutate();
+      var b = card.getBoundingClientRect();
+      card.style.transition = 'none';
+      card.style.transformOrigin = 'top left';
+      card.style.transform = 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ',' + (a.height / b.height) + ')';
+      void card.offsetWidth;
+      // 摘掉倒放的 transform，靠内联过渡滑回原位。过渡要写成内联而不能
+      // 清成 '' 交给样式表 —— 否则入场规则的 transition-delay
+      // （错峰上浮用的）会拖着这次补间晚半拍才动
+      card.style.transform = '';
+      card.style.transition = 'transform 0.48s var(--ios-ease-out)';
+      after(520, function () { card.style.transition = ''; card.style.transformOrigin = ''; });
+    }
+
+    function promote(key, animate) {
+      var card = cards[key];
+      if (!card || card.parentElement === stage) return;
+      if (!card._slot) card._slot = card.nextSibling;   // 记住自己在栏里的坑位
+      if (animate) flip(card, function () { stage.appendChild(card); });
+      else stage.appendChild(card);
+      root.dataset.stage = key;
+      active = key;
+    }
+
+    function collapse(animate) {
+      if (!active) return;
+      var card = cards[active];
+      if (card && card.parentElement === stage) {
+        if (animate) flip(card, function () { rail.insertBefore(card, card._slot || null); });
+        else rail.insertBefore(card, card._slot || null);
+      }
+      root.dataset.stage = '';
+      active = null;
+    }
+
+    // 解锁后默认聚焦「最近更新」——boot 里静默推上去（不动画），
+    // pjax 回首页整轮 boot 重跑时，parentElement 判断会挡掉重复推
+    promote('latest', false);
+
+    // 点栏里的卡片 → 推上台前（拦掉它自带的跳转，上台前再点里面的链接才走）
+    rail.addEventListener('click', function (e) {
+      var card = e.target.closest('.widget');
+      if (!card || card.parentElement !== rail) return;
+      e.preventDefault();
+      promote(card.dataset.stageKey, true);
+    });
+
+    // 点背景（桌面空白处）→ 台前的卡片收回栏里
+    var homeEl = $('ios-home');
+    if (homeEl) {
+      homeEl.addEventListener('click', function (e) {
+        if (e.target.closest('.widget') || e.target.closest('.sm-topbar')) return;
+        collapse(true);
+      });
+    }
   }
 
   // ------------------------------------------------------------
@@ -578,6 +629,15 @@
   function initDocShell() {
     var screen = $('ios-screen');
 
+    // 记下「当前浏览」：首页调度栏的那张卡靠它回显（标题 + 路径 + 时间）
+    try {
+      localStorage.setItem('awen-last-read', JSON.stringify({
+        t: (document.querySelector('.post-title') || {}).textContent || document.title,
+        h: window.location.pathname,
+        d: Date.now()
+      }));
+    } catch (err) {}
+
     // 入场过渡：点 App 进来时（awenDocEnter 标记）播一次淡入上移；
     // 后退 / 站内翻页 / 直接甩链接过来都不播 —— 那是「回内容」，不该再闪。
     if (!window.awenDocEnter) root.classList.add('no-doc-enter');
@@ -654,13 +714,11 @@
 
     var lock = $('ios-lock');
     var homeEl = $('ios-home');
-    var dock = root.querySelector('.home-dock');
     var ccEl = $('ios-cc');
     var searchEl = $('ios-search');
 
     setInert(lock, home);                                // 解锁后，锁屏整层屏蔽
     setInert(homeEl, !home || busy);                     // 没解锁 / 有浮层时，主屏屏蔽
-    setInert(dock, !home || busy);                       // Dock 跟着主屏走
     setInert(ccEl, !cc);
     setInert(searchEl, !search);
 
@@ -742,7 +800,7 @@
     initA11y();
     runModule('globe');      // 定位 + 地球（ios-globe.js）
     initUnlock();
-    initApps();
+    initStage();
     initControlCenter();
     initMusicBridge();
     initSearch();
