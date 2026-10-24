@@ -219,11 +219,39 @@
     var rail = $('sm-rail');
     var stage = $('sm-stage');
     if (!rail || !stage) return;
-    var cards = {};
+    var cards = {};          // key → 卡片节点
+    var slots = {};          // key → 栏里的槽位（卡片缩略时住的地方）
     var active = null;
-    Array.prototype.forEach.call(rail.querySelectorAll('.widget'), function (w) {
-      cards[w.dataset.stageKey] = w;
+    var THUMB = 0.34;        // 缩略比例，与 .sm-slot .widget 的 scale 保持一致
+
+    // 把栏里的卡片包进槽位：槽位定缩略后的占位尺寸，卡片在槽内
+    // transform 等比缩小 —— 内容原样的「窗口缩略图」，不是重新排版
+    Array.prototype.forEach.call(Array.prototype.slice.call(rail.children), function (card) {
+      if (!card.classList.contains('widget')) return;
+      var slot = document.createElement('div');
+      slot.className = 'sm-slot';
+      card.parentNode.insertBefore(slot, card);
+      slot.appendChild(card);
+      var key = card.dataset.stageKey;
+      slots[key] = slot;
+      cards[key] = card;
     });
+
+    // 量卡片自然高度，把槽位撑到缩略后的高度（transform 不改变布局，
+    // 槽高得手动写；图片/字体就绪后再量一次才准）
+    function sizeSlots() {
+      Object.keys(slots).forEach(function (key) {
+        var slot = slots[key];
+        if (slot.style.display === 'none') return;
+        var card = slot.firstElementChild;
+        if (card) slot.style.height = Math.round(card.offsetHeight * THUMB) + 'px';
+      });
+    }
+    sizeSlots();
+    after(600, sizeSlots);
+    after(1800, sizeSlots);
+    on(window, 'resize', sizeSlots);
+    on(document, 'awen:unlock', sizeSlots);
 
     // 「当前浏览」卡回显：上次读的文章（读的是本机 localStorage，构建期拿不到）
     try {
@@ -238,7 +266,7 @@
     } catch (err) {}
 
     // FLIP：先量起点，搬完量终点，倒放一次 transform 再松手 ——
-    // 换父容器的位置/尺寸变化就成了一段连续动画，而不是瞬移
+    // 缩略(0.34)↔台前(1) 的整窗缩放就成了连续动画，而不是瞬移
     function flip(card, mutate) {
       if (reduceMotion) { mutate(); return; }
       var a = card.getBoundingClientRect();
@@ -248,9 +276,9 @@
       card.style.transformOrigin = 'top left';
       card.style.transform = 'translate(' + (a.left - b.left) + 'px,' + (a.top - b.top) + 'px) scale(' + (a.width / b.width) + ',' + (a.height / b.height) + ')';
       void card.offsetWidth;
-      // 摘掉倒放的 transform，靠内联过渡滑回原位。过渡要写成内联而不能
-      // 清成 '' 交给样式表 —— 否则入场规则的 transition-delay
-      // （错峰上浮用的）会拖着这次补间晚半拍才动
+      // 摘掉倒放的 transform，靠内联过渡滑回终点态（槽里是 CSS 的 0.34，
+      // 台前是 1）。过渡要写成内联而不能清成 '' 交给样式表 ——
+      // 否则入场规则的 transition-delay 会拖着这次补间晚半拍才动
       card.style.transform = '';
       card.style.transition = 'transform 0.48s var(--ios-ease-out)';
       after(520, function () { card.style.transition = ''; card.style.transformOrigin = ''; });
@@ -258,10 +286,14 @@
 
     function promote(key, animate) {
       var card = cards[key];
-      if (!card || card.parentElement === stage) return;
-      if (!card._slot) card._slot = card.nextSibling;   // 记住自己在栏里的坑位
-      if (animate) flip(card, function () { stage.appendChild(card); });
-      else stage.appendChild(card);
+      var slot = slots[key];
+      if (!card || !slot || card.parentElement === stage) return;
+      var run = function () {
+        stage.appendChild(card);
+        slot.style.display = 'none';   // 上台前后槽位让位，栏里不留空洞
+      };
+      if (animate) flip(card, run);
+      else run();
       root.dataset.stage = key;
       active = key;
     }
@@ -269,9 +301,14 @@
     function collapse(animate) {
       if (!active) return;
       var card = cards[active];
-      if (card && card.parentElement === stage) {
-        if (animate) flip(card, function () { rail.insertBefore(card, card._slot || null); });
-        else rail.insertBefore(card, card._slot || null);
+      var slot = slots[active];
+      if (card && slot && card.parentElement === stage) {
+        var run = function () {
+          slot.style.display = '';
+          slot.appendChild(card);
+        };
+        if (animate) flip(card, run);
+        else run();
       }
       root.dataset.stage = '';
       active = null;
@@ -281,15 +318,16 @@
     // pjax 回首页整轮 boot 重跑时，parentElement 判断会挡掉重复推
     promote('latest', false);
 
-    // 点栏里的卡片 → 推上台前（拦掉它自带的跳转，上台前再点里面的链接才走）
+    // 点栏里的缩略图 → 整窗放大上台前（拦掉它自带的跳转，
+    // 上台前再点里面的链接才走）
     rail.addEventListener('click', function (e) {
       var card = e.target.closest('.widget');
-      if (!card || card.parentElement !== rail) return;
+      if (!card || !card.parentElement.classList.contains('sm-slot')) return;
       e.preventDefault();
       promote(card.dataset.stageKey, true);
     });
 
-    // 点背景（桌面空白处）→ 台前的卡片收回栏里
+    // 点背景（桌面空白处）→ 台前的窗口缩回栏里
     var homeEl = $('ios-home');
     if (homeEl) {
       homeEl.addEventListener('click', function (e) {

@@ -362,15 +362,17 @@ html { background: #05070c; }
   transition: visibility 0s linear 0s;
 }
 
-/* 解锁入场：调度栏卡片 → 顶部栏 错峰上浮淡入，
-   比原来「整屏一起弹」更有层次，也更顺 */
+/* 解锁入场：调度栏缩略图 → 顶部栏 错峰上浮淡入。
+   缩略的 transform 归 .sm-slot .widget 管，这里只动透明度，
+   免得两处 transform 打架把缩略放回原尺寸 */
 .sm-rail .widget,
 .sm-stage .widget,
 .sm-topbar .sm-chip {
   opacity: 0;
-  transform: translateY(14px) scale(0.985);
   transition: opacity 0.46s var(--ios-ease-out), transform 0.5s var(--ios-ease-out);
 }
+
+.sm-stage .widget { transform: translateY(14px) scale(0.985); }
 
 .ios.is-home .sm-rail .widget,
 .ios.is-home .sm-stage .widget,
@@ -379,11 +381,11 @@ html { background: #05070c; }
   transform: none;
 }
 
-.ios.is-home .sm-rail .widget:nth-child(1) { transition-delay: 0.1s; }
-.ios.is-home .sm-rail .widget:nth-child(2) { transition-delay: 0.15s; }
-.ios.is-home .sm-rail .widget:nth-child(3) { transition-delay: 0.2s; }
-.ios.is-home .sm-rail .widget:nth-child(4) { transition-delay: 0.25s; }
-.ios.is-home .sm-rail .widget:nth-child(n + 5) { transition-delay: 0.3s; }
+.ios.is-home .sm-rail .sm-slot:nth-child(1) { transition-delay: 0.1s; }
+.ios.is-home .sm-rail .sm-slot:nth-child(2) { transition-delay: 0.15s; }
+.ios.is-home .sm-rail .sm-slot:nth-child(3) { transition-delay: 0.2s; }
+.ios.is-home .sm-rail .sm-slot:nth-child(4) { transition-delay: 0.25s; }
+.ios.is-home .sm-rail .sm-slot:nth-child(n + 5) { transition-delay: 0.3s; }
 .ios.is-home .sm-topbar .sm-chip { transition-delay: 0.34s; }
 
 /* ---------- 小组件：iOS「天文」样式 ----------
@@ -392,81 +394,64 @@ html { background: #05070c; }
 
 /* ---------- 主屏台前调度（Stage Manager） ---------- */
 
-/* 调度栏：左边一条竖列，收着没在台前的卡片（点击推上台前） */
+/* 调度栏：左边一列窗口缩略图，垂直居中（macOS 台前调度就是这样） */
 .sm-rail {
   position: absolute;
   left: 14px;
-  top: 58px;
-  bottom: 218px;
+  top: 50%;
+  transform: translateY(-50%);
   z-index: 24;
-  width: 216px;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: 10px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  /* 底部给播放器留出一截，别让卡片压到它 */
-  padding-bottom: 4px;
+  /* 底部给播放器留出一截，别让缩略图压到它 */
+  max-height: calc(100% - 230px);
+  padding: 2px;
 }
 
 .sm-rail::-webkit-scrollbar { display: none; }
 
-/* 栏里的卡片是「缩略」形态：一行卡，只露标题层的头和名字 */
-.sm-rail .widget {
+/* 栏里的卡片是「窗口缩略图」：槽位定缩略尺寸，卡片整体 transform 等比缩小
+   （不能用 zoom——软件合成下会崩渲染进程），内容原样可辨，
+   才是 macOS 台前调度那种小窗预览。槽高由 ios.js 量出来写死。 */
+.sm-slot {
   flex: none;
-  min-height: 0;
-  height: 58px;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-  padding: 0 13px;
+  width: 211px;              /* 620px 台前窗宽 × 0.34 */
+  overflow: visible;
   cursor: pointer;
 }
 
-.sm-rail .widget .w-bg,
-.sm-rail .widget .w-scrim,
-.sm-rail .widget .w-foot,
-.sm-rail .widget .w-excerpt,
-.sm-rail .widget .w-stat-grid,
-.sm-rail .widget .w-tag-row { display: none; }
-
-.sm-rail .widget .w-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.sm-slot .widget {
+  width: 620px;              /* 与台前同宽，缩略才是同一个窗 */
+  transform: scale(0.34);
+  transform-origin: top left;
+  margin: 0;                 /* 压掉 .widget 默认外距，缩略贴槽位 */
 }
 
-.sm-rail .widget .w-head { margin: 0; }
-.sm-rail .widget .w-title,
-.sm-rail .widget .w-date {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.sm-rail .widget .w-title { font-size: 12.5px; -webkit-line-clamp: 1; }
-.sm-rail .widget .w-date { font-size: 10.5px; }
-
-/* 台前舞台：当前聚焦的卡片住这里；空着时整幅地球就是桌面 */
+/* 台前舞台：前台窗口住这里——大、居中，像真正的前台应用；
+   空着时整幅地球就是桌面 */
 .sm-stage {
   position: absolute;
   left: 252px;
   right: 30px;
-  top: 88px;
-  bottom: 210px;
+  top: 80px;
+  bottom: 190px;
   z-index: 24;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
 }
 
 .sm-stage .widget { pointer-events: auto; }
 
-/* 舞台上的卡可以比原来更宽：正居中偏左，压着地球的光晕 */
-.sm-stage .widget-wide { width: min(560px, 100%); }
+/* 台前的卡就是一扇前台窗口：统一窗宽，矮的卡也撑出窗口的最小高度 */
+.sm-stage .widget { width: min(620px, 100%); min-height: 320px; }
+.sm-stage .widget-wide { width: min(620px, 100%); }
 
 /* 顶部栏：RSS / GitHub 常驻右上角，全站级的跳转入口 */
 .sm-topbar {
@@ -1569,37 +1554,34 @@ html { background: #05070c; }
 
   .ios-home { display: block; padding: 0; }
 
-  /* 调度栏：竖列贴着左缘，尺寸全走 cqw 随屏缩放 */
+  /* 调度栏：窗口缩略图列，垂直居中；缩略 = 槽位 + transform 等比缩小，
+     内容原样可辨，点一下整窗放大上台前 */
   .sm-rail {
-    left: 2.2cqw;
-    top: 9.6cqw;
-    bottom: 14cqw;
-    width: 16.6cqw;
-    gap: 0.8cqw;
+    left: 1.8cqw;
+    top: 50%;
+    transform: translateY(-50%);
+    max-height: calc(100% - 27cqw);
+    gap: 1cqw;
   }
 
-  .sm-rail .widget {
-    height: 4.6cqw;
-    padding: 0 1cqw;
-    gap: 0.8cqw;
-    border-radius: 1.5cqw;
-    box-shadow: 0 0.4cqw 1.1cqw rgba(0, 0, 0, 0.3);
-  }
+  .sm-slot { width: 16.3cqw; }   /* 48cqw 台前窗宽 × 0.34 */
 
-  .sm-rail .widget .w-head { font-size: 0.78cqw; gap: 0.3cqw; }
-  .sm-rail .widget .w-head svg { width: 0.78cqw; height: 0.78cqw; }
-  .sm-rail .widget .w-title { font-size: 1cqw; }
-  .sm-rail .widget .w-date { font-size: 0.8cqw; }
+  .sm-slot .widget { width: 48cqw; }
 
-  /* 台前舞台：卡在「调度栏右侧 → 地球亮部」这一带展开 */
+  /* 台前：前台窗口大、居中，占地球亮部正中 */
   .sm-stage {
-    left: 20.8cqw;
-    right: 26cqw;
-    top: 9.6cqw;
-    bottom: 12.5cqw;
+    left: 19cqw;
+    right: 4cqw;
+    top: 8.5cqw;
+    bottom: 10.5cqw;
   }
 
-  .sm-stage .widget { box-shadow: 0 0.7cqw 2.2cqw rgba(0, 0, 0, 0.4); }
+  .sm-stage .widget {
+    width: min(48cqw, 100%);
+    min-height: 38cqw;
+    border-radius: 2.2cqw;
+    box-shadow: 0 1cqw 3cqw rgba(0, 0, 0, 0.42);
+  }
 
   /* 顶部栏：RSS / GitHub 贴在状态栏正下方 */
   .sm-topbar { top: 4.2cqw; right: 2.2cqw; gap: 0.6cqw; }

@@ -10,7 +10,7 @@
  *
  * 版本号变了才会重装 SW 并清旧缓存；改了静态资源记得 bump。
  * ============================================================ */
-var VERSION = 'awen-sw-v9';
+var VERSION = 'awen-sw-v10';
 
 var PRECACHE = [
   '/css/style.css',
