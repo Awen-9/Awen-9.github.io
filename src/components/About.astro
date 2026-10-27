@@ -1,0 +1,16 @@
+---
+import { SITE, PROFILE, HOME } from '../config';
+---
+
+<div class="about prose">
+  {PROFILE.intro.map((p) => <p>{p}</p>)}
+  <dl class="facts">
+    <dt>方向</dt><dd>{PROFILE.focus}</dd>
+    <dt>常用</dt><dd>{PROFILE.stack.join('、')}</dd>
+    <dt>在深入</dt><dd>{PROFILE.learning}</dd>
+    <dt>联系</dt><dd><a href={SITE.github}>GitHub · {SITE.githubName}</a></dd>
+  </dl>
+  <p class="colophon">
+    首页的地球按真实时间计算太阳直射点，晨昏线和此刻的地球一致，橙色光点是{HOME.city}。站点用 Astro 构建，托管在 GitHub Pages。
+  </p>
+</div>

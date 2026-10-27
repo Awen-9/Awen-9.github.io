@@ -1,0 +1,45 @@
+---
+import '../styles/base.css';
+import '../styles/theme.css';
+import Search from '../components/Search.astro';
+import { SITE } from '../config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  bodyClass?: string;
+}
+
+const { title, description = SITE.description, bodyClass } = Astro.props;
+const fullTitle = [title, SITE.title].filter(Boolean).join(' · ');
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light only" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title={SITE.title} href="/atom.xml" />
+    <script is:inline>
+      // 首帧前按 hash 标出当前面板，带 #posts 打开时不会先闪一下首屏
+      (() => {
+        const id = decodeURIComponent(location.hash.slice(1));
+        document.documentElement.dataset.panel = ['posts', 'categories', 'about'].includes(id) ? id : '';
+      })();
+    </script>
+    <!-- 首页和阅读页之间用浏览器原生的跨页过渡，格子变形成文章卡片。不支持的浏览器照常跳转 -->
+    <style is:inline>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
+    <slot name="head" />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+    <Search />
+  </body>
+</html>

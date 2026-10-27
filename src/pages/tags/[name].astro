@@ -1,0 +1,21 @@
+---
+import Page from '../../layouts/Page.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, tagCounts, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return tagCounts(posts).map(([name]) => ({ params: { name }, props: { posts: posts.filter((p) => p.data.tags.includes(name)) } }));
+}
+
+const { name } = Astro.params;
+const { posts } = Astro.props as { posts: Post[] };
+---
+
+<Page title={`标签：${name}`} back="categories">
+  <header class="lp-h">
+    <h1>#{name}</h1>
+    <p class="lp-meta"><a href="/tags/">全部标签</a><span>{posts.length} 篇</span></p>
+  </header>
+  <PostList posts={posts} />
+</Page>

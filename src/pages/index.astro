@@ -1,0 +1,459 @@
+---
+// 首页：左边便当盒格子，右边可拖动的地球，底部 Dock 打开文章、分类、关于三个抽屉
+import Base from '../layouts/Base.astro';
+import PostList from '../components/PostList.astro';
+import CategoryGroups from '../components/CategoryGroups.astro';
+import About from '../components/About.astro';
+import { SITE, PROFILE, HOME } from '../config';
+import { getPosts, groupByCategory, formatDate, postPath, tagHref, tagCounts, readingMinutes } from '../lib/posts';
+
+const posts = await getPosts();
+const groups = groupByCategory(posts);
+const [latest, ...older] = posts;
+const recent = older.slice(0, 3);
+const tags = tagCounts(posts);
+// 最近 12 个月每月写了几篇，月份按 HOME.timeZone 算
+const monthOf = (d: Date) => formatDate(d).slice(0, 7);
+const now = new Date();
+const months = Array.from({ length: 12 }, (_, i) => {
+  const key = monthOf(new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11 + i, 15)));
+  return { key, n: posts.filter((p) => monthOf(p.data.date) === key).length };
+});
+const short = (key: string) => key.slice(2).replace('.', '/');
+const yearCount = months.reduce((sum, m) => sum + m.n, 0);
+const peak = Math.max(1, ...months.map((m) => m.n));
+const drawers = [
+  { id: 'posts', key: 'P', title: '文章', more: '/archives/', moreLabel: 'archives/' },
+  { id: 'categories', key: 'C', title: '分类', more: '/categories/', moreLabel: 'categories/' },
+  { id: 'about', key: 'A', title: '关于', more: '/about/', moreLabel: 'about/' },
+];
+// 分类抽屉顶上只摆最常用的一批标签，其余的去标签页看
+const TOP_TAGS = 12;
+---
+
+<Base bodyClass="c-home">
+  <!-- 首帧等到快捷键卡片解析完。它前面的内联脚本这时已经跑过，返回首页时抽屉滚动位置和变形目标都已就位 -->
+  <link slot="head" rel="expect" href="#c-keys" blocking="render" />
+  <div class="c-space earth-wrap" aria-hidden="false">
+    <canvas class="earth" id="earth" aria-label={`可拖动旋转的地球，橙色光点是${HOME.city}`}></canvas>
+  </div>
+  <div class="c-shapes" aria-hidden="true">
+    <i class="c-s1"></i><i class="c-s2"></i><i class="c-s3"></i><i class="c-s4"></i><i class="c-s5"></i>
+  </div>
+
+  <main class="c-bento">
+    <a class="c-tile c-brand" href="/" data-go="">
+      <span class="c-tag">{SITE.handle}</span>
+      <strong set:html={SITE.brand.split('\n').map((l) => l.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`)).join('<br />')} />
+      <span class="c-role">{PROFILE.role}</span>
+    </a>
+    <section class="c-tile c-clock" aria-label={`此刻的${HOME.city}`}>
+      <span class="c-tag">TZ={HOME.timeZone}</span>
+      <p class="c-time" data-clock="time"></p>
+      <p class="c-date"><span data-clock="date"></span><span data-clock="sun"></span></p>
+    </section>
+    <div class="c-window" aria-hidden="true"></div>
+    {
+      latest && (
+        <a class="c-tile c-latest" href={postPath(latest)} data-t={latest.data.date.valueOf()}>
+          <span class="c-tag">latest · {formatDate(latest.data.date)}</span>
+          <strong>{latest.data.title}</strong>
+          {latest.data.description && <span class="c-latest-d">{latest.data.description}</span>}
+          <span class="c-latest-m">
+            <span class="c-latest-c">{latest.data.category}</span>
+            <span>约 {readingMinutes(latest.body)} 分钟</span>
+            {latest.data.tags.slice(0, 3).map((t) => <span>#{t}</span>)}
+          </span>
+        </a>
+      )
+    }
+    <a class="c-tile c-stack" href="#about" data-go="about">
+      <span class="c-tag">stack.md</span>
+      <p class="c-focus">{PROFILE.focus}</p>
+      <ul class="c-chips">{PROFILE.stack.map((s) => <li>{s}</li>)}</ul>
+      <p class="c-now"><b>在深入</b><span>{PROFILE.learning}</span></p>
+      <p class="c-more">关于我和联系方式</p>
+    </a>
+    {
+      recent.length > 0 && (
+        <section class="c-tile c-recent" aria-label="更早的文章">
+          <span class="c-tag">recent</span>
+          <ol>
+            {recent.map((p) => (
+              <li>
+                <a href={postPath(p)} data-t={p.data.date.valueOf()}>
+                  <time datetime={p.data.date.toISOString()}>{formatDate(p.data.date)}</time>
+                  <span>{p.data.title}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
+    <section class="c-tile c-log" aria-labelledby="c-log-t">
+      <span class="c-tag" id="c-log-t">近 12 个月写了 {yearCount} 篇</span>
+      <ol class="c-bars">
+        {months.map((m) => (
+          <li style={`--h: ${m.n / peak}`} title={`${m.key}：${m.n} 篇`} data-n={m.n || undefined}>
+            <span class="sr-only">{m.key} 写了 {m.n} 篇</span>
+          </li>
+        ))}
+      </ol>
+      <p class="c-axis" aria-hidden="true"><span>{short(months[0].key)}</span><span>每月篇数</span><span>{short(months[11].key)}</span></p>
+    </section>
+    <section class="c-tile c-tags" aria-label="常写的标签">
+      <span class="c-tag">常写的标签 · 共 {tags.length} 个</span>
+      <ul>
+        {tags.slice(0, 6).map(([t, n]) => (
+          <li>
+            <a href={tagHref(t)}><span>#{t}</span><small>{n}</small></a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </main>
+
+  <p class="c-hint" aria-hidden="true">
+    <span class="c-hint-a">// 拖动地球旋转</span><span class="c-hint-b">// 双击地球回到{HOME.city}</span> · ⌘K 搜索 · ? 快捷键
+  </p>
+
+  <nav class="c-dock" aria-label="主导航">
+    {
+      drawers.map((d) => (
+        <a href={`#${d.id}`} data-go={d.id} data-toggle data-key={d.key.toLowerCase()} aria-expanded="false" aria-controls={`c-${d.id}`} aria-keyshortcuts={d.key}>
+          <span class="c-key" aria-hidden="true">{d.key}</span>
+          <span>{d.title}</span>
+        </a>
+      ))
+    }
+    <button type="button" class="c-find-btn" data-search aria-keyshortcuts="Meta+K Control+K"><span class="c-key c-key-w" aria-hidden="true" data-search-key>⌘K</span><span>搜索</span></button>
+    <span class="c-sep" aria-hidden="true"></span>
+    <a href="/atom.xml" target="_blank" rel="noopener" data-key="r" aria-keyshortcuts="R"><span class="c-key" aria-hidden="true">R</span><span>RSS</span></a>
+    <a href={SITE.github} target="_blank" rel="noopener" data-key="g" aria-keyshortcuts="G"><span class="c-key" aria-hidden="true">G</span><span>GitHub</span></a>
+    <button type="button" data-key="?" aria-keyshortcuts="?" aria-haspopup="dialog" aria-label="快捷键"><span class="c-key" aria-hidden="true">?</span></button>
+  </nav>
+
+  {
+    drawers.map((d) => (
+      <aside class="c-drawer" id={`c-${d.id}`} data-box={d.id} aria-labelledby={`c-${d.id}-t`} tabindex="-1">
+        <div class="c-grip" aria-hidden="true"></div>
+        <header class="c-drawer-h">
+          <h2 id={`c-${d.id}-t`}>
+            <span>[{d.key}]</span> {d.title}
+          </h2>
+          <a href={d.more}>{d.moreLabel}</a>
+          {d.id !== 'about' && (
+            <button type="button" class="c-x" data-grep aria-label="过滤" aria-keyshortcuts="/">/</button>
+          )}
+          <button type="button" class="c-x" data-go="" aria-label="关闭">esc</button>
+        </header>
+        {d.id !== 'about' && (
+          <div class="c-grep" hidden>
+            <label for={`c-${d.id}-q`}>grep:</label>
+            <input id={`c-${d.id}-q`} type="search" autocomplete="off" spellcheck="false" placeholder="标题、摘要、标签或正文" />
+            <output for={`c-${d.id}-q`} aria-live="polite"></output>
+          </div>
+        )}
+        <div class="c-drawer-b">
+          {d.id === 'posts' && <PostList posts={posts} />}
+          {d.id === 'categories' && (
+            <>
+              <ul class="c-alltags" aria-label="常用标签">
+                {tags.slice(0, TOP_TAGS).map(([t, n]) => (
+                  <li>
+                    <a href={tagHref(t)}>#{t}<small>{n}</small></a>
+                  </li>
+                ))}
+                {tags.length > TOP_TAGS && (
+                  <li class="c-alltags-more">
+                    <a href="/tags/">全部 {tags.length} 个标签 →</a>
+                  </li>
+                )}
+              </ul>
+              <CategoryGroups groups={groups} />
+            </>
+          )}
+          {d.id !== 'about' && <p class="c-empty" hidden>// grep 没有找到，换个词试试，或者按 Esc 清空</p>}
+          {d.id === 'about' && <About />}
+        </div>
+      </aside>
+    ))
+  }
+
+  <script is:inline>
+    // 从文章返回时：恢复抽屉滚动位置，标出刚读过的那篇，并让它和文章卡片互相变形
+    (() => {
+      const root = document.documentElement;
+      let named = [];
+      // 路径里有中文，统一比较编码后的 pathname
+      const find = (scope, path) => [...document.querySelectorAll(`${scope} a`)].filter((a) => a.pathname === path);
+      const target = (path) => find(root.dataset.panel ? `.c-drawer[data-box="${root.dataset.panel}"]` : '.c-bento', path)[0];
+      const morph = (path, vt) => {
+        for (const el of named) el.style.viewTransitionName = '';
+        const a = path && target(path);
+        named = a ? [a] : [];
+        for (const el of named) el.style.viewTransitionName = 'c-card';
+        vt?.finished.finally(() => morph(''));
+      };
+      const mark = () => {
+        const last = sessionStorage.getItem('c:last');
+        for (const a of document.querySelectorAll('[data-last]')) a.removeAttribute('data-last');
+        if (last) for (const a of find('.c-drawer', last)) a.dataset.last = '';
+        return last;
+      };
+      for (const b of document.querySelectorAll('.c-drawer')) {
+        b.querySelector('.c-drawer-b').scrollTop = +(sessionStorage.getItem(`c:scroll:${b.dataset.box}`) ?? 0);
+      }
+      mark();
+      if (localStorage.getItem('c:dragged')) root.classList.add('c-dragged');
+      // 上次来过之后发的文章标 new。基准时间在一次会话里固定，刷新不会把标记刷掉；第一次来不标
+      const base = sessionStorage.getItem('c:base') ?? localStorage.getItem('c:seen') ?? '';
+      sessionStorage.setItem('c:base', base);
+      localStorage.setItem('c:seen', String(Date.now()));
+      if (base) for (const a of document.querySelectorAll('[data-t]')) if (+a.dataset.t > +base) a.dataset.new = '';
+      // 这次会话里已经看过首页，或者直接带着 #posts 打开，格子就不再淡入
+      if (sessionStorage.getItem('c:home') || root.dataset.panel) root.classList.add('c-calm');
+      sessionStorage.setItem('c:home', '1');
+      addEventListener('pagereveal', (e) => {
+        mark();
+        // 变形的另一头是刚离开的那一页，不一定是最后读的文章（也可能是从归档页回来）
+        const from = window.navigation?.activation?.from?.url;
+        if (e.viewTransition && from) morph(new URL(from).pathname, e.viewTransition);
+      });
+      addEventListener('pageswap', (e) => {
+        if (e.viewTransition && e.activation) morph(new URL(e.activation.entry.url).pathname, e.viewTransition);
+      });
+      addEventListener('pagehide', () => {
+        for (const b of document.querySelectorAll('.c-drawer')) {
+          sessionStorage.setItem(`c:scroll:${b.dataset.box}`, String(b.querySelector('.c-drawer-b').scrollTop));
+        }
+      });
+    })();
+  </script>
+
+  <dialog class="c-keys" id="c-keys" aria-labelledby="c-keys-t">
+    <header>
+      <h2 id="c-keys-t">keys.txt</h2>
+      <form method="dialog"><button class="c-x" aria-label="关闭">esc</button></form>
+    </header>
+    <dl>
+      <dt><kbd>P</kbd><kbd>C</kbd><kbd>A</kbd></dt><dd>打开文章、分类、关于抽屉，再按一次收起</dd>
+      <dt><kbd>J</kbd><kbd>K</kbd></dt><dd>在抽屉里上下移动，方向键也行</dd>
+      <dt><kbd>Enter</kbd></dt><dd>打开选中的文章</dd>
+      <dt><kbd>⌘</kbd><kbd>K</kbd></dt><dd>全站搜索，Windows 上是 Ctrl K</dd>
+      <dt><kbd>/</kbd></dt><dd>抽屉打开时只过滤抽屉里的文章，否则也是全站搜索</dd>
+      <dt><kbd>Esc</kbd></dt><dd>清空搜索，关闭抽屉</dd>
+      <dt><kbd>R</kbd><kbd>G</kbd></dt><dd>在新标签页打开 RSS 和 GitHub</dd>
+      <dt><kbd>?</kbd></dt><dd>显示这张卡片</dd>
+    </dl>
+    <dl class="c-touch">
+      <dt>拖</dt><dd>单指拖动地球旋转，双击回到{HOME.city}</dd>
+      <dt>点</dt><dd>点地球空白处收起抽屉</dd>
+      <dt>滑</dt><dd>按住抽屉顶部的把手往下拉，也能收起</dd>
+      <dt>搜</dt><dd>Dock 上的搜索按钮可以搜全站文章</dd>
+    </dl>
+    <label><input type="checkbox" id="c-keys-on" checked /> 启用单键快捷键（读屏或语音输入时可以关掉）</label>
+    <p>// 拖动地球旋转，双击回到{HOME.city}，松手几秒后也会自己转回去</p>
+  </dialog>
+  <script>
+    import { earth, clock, panels, moveFocus, reducedMotion } from '../scripts/runtime';
+    import { loadIndex, openSearch } from '../scripts/search';
+
+    const root = document.documentElement;
+    const canvas = document.getElementById('earth') as HTMLCanvasElement;
+    const wide = matchMedia('(min-width: 900px)');
+    // 手机和省流量模式换 1k 贴图；大气光用纸白，不再是和配色无关的蓝
+    const saveData = (navigator as { connection?: { saveData?: boolean } }).connection?.saveData;
+    const globe = earth(canvas, { size: wide.matches ? 0.82 : 0.5, lowRes: !wide.matches || !!saveData, glow: 0xfafaf8 });
+    // 全幅背景：首屏地球偏右给便当盒让位；打开抽屉时便当盒整体向左滑走，地球跟着挪到左边空出来的位置。
+    // 手机上地球住在 .c-window 那一格里，跟着页面滚动；抽屉打开时浮到底部面板上方
+    const win = document.querySelector<HTMLElement>('.c-window')!;
+    const focus = (instant = false) => {
+      const open = !!root.dataset.panel;
+      if (wide.matches) return globe?.setFocus(open ? -0.2 : 0.2, -0.02, instant);
+      if (open) return globe?.setFocus(0, -0.18, instant);
+      const r = win.getBoundingClientRect();
+      globe?.setFocus(0, (r.top + r.height / 2) / innerHeight - 0.5, instant);
+    };
+    focus(true);
+    wide.addEventListener('change', () => focus(true));
+    addEventListener('resize', () => focus(true));
+    addEventListener('scroll', () => !wide.matches && !root.dataset.panel && focus(true), { passive: true });
+    clock();
+
+    const bento = document.querySelector<HTMLElement>('.c-bento')!;
+    const nav = panels((id, prev, init) => {
+      bento.inert = !!id;
+      focus(init);
+      if (id || !init) moveFocus(id, prev);
+    });
+
+    // 地球：点空白处关抽屉，位移不到 5px 才算点击，免得拖完一松手就关了。拖过之后几秒自己转回 HOME 城市，双击立刻回去
+    let downX = 0;
+    let downY = 0;
+    let idle = 0;
+    canvas.addEventListener('pointerdown', (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+      clearTimeout(idle);
+    });
+    canvas.addEventListener('pointerup', (e) => {
+      if (Math.hypot(e.clientX - downX, e.clientY - downY) < 5) {
+        if (nav.current) nav.go('');
+        return;
+      }
+      root.classList.add('c-dragged');
+      localStorage.setItem('c:dragged', '1');
+      idle = window.setTimeout(() => globe?.recenter(), 4000);
+    });
+    canvas.addEventListener('dblclick', () => {
+      clearTimeout(idle);
+      globe?.recenter(true);
+    });
+
+    // 手机上抽屉是底部面板：按住顶部把手往下拖，超过三分之一高度松手就关掉
+    for (const box of document.querySelectorAll<HTMLElement>('.c-drawer')) {
+      let startY = -1;
+      const handle = (e: PointerEvent) => !wide.matches && !(e.target as Element).closest('a, button, input');
+      box.addEventListener('pointerdown', (e) => {
+        if (!handle(e) || !(e.target as Element).closest('.c-grip, .c-drawer-h')) return;
+        startY = e.clientY;
+        box.setPointerCapture(e.pointerId);
+        box.style.transition = 'none';
+      });
+      box.addEventListener('pointermove', (e) => {
+        if (startY >= 0) box.style.translate = `0 ${Math.max(0, e.clientY - startY)}px`;
+      });
+      const end = (e: PointerEvent) => {
+        if (startY < 0) return;
+        const close = e.type === 'pointerup' && e.clientY - startY > box.offsetHeight / 3;
+        startY = -1;
+        box.style.transition = box.style.translate = '';
+        if (close) nav.go('');
+      };
+      box.addEventListener('pointerup', end);
+      box.addEventListener('pointercancel', end);
+    }
+
+    // 抽屉里的搜索：标题、摘要、分类和标签在页面里就有，正文第一次打开搜索框时再拉索引。
+    // 分类抽屉里整组都没命中时连组标题一起藏起来；搜索词同步到地址栏的 ?q=，刷新或分享链接还在
+    let bodies: Record<string, string> = {};
+    let loading: Promise<void> | undefined;
+    const loadBodies = () =>
+      (loading ??= loadIndex().then((list) => void (bodies = Object.fromEntries(list.map((p) => [p.url, p.body])))));
+    const bodyOf = (a: HTMLAnchorElement) => bodies[decodeURIComponent(a.pathname)] ?? '';
+    const grepOf = (box: Element) => box.querySelector<HTMLElement>('.c-grep');
+    const openGrep = (box: Element, q?: string) => {
+      const g = grepOf(box);
+      if (!g) return;
+      g.hidden = false;
+      const input = g.querySelector('input')!;
+      if (q !== undefined) input.value = q;
+      input.focus();
+      loadBodies().then(() => input.value && input.dispatchEvent(new Event('input')));
+    };
+    const syncQuery = (q: string) => {
+      const url = new URL(location.href);
+      q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+      history.replaceState(history.state, '', url);
+    };
+    for (const g of document.querySelectorAll<HTMLElement>('.c-grep')) {
+      const box = g.closest('.c-drawer')!;
+      const input = g.querySelector('input')!;
+      const out = g.querySelector('output')!;
+      const empty = box.querySelector<HTMLElement>('.c-empty')!;
+      input.addEventListener('input', () => {
+        const raw = input.value.trim();
+        const q = raw.toLowerCase();
+        let n = 0;
+        for (const li of box.querySelectorAll<HTMLElement>('.lp-list li')) {
+          const a = li.querySelector('a')!;
+          const text = [...li.querySelectorAll('.lp-t, .lp-d')].map((s) => s.textContent).join(' ') + ' ' + li.dataset.k;
+          li.hidden = !!q && !text.toLowerCase().includes(q) && !bodyOf(a).includes(q);
+          if (!li.hidden) n++;
+        }
+        for (const s of box.querySelectorAll<HTMLElement>('.lp-group')) s.hidden = !s.querySelector('li:not([hidden])');
+        out.textContent = q ? (n ? `${n} 篇` : '0 篇') : '';
+        empty.hidden = !q || n > 0;
+        syncQuery(raw);
+      });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.stopPropagation();
+          if (input.value) {
+            input.value = '';
+            input.dispatchEvent(new Event('input'));
+          } else {
+            g.hidden = true;
+            (box as HTMLElement).focus();
+          }
+        } else if (e.key === 'ArrowDown' || e.key === 'Enter') {
+          e.preventDefault();
+          step(box, 1, e.key === 'Enter');
+        }
+      });
+    }
+    // 带着 ?q= 打开时直接把搜索框和结果摆出来
+    const q0 = new URLSearchParams(location.search).get('q');
+    const box0 = nav.current && document.querySelector(`.c-drawer[data-box="${nav.current}"]`);
+    if (q0 && box0) openGrep(box0, q0);
+    document.addEventListener('click', (e) => {
+      const btn = (e.target as Element).closest('[data-grep]');
+      if (btn) openGrep(btn.closest('.c-drawer')!);
+    });
+
+    // J K 或方向键在抽屉里逐行移动，焦点所在的行就是选中行，回车直接打开
+    const rows = (box: Element) => [...box.querySelectorAll<HTMLAnchorElement>('.lp-list li:not([hidden]) a')].filter((a) => !a.closest('[hidden]'));
+    const step = (box: Element, d: number, open = false) => {
+      const list = rows(box);
+      if (!list.length) return;
+      let i = list.indexOf(document.activeElement as HTMLAnchorElement);
+      if (i < 0) i = Math.max(0, list.findIndex((a) => a.hasAttribute('data-last')));
+      else i = Math.min(list.length - 1, Math.max(0, i + d));
+      if (open) return list[i].click();
+      list[i].focus();
+      list[i].scrollIntoView({ block: 'nearest' });
+    };
+
+    const keys = document.getElementById('c-keys') as HTMLDialogElement;
+    keys.addEventListener('keydown', (e) => e.key === 'Escape' && e.stopPropagation());
+    keys.addEventListener('click', (e) => e.target === keys && keys.close());
+    // 单键快捷键可以关掉（WCAG 2.1.4），关掉后只剩方向键、回车和 Esc，Dock 上的 ? 按钮还能把这张卡片叫出来
+    const keysOn = document.getElementById('c-keys-on') as HTMLInputElement;
+    keysOn.checked = localStorage.getItem('c:keys') !== 'off';
+    keysOn.addEventListener('change', () => (keysOn.checked ? localStorage.removeItem('c:keys') : localStorage.setItem('c:keys', 'off')));
+
+    addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || keys.open || (e.target as Element).closest('input, textarea')) return;
+      if (!keysOn.checked && e.key.length === 1) return;
+      const box = nav.current && document.querySelector(`.c-drawer[data-box="${nav.current}"]`);
+      if (e.key === '/') {
+        e.preventDefault();
+        return box && grepOf(box) ? openGrep(box) : openSearch();
+      }
+      const d = ({ j: 1, ArrowDown: 1, k: -1, ArrowUp: -1 } as Record<string, number>)[e.key];
+      if (box && d && rows(box).length) {
+        e.preventDefault();
+        return step(box, d);
+      }
+      if (e.key === '?') return keys.showModal();
+      // Dock 上的键帽可以直接按：P C A 开关抽屉，R G 打开外链
+      if (!e.repeat) document.querySelector<HTMLElement>(`.c-dock [data-key="${e.key.toLowerCase()}"]`)?.click();
+    });
+    document.querySelector('.c-dock [data-key="?"]')!.addEventListener('click', () => keys.showModal());
+
+    // 几何碎片随指针轻微错位，各自深度不同
+    if (!reducedMotion && matchMedia('(hover: hover)').matches) {
+      const shapes = document.querySelector<HTMLElement>('.c-shapes')!;
+      addEventListener(
+        'pointermove',
+        (e) => {
+          shapes.style.setProperty('--mx', (e.clientX / innerWidth - 0.5).toFixed(3));
+          shapes.style.setProperty('--my', (e.clientY / innerHeight - 0.5).toFixed(3));
+        },
+        { passive: true },
+      );
+    }
+  </script>
+</Base>

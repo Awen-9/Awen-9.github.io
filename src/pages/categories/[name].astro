@@ -1,0 +1,21 @@
+---
+import Page from '../../layouts/Page.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, groupByCategory, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const groups = groupByCategory(await getPosts());
+  return groups.map(([name, posts]) => ({ params: { name }, props: { posts } }));
+}
+
+const { name } = Astro.params;
+const { posts } = Astro.props as { posts: Post[] };
+---
+
+<Page title={`分类：${name}`} back="categories">
+  <header class="lp-h">
+    <h1>{name}</h1>
+    <p class="lp-meta"><a href="/categories/">全部分类</a><span>{posts.length} 篇</span></p>
+  </header>
+  <PostList posts={posts} />
+</Page>

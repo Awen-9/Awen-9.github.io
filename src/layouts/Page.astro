@@ -1,0 +1,33 @@
+---
+// 阅读页、归档、分类、标签、关于这些子页面的外壳
+import Base from './Base.astro';
+import { SITE } from '../config';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** 回到首页时打开哪个抽屉 */
+  back?: 'posts' | 'categories' | 'about';
+}
+
+const { title, description, back = 'posts' } = Astro.props;
+---
+
+<Base title={title} description={description} bodyClass="lp">
+  <header class="lp-head">
+    <a class="lp-brand" href="/">{SITE.title}</a>
+    <nav class="lp-nav" aria-label="主导航">
+      <a href="/#posts">文章</a>
+      <a href="/#categories">分类</a>
+      <a href="/#about">关于</a>
+      <a href="/atom.xml">RSS</a>
+      <a href={SITE.github}>GitHub</a>
+      <button type="button" class="lp-search" data-search aria-keyshortcuts="Meta+K Control+K">搜索 <kbd data-search-key>⌘K</kbd></button>
+    </nav>
+    <a class="lp-back" href={`/#${back}`}>← 回到首页</a>
+  </header>
+  <main class="lp-main">
+    <slot />
+  </main>
+  <footer class="lp-foot">© {new Date().getFullYear()} {SITE.author} · <a href="/atom.xml">RSS</a></footer>
+</Base>

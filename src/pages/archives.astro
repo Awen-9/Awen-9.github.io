@@ -1,0 +1,27 @@
+---
+import Page from '../layouts/Page.astro';
+import PostList from '../components/PostList.astro';
+import { getPosts, type Post } from '../lib/posts';
+
+const posts = await getPosts();
+const years = new Map<string, Post[]>();
+for (const post of posts) {
+  const y = post.id.slice(0, 4);
+  years.set(y, [...(years.get(y) ?? []), post]);
+}
+---
+
+<Page title="归档">
+  <header class="lp-h">
+    <h1>归档</h1>
+    <p class="lp-meta">共 {posts.length} 篇</p>
+  </header>
+  {
+    [...years].map(([year, list]) => (
+      <section>
+        <h2 class="lp-year">{year}</h2>
+        <PostList posts={list} brief={false} />
+      </section>
+    ))
+  }
+</Page>

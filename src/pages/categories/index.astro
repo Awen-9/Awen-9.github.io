@@ -1,0 +1,25 @@
+---
+import Page from '../../layouts/Page.astro';
+import { getPosts, groupByCategory, catHref } from '../../lib/posts';
+
+const groups = groupByCategory(await getPosts());
+---
+
+<Page title="分类" back="categories">
+  <header class="lp-h">
+    <h1>分类</h1>
+    <p class="lp-meta">共 {groups.length} 个</p>
+  </header>
+  <ul class="lp-cats">
+    {
+      groups.map(([name, list]) => (
+        <li>
+          <a href={catHref(name)}>
+            {name}
+            <span>{list.length}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Page>

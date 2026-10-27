@@ -1,0 +1,241 @@
+---
+import { render } from 'astro:content';
+import Page from '../../../../layouts/Page.astro';
+import { GISCUS } from '../../../../config';
+import { getPosts, postPath, formatDate, readingMinutes, catHref, tagHref, type Post } from '../../../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  // 相关文章：共享的标签越多越靠前，同分类再加半分，取前三
+  const relatedTo = (post: Post) =>
+    posts
+      .filter((p) => p !== post)
+      .map((p) => ({ p, score: p.data.tags.filter((t) => post.data.tags.includes(t)).length + (p.data.category === post.data.category ? 0.5 : 0) }))
+      .filter((x) => x.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((x) => x.p);
+  return posts.map((post, i) => {
+    const [y, m, d, slug] = postPath(post).split('/').filter(Boolean);
+    const name = post.data.series;
+    const series = name ? posts.filter((p) => p.data.series === name).reverse() : [];
+    // 列表按日期倒序，所以下一篇（更新的）在前面
+    return {
+      params: { y, m, d, slug },
+      props: { post, newer: posts[i - 1], older: posts[i + 1], related: relatedTo(post), series },
+    };
+  });
+}
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+  related: Post[];
+  series: Post[];
+}
+
+const { post, newer, older, related, series } = Astro.props;
+const { Content, headings } = await render(post);
+const { title, description, date, updated, category, tags } = post.data;
+const toc = headings.filter((h) => h.depth === 2);
+const giscus = GISCUS.repoId && GISCUS.categoryId;
+---
+
+<Page title={title} description={description || undefined}>
+  <article data-date={(updated ?? date).valueOf()}>
+    <header class="lp-h">
+      <h1>{title}</h1>
+      <p class="lp-meta">
+        <time datetime={date.toISOString()}>{formatDate(date)}</time>
+        {updated && <span>更新于 {formatDate(updated)}</span>}
+        <a href={catHref(category)}>{category}</a>
+        <span>约 {readingMinutes(post.body)} 分钟</span>
+      </p>
+    </header>
+    {
+      series.length > 1 && (
+        <nav class="c-series" aria-label={`系列：${post.data.series}`}>
+          <p>
+            系列 · {post.data.series} · {series.findIndex((p) => p.id === post.id) + 1}/{series.length}
+          </p>
+          <ol>
+            {series.map((p) => (
+              <li>{p.id === post.id ? <span aria-current="page">{p.data.title}</span> : <a href={postPath(p)}>{p.data.title}</a>}</li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+    {
+      toc.length >= 3 && (
+        <details class="c-toc">
+          <summary>目录 · {toc.length} 节</summary>
+          <ol>
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )
+    }
+    <div class="prose">
+      <Content />
+    </div>
+    {
+      tags.length > 0 && (
+        <ul class="lp-tags" aria-label="标签">
+          {tags.map((tag) => (
+            <li>
+              <a href={tagHref(tag)}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </article>
+  <nav class="lp-pager" aria-label="相邻文章">
+    <div>
+      {
+        older && (
+          <a href={postPath(older)}>
+            <span>上一篇</span>
+            <strong>{older.data.title}</strong>
+          </a>
+        )
+      }
+    </div>
+    <div class="next">
+      {
+        newer && (
+          <a href={postPath(newer)}>
+            <span>下一篇</span>
+            <strong>{newer.data.title}</strong>
+          </a>
+        )
+      }
+    </div>
+  </nav>
+  {
+    related.length > 0 && (
+      <section class="c-related" aria-labelledby="c-related-t">
+        <h2 id="c-related-t">相关文章</h2>
+        <ol>
+          {related.map((p) => (
+            <li>
+              <a href={postPath(p)}>
+                <span>{p.data.category} · {formatDate(p.data.date)}</span>
+                <strong>{p.data.title}</strong>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )
+  }
+  {
+    giscus && (
+      <section class="c-comments" aria-label="评论">
+        <script
+          is:inline
+          src="https://giscus.app/client.js"
+          data-repo={GISCUS.repo}
+          data-repo-id={GISCUS.repoId}
+          data-category={GISCUS.category}
+          data-category-id={GISCUS.categoryId}
+          data-mapping="pathname"
+          data-reactions-enabled="1"
+          data-input-position="top"
+          data-theme="light"
+          data-lang="zh-CN"
+          data-loading="lazy"
+          crossorigin="anonymous"
+          async
+        />
+      </section>
+    )
+  }
+
+  <script>
+    // 阅读页：顶部进度条、代码块复制按钮、目录高亮和返回逻辑
+    {
+      const home = '/';
+      // 记下读到哪篇，回首页时在抽屉里标出来
+      sessionStorage.setItem('c:last', location.pathname);
+      // 从站内首页点进来的，回到首页就是后退一步，抽屉、滚动位置都原样还在；直接打开的才跳到文章抽屉
+      const back = document.querySelector<HTMLAnchorElement>('.lp-back')!;
+      back.addEventListener('click', (e) => {
+        const ref = document.referrer && new URL(document.referrer);
+        if (ref && ref.origin === location.origin && ref.pathname === home && history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+      });
+
+      // 一年多没更新的技术文章，在正文前提醒一句版本可能变了
+      const article = document.querySelector<HTMLElement>('article')!;
+      const days = Math.floor((Date.now() - +article.dataset.date!) / 864e5);
+      if (days > 365) {
+        const note = document.createElement('p');
+        note.className = 'c-stale';
+        note.textContent = `// 这篇最后更新在 ${Math.floor(days / 30)} 个月前，里面的版本和做法可能已经过时，参考时留意一下`;
+        article.querySelector('.prose')!.before(note);
+      }
+
+      // 每个小节标题前挂一个 # 链接，点了复制这一节的地址
+      for (const h of document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]')) {
+        const a = document.createElement('a');
+        a.className = 'c-anchor';
+        a.href = `#${h.id}`;
+        a.textContent = '#';
+        a.setAttribute('aria-label', `复制“${h.textContent}”这一节的链接`);
+        a.addEventListener('click', () => navigator.clipboard?.writeText(a.href).catch(() => {}));
+        h.append(a);
+      }
+
+      // 目录：宽屏时摆在左边默认展开，读到哪一节就把哪一项点亮
+      const tocBox = document.querySelector<HTMLDetailsElement>('.c-toc');
+      if (tocBox && matchMedia('(min-width: 1240px)').matches) tocBox.open = true;
+      const links = [...document.querySelectorAll<HTMLAnchorElement>('.c-toc a')];
+      const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+      const lightToc = () => {
+        let i = -1;
+        heads.forEach((h, j) => h && h.getBoundingClientRect().top < 140 && (i = j));
+        links.forEach((a, j) => (j === i ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
+      };
+      if (links.length) {
+        addEventListener('scroll', lightToc, { passive: true });
+        lightToc();
+      }
+
+      const bar = document.body.appendChild(document.createElement('div'));
+      bar.className = 'c-progress';
+      const update = () => {
+        const { top, height } = article.getBoundingClientRect();
+        const p = Math.min(1, Math.max(0, -top / (height - innerHeight)));
+        bar.style.setProperty('--p', String(p));
+      };
+      addEventListener('scroll', update, { passive: true });
+      addEventListener('resize', update);
+      update();
+
+      for (const pre of document.querySelectorAll('.prose pre')) {
+        const btn = pre.appendChild(document.createElement('button'));
+        btn.type = 'button';
+        btn.className = 'c-copy';
+        btn.textContent = 'copy';
+        btn.addEventListener('click', async () => {
+          await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '');
+          btn.textContent = 'copied';
+          btn.classList.add('is-done');
+          setTimeout(() => {
+            btn.textContent = 'copy';
+            btn.classList.remove('is-done');
+          }, 1500);
+        });
+      }
+    }
+  </script>
+</Page>

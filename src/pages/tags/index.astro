@@ -1,0 +1,25 @@
+---
+import Page from '../../layouts/Page.astro';
+import { getPosts, tagHref, tagCounts } from '../../lib/posts';
+
+const tags = tagCounts(await getPosts());
+---
+
+<Page title="标签" back="categories">
+  <header class="lp-h">
+    <h1>标签</h1>
+    <p class="lp-meta">共 {tags.length} 个</p>
+  </header>
+  <ul class="lp-cats">
+    {
+      tags.map(([name, n]) => (
+        <li>
+          <a href={tagHref(name)}>
+            #{name}
+            <span>{n}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</Page>

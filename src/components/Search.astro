@@ -1,0 +1,21 @@
+<dialog class="c-find" id="c-find" aria-label="全站搜索">
+  <div class="c-find-bar">
+    <label for="c-find-q">find:</label>
+    <input
+      id="c-find-q"
+      type="search"
+      autocomplete="off"
+      spellcheck="false"
+      placeholder="搜标题、标签、分类和正文，空格分隔多个词"
+      role="combobox"
+      aria-expanded="true"
+      aria-controls="c-find-list"
+    />
+    <output for="c-find-q" aria-live="polite"></output>
+  </div>
+  <ol id="c-find-list" role="listbox" aria-label="搜索结果"></ol>
+  <p class="c-find-foot"><kbd>↑</kbd><kbd>↓</kbd> 选择 <kbd>Enter</kbd> 打开 <kbd>Esc</kbd> 关闭</p>
+</dialog>
+<script>
+  import '../scripts/search';
+</script>

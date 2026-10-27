@@ -1,0 +1,21 @@
+---
+import PostList from './PostList.astro';
+import { catHref, type Post } from '../lib/posts';
+
+interface Props {
+  groups: [string, Post[]][];
+}
+const { groups } = Astro.props;
+---
+
+{
+  groups.map(([name, list]) => (
+    <section class="lp-group">
+      <h3>
+        <a href={catHref(name)}>{name}</a>
+        <span class="lp-count">{list.length}</span>
+      </h3>
+      <PostList posts={list} brief={false} />
+    </section>
+  ))
+}
