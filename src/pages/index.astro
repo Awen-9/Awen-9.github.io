@@ -1,10 +1,12 @@
 ---
 // 首页：左边便当盒格子，右边可拖动的地球，底部 Dock 打开文章、分类、关于三个抽屉
 import Base from '../layouts/Base.astro';
+import '../styles/home.css';
 import PostList from '../components/PostList.astro';
 import CategoryGroups from '../components/CategoryGroups.astro';
 import About from '../components/About.astro';
 import { SITE, PROFILE, HOME } from '../config';
+import { TEXTURES } from '../scripts/earth';
 import { getPosts, groupByCategory, formatDate, postPath, tagHref, tagCounts, readingMinutes } from '../lib/posts';
 
 const posts = await getPosts();
@@ -34,6 +36,8 @@ const TOP_TAGS = 12;
 <Base bodyClass="c-home">
   <!-- 首帧等到快捷键卡片解析完。它前面的内联脚本这时已经跑过，返回首页时抽屉滚动位置和变形目标都已就位 -->
   <link slot="head" rel="expect" href="#c-keys" blocking="render" />
+  <!-- 手机上的地球贴图不等脚本跑起来就先下载；crossorigin 和 three 加载贴图的方式一致，才能复用这次下载 -->
+  {TEXTURES.low.map((f) => <link slot="head" rel="preload" as="image" href={`/textures/${f}`} media="(max-width: 899.98px)" crossorigin="anonymous" />)}
   <div class="c-space earth-wrap" aria-hidden="false">
     <canvas class="earth" id="earth" aria-label={`可拖动旋转的地球，橙色光点是${HOME.city}`}></canvas>
   </div>
@@ -52,7 +56,7 @@ const TOP_TAGS = 12;
       <p class="c-time" data-clock="time"></p>
       <p class="c-date"><span data-clock="date"></span><span data-clock="sun"></span></p>
     </section>
-    <div class="c-window" aria-hidden="true"></div>
+    <div class="c-window"></div>
     {
       latest && (
         <a class="c-tile c-latest" href={postPath(latest)} data-t={latest.data.date.valueOf()}>
@@ -259,27 +263,34 @@ const TOP_TAGS = 12;
   <script>
     import { earth, clock, panels, moveFocus, reducedMotion } from '../scripts/runtime';
     import { loadIndex, openSearch } from '../scripts/search';
+    import type { EarthHandle } from '../scripts/earth';
 
     const root = document.documentElement;
     const canvas = document.getElementById('earth') as HTMLCanvasElement;
+    // 900px 和 styles/home.css 里手机布局的断点一致
     const wide = matchMedia('(min-width: 900px)');
-    // 手机和省流量模式换 1k 贴图；大气光用纸白，不再是和配色无关的蓝
-    const saveData = (navigator as { connection?: { saveData?: boolean } }).connection?.saveData;
-    const globe = earth(canvas, { size: wide.matches ? 0.82 : 0.5, lowRes: !wide.matches || !!saveData, glow: 0xfafaf8 });
-    // 全幅背景：首屏地球偏右给便当盒让位；打开抽屉时便当盒整体向左滑走，地球跟着挪到左边空出来的位置。
-    // 手机上地球住在 .c-window 那一格里，跟着页面滚动；抽屉打开时浮到底部面板上方
+    // 宽屏上地球铺满整个背景；手机上画布搬进 .c-window 那一格，跟着页面原生滚动，
+    // 不再按滚动位置每帧挪地球（滚得快时会跟不上、出重影），要画的面积也只剩一格那么大
+    const space = document.querySelector<HTMLElement>('.c-space')!;
     const win = document.querySelector<HTMLElement>('.c-window')!;
+    const place = () => (wide.matches ? space : win).append(canvas);
+    place();
+    // 手机和省流量模式换 1k 贴图；大气光用纸白（theme.css 的 --paper），不再是和配色无关的蓝
+    const saveData = (navigator as { connection?: { saveData?: boolean } }).connection?.saveData;
+    let globe: EarthHandle | null = null;
+    // 首屏地球偏右给便当盒让位；打开抽屉时便当盒整体向左滑走，地球跟着挪到左边空出来的位置。手机上就待在格子正中
     const focus = (instant = false) => {
-      const open = !!root.dataset.panel;
-      if (wide.matches) return globe?.setFocus(open ? -0.2 : 0.2, -0.02, instant);
-      if (open) return globe?.setFocus(0, -0.18, instant);
-      const r = win.getBoundingClientRect();
-      globe?.setFocus(0, (r.top + r.height / 2) / innerHeight - 0.5, instant);
+      if (!wide.matches) return globe?.setFocus(0, 0, true);
+      globe?.setFocus(root.dataset.panel ? -0.2 : 0.2, -0.02, instant);
     };
-    focus(true);
-    wide.addEventListener('change', () => focus(true));
-    addEventListener('resize', () => focus(true));
-    addEventListener('scroll', () => !wide.matches && !root.dataset.panel && focus(true), { passive: true });
+    earth(canvas, { size: wide.matches ? 0.82 : 0.86, lowRes: !wide.matches || !!saveData, glow: 0xfafaf8 }).then((g) => {
+      globe = g;
+      focus(true);
+    });
+    wide.addEventListener('change', () => {
+      place();
+      focus(true);
+    });
     clock();
 
     const bento = document.querySelector<HTMLElement>('.c-bento')!;
@@ -307,6 +318,8 @@ const TOP_TAGS = 12;
       localStorage.setItem('c:dragged', '1');
       idle = window.setTimeout(() => globe?.recenter(), 4000);
     });
+    // 手机上打开抽屉时地球跟着便当盒滑走了，上面露出的空白处就是背景本身，点它同样收起抽屉
+    space.addEventListener('click', (e) => e.target === space && nav.current && nav.go(''));
     canvas.addEventListener('dblclick', () => {
       clearTimeout(idle);
       globe?.recenter(true);

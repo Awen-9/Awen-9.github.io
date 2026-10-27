@@ -36,6 +36,11 @@ const fullTitle = [title, SITE.title].filter(Boolean).join(' · ');
     </script>
     <!-- 首页和阅读页之间用浏览器原生的跨页过渡，格子变形成文章卡片。不支持的浏览器照常跳转 -->
     <style is:inline>@media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }</style>
+    <!-- 鼠标停在站内链接上（手机上是按下时），浏览器提前在后台把那一页渲染好，点下去过渡立刻开始。
+         首页有地球和会写本地记录的脚本，不提前渲染；atom.xml 不是页面。不支持的浏览器忽略这段 -->
+    <script is:inline type="speculationrules">
+      { "prerender": [{ "where": { "and": [{ "href_matches": "/*" }, { "not": { "href_matches": "/" } }, { "not": { "href_matches": "/*.xml" } }] }, "eagerness": "moderate" }] }
+    </script>
     <slot name="head" />
   </head>
   <body class={bodyClass}>

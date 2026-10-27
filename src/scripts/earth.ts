@@ -1,17 +1,14 @@
 import * as THREE from 'three';
+import { subsolarPoint } from './sun';
 
 const DEG = Math.PI / 180;
 const TEX = '/textures/';
-
-// 太阳直射点。近似公式加时差修正，误差在 1° 以内，画晨昏线足够
-export function subsolarPoint(date = new Date()) {
-  const day = (date.getTime() - Date.UTC(date.getUTCFullYear(), 0, 0)) / 864e5;
-  const decl = -23.44 * Math.cos(((2 * Math.PI) / 365) * (day + 10));
-  const b = ((2 * Math.PI) / 364) * (day - 81);
-  const eot = 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b);
-  const hours = date.getUTCHours() + date.getUTCMinutes() / 60 + eot / 60;
-  return { lat: decl, lon: -15 * (hours - 12) };
-}
+/** 贴图，依次是白天、夜灯、海面高光、云。手机和省流量模式用 low，首页给手机提前预加载 low 这一组。
+ * 云图是灰度 JPG，亮度里已经乘好了透明度，比原来带透明通道的 PNG 小一半多 */
+export const TEXTURES = {
+  low: ['earth-natural-1k.jpg', 'earth_lights_1024.jpg', 'earth_specular_1024.jpg', 'earth_clouds_1024.jpg'],
+  high: ['earth-natural-2k.jpg', 'earth_lights_2048.png', 'earth_specular_2048.jpg', 'earth_clouds_1024.jpg'],
+};
 
 // 与 SphereGeometry 的 UV 展开一致：经纬度 → 球面局部方向
 function lonLatToVec(lon: number, lat: number, out = new THREE.Vector3()) {
@@ -50,8 +47,7 @@ const earthFragment = /* glsl */ `
     float ndl = dot(n, sunDir);
     float dayMix = smoothstep(-0.1, 0.16, ndl);
 
-    vec4 c = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0));
-    float cloud = c.a * dot(c.rgb, vec3(0.333));
+    float cloud = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0)).r;
 
     vec3 day = texture2D(dayMap, vUv).rgb * (1.0 - cloud * 0.3);
     vec3 dayCol = day * (0.06 + 1.15 * max(ndl, 0.0));
@@ -81,8 +77,7 @@ const cloudFragment = /* glsl */ `
   varying vec2 vUv;
   varying vec3 vNormalW;
   void main() {
-    vec4 c = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0));
-    float cloud = c.a * dot(c.rgb, vec3(0.333));
+    float cloud = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0)).r;
     float ndl = dot(normalize(vNormalW), sunDir);
     float lit = smoothstep(-0.2, 0.25, ndl);
     gl_FragColor = vec4(vec3(0.05 + 0.95 * max(ndl, 0.0)), cloud * (0.04 + 0.86 * lit));
@@ -132,7 +127,8 @@ export interface EarthHandle {
 export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): EarthHandle | null {
   let renderer: THREE.WebGLRenderer;
   try {
-    renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+    // 2 倍屏上锯齿本来就看不出，关掉多重采样，手机上每帧省一大块显存带宽
+    renderer = new THREE.WebGLRenderer({ canvas, antialias: devicePixelRatio < 2, alpha: true, powerPreference: 'high-performance' });
   } catch {
     return null;
   }
@@ -154,11 +150,11 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
     t.wrapS = THREE.RepeatWrapping;
     return t;
   };
-  const lo = opts.lowRes;
-  const dayMap = tex(lo ? 'earth-natural-1k.jpg' : 'earth-natural-2k.jpg');
-  const nightMap = tex(lo ? 'earth_lights_1024.jpg' : 'earth_lights_2048.png');
-  const specMap = tex(lo ? 'earth_specular_1024.jpg' : 'earth_specular_2048.jpg', false);
-  const cloudMap = tex('earth_clouds_1024.png');
+  const [day, night, spec, cloud] = TEXTURES[opts.lowRes ? 'low' : 'high'];
+  const dayMap = tex(day);
+  const nightMap = tex(night);
+  const specMap = tex(spec, false);
+  const cloudMap = tex(cloud, false);
 
   const sunDir = new THREE.Vector3();
   const uniforms = {

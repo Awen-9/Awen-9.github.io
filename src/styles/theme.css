@@ -1,15 +1,17 @@
-/* 主题：孟菲斯碎片、便当盒格子、等宽字、灰阶加荧光、索引卡细线、纸张颗粒、底部 Dock 和抽屉 */
+/* 主题：配色和字号、索引卡列表、正文排版、全站搜索、跨页变形。首页和子页面各自的样式在 home.css、page.css */
 :root {
   --bg: #e9e9e6;
-  --tile: rgba(250, 250, 248, 0.86);
+  /* 纸白：卡片、抽屉、弹窗的底色，半透明的格子和压在深色上的浅字都从它调 */
+  --paper: #fafaf8;
+  --tile: color-mix(in srgb, var(--paper) 86%, transparent);
   --fg: #1a1a1a;
   --muted: #6b6b68;
   --line: #1a1a1a;
-  --soft: rgba(26, 26, 26, 0.2);
+  --soft: color-mix(in srgb, var(--fg) 20%, transparent);
   --neon: #dcff00;
   --pink: #ff6fb5;
   --accent: #1a1a1a;
-  --code-bg: rgba(26, 26, 26, 0.07);
+  --code-bg: color-mix(in srgb, var(--fg) 7%, transparent);
   --dots: radial-gradient(var(--fg) 1.2px, transparent 1.6px) 0 0 / 12px 12px;
   --ease: cubic-bezier(0.3, 0.8, 0.2, 1);
   /* 动效时长三档：按键反馈、面板和卡片、慢悠悠的装饰 */
@@ -23,7 +25,7 @@
   --t-l: 15px;
   --t-xl: 22px;
   /* 颜色语义：荧光只给能点的和当前所在，粉色只给读过的 */
-  --read: rgba(255, 111, 181, 0.16);
+  --read: color-mix(in srgb, var(--pink) 16%, transparent);
 }
 body {
   background: var(--bg) var(--grain);
@@ -41,791 +43,6 @@ h3 {
 }
 :focus-visible {
   outline: 2px dashed var(--fg);
-}
-
-/* 全幅背景：地球铺满视口，内容浮在上面 */
-.c-space {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-}
-/* 贴图下载完之前先画一个点阵圆占位，位置和大小与地球一致；没有 WebGL 时它就留着当示意图 */
-.c-space::before {
-  content: '';
-  position: absolute;
-  aspect-ratio: 1;
-  border: 1px dashed var(--fg);
-  border-radius: 50%;
-  background: var(--dots);
-  opacity: 0.18;
-  translate: -50% -50%;
-  transition: opacity var(--dur-l);
-  pointer-events: none;
-}
-.c-space::before {
-  top: 48%;
-  left: 70%;
-  height: 82vh;
-}
-.c-home:has(.earth.ready) .c-space::before,
-[data-panel]:not([data-panel='']) .c-space::before {
-  opacity: 0;
-}
-.no-webgl .c-space {
-  background: none;
-}
-.no-webgl .c-space::after {
-  content: '// 这台设备不支持 WebGL，地球先画成这样';
-  position: absolute;
-  top: calc(48% + 43vh);
-  left: 70%;
-  translate: -50% 0;
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-/* 孟菲斯几何碎片：只做装饰，不挡拖动。贴着便当盒和画面边角摆，不压地球 */
-.c-shapes {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-}
-.c-shapes i {
-  position: absolute;
-  display: block;
-  translate: calc(var(--mx, 0) * var(--d) * 1px) calc(var(--my, 0) * var(--d) * 1px);
-  transition: translate var(--dur-l) var(--ease);
-}
-.c-s1 {
-  --d: 36;
-  top: 4%;
-  right: 3%;
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: var(--neon);
-  border: 1.5px solid var(--fg);
-}
-.c-s2 {
-  --d: -28;
-  top: 15%;
-  left: 600px;
-  width: 56px;
-  height: 50px;
-  background: var(--pink);
-  clip-path: polygon(50% 0, 100% 100%, 0 100%);
-  rotate: 18deg;
-}
-.c-s3 {
-  --d: 20;
-  right: 2%;
-  bottom: 14%;
-  width: 120px;
-  height: 22px;
-  background: repeating-linear-gradient(-45deg, var(--fg) 0 2px, transparent 2px 9px);
-}
-.c-s4 {
-  --d: -16;
-  top: 4%;
-  left: 640px;
-  width: 64px;
-  height: 64px;
-  background: var(--dots);
-  border-radius: 50%;
-}
-.c-s5 {
-  --d: 44;
-  bottom: 13%;
-  left: 610px;
-  width: 100px;
-  height: 36px;
-  border: 3px solid var(--pink);
-  border-color: var(--pink) transparent transparent;
-  border-radius: 50% 50% 0 0;
-  rotate: -14deg;
-}
-
-/* 便当盒：左侧大小不一的索引卡格子，铺满到 Dock 上方，右侧留给地球 */
-.c-bento {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(4, 128px);
-  /* 行高跟着屏幕高度缩放，但不会小于格子里的内容，矮屏上宁可页面多滚一点也不压字 */
-  grid-auto-rows: minmax(clamp(80px, calc((100dvh - 180px) / 7), 112px), auto);
-  grid-template-areas:
-    'brand brand clock clock'
-    'brand brand clock clock'
-    'latest latest latest latest'
-    'latest latest latest latest'
-    'stack stack recent recent'
-    'stack stack recent recent'
-    'log log tags tags';
-  gap: 8px;
-  width: max-content;
-  padding: 28px 0 96px 28px;
-  pointer-events: none;
-  transition:
-    translate var(--dur-m) var(--ease),
-    opacity var(--dur-m);
-}
-/* 打开抽屉时便当盒整体向左滑出，地球跟着移到左边，不会被格子挡住 */
-[data-panel]:not([data-panel='']) .c-bento {
-  translate: calc(-100% - 40px) 0;
-  opacity: 0;
-}
-/* 手机上地球住在自己的格子里，桌面上不需要这一格 */
-.c-window {
-  display: none;
-}
-.c-tile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  min-width: 0;
-  padding: 24px 12px 10px;
-  background: var(--tile);
-  border: 1px solid var(--line);
-  text-decoration: none;
-  pointer-events: auto;
-  backdrop-filter: blur(2px);
-  animation: c-in var(--dur-m) both;
-}
-.c-tile:nth-child(2) {
-  animation-delay: 0.05s;
-}
-.c-tile:nth-child(3),
-.c-tile:nth-child(4) {
-  animation-delay: 0.1s;
-}
-.c-tile:nth-child(n + 5) {
-  animation-delay: 0.15s;
-}
-/* 同一次会话里回到首页、或者带着 #posts 直接打开，格子不再重新淡入 */
-.c-calm .c-tile {
-  animation: none;
-}
-@keyframes c-in {
-  from {
-    opacity: 0;
-  }
-}
-.c-tag {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  padding: 1px 8px;
-  border-bottom: 1px solid var(--soft);
-  font-size: var(--t-xs);
-  color: var(--muted);
-  letter-spacing: 0.02em;
-}
-/* 能点的格子在右上角标箭头，静态时也看得出是入口 */
-a.c-tile::after {
-  content: '→';
-  position: absolute;
-  top: 1px;
-  right: 8px;
-  font-size: var(--t-xs);
-  line-height: 18px;
-}
-a.c-tile[href^='#']::after {
-  content: 'open ↗';
-}
-.c-tile p {
-  margin: 0;
-}
-a.c-tile:hover,
-a.c-tile:focus-visible {
-  background: var(--neon);
-}
-.c-brand {
-  grid-area: brand;
-  gap: 8px;
-  background: var(--fg);
-  color: #fafaf8;
-}
-.c-brand .c-tag {
-  color: rgba(250, 250, 248, 0.6);
-  border-color: rgba(250, 250, 248, 0.2);
-}
-.c-brand::after {
-  display: none;
-}
-.c-brand strong {
-  font-size: 46px;
-  line-height: 0.95;
-  letter-spacing: -0.05em;
-}
-.c-role {
-  font-size: var(--t-s);
-  color: rgba(250, 250, 248, 0.72);
-}
-.c-brand:hover,
-.c-brand:focus-visible {
-  color: var(--fg);
-}
-.c-brand:hover .c-role,
-.c-brand:focus-visible .c-role {
-  color: var(--fg);
-}
-.c-clock {
-  grid-area: clock;
-}
-.c-time {
-  font-size: 82px;
-  font-weight: 700;
-  line-height: 0.9;
-  letter-spacing: -0.06em;
-  font-variant-numeric: tabular-nums;
-}
-.c-date {
-  display: flex;
-  flex-direction: column;
-  margin-top: 8px !important;
-  padding-top: 4px;
-  border-top: 1px solid var(--soft);
-  font-size: var(--t-s);
-}
-.c-date span + span {
-  color: var(--muted);
-}
-/* latest 是最大的格子：分类、标题、摘要 */
-.c-latest {
-  grid-area: latest;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 34px 16px 14px;
-  box-shadow: 5px 5px 0 #fafaf8, 5px 5px 0 1px var(--fg);
-}
-.c-latest strong {
-  font: 700 26px / 1.3 var(--sans);
-  letter-spacing: -0.01em;
-}
-.c-latest-d {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  font: 14px / 1.7 var(--sans);
-  color: var(--muted);
-}
-/* 底部一行元信息：分类、阅读时长、标签 */
-.c-latest-m {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px 12px;
-  margin-top: auto;
-  padding-top: 8px;
-  border-top: 1px solid var(--soft);
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-.c-latest-c {
-  padding: 0 6px;
-  background: var(--fg);
-  color: #fafaf8;
-}
-/* 技术栈：给第一次来的人，尤其是面试官，一眼看到做什么、会什么、在学什么 */
-.c-stack {
-  grid-area: stack;
-  justify-content: flex-start;
-  gap: 8px;
-  padding-top: 28px;
-}
-.c-focus {
-  font: 700 var(--t-l) / 1.35 var(--sans);
-}
-.c-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.c-chips li {
-  padding: 1px 7px;
-  border: 1px solid var(--soft);
-  font-size: var(--t-s);
-  line-height: 20px;
-}
-.c-now {
-  display: grid;
-  gap: 2px;
-  padding-top: 8px;
-  border-top: 1px dashed var(--soft);
-  font-size: var(--t-s);
-  color: var(--muted);
-}
-.c-now b {
-  font-size: var(--t-xs);
-  font-weight: 400;
-}
-.c-now span {
-  color: var(--fg);
-}
-.c-more {
-  margin-top: auto !important;
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-.c-recent {
-  grid-area: recent;
-  justify-content: flex-start;
-  padding: 24px 0 0;
-}
-.c-recent ol {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-.c-recent a {
-  display: block;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--soft);
-  text-decoration: none;
-}
-.c-recent li:last-child a {
-  border-bottom: 0;
-}
-.c-recent a:hover,
-.c-recent a:focus-visible {
-  background: var(--neon);
-}
-.c-recent time {
-  display: block;
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-.c-recent span {
-  display: block;
-  overflow: hidden;
-  font: 500 var(--t-m) / 1.6 var(--sans);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-/* 写作记录：最近 12 个月每月一根柱子，下面标出起止月份 */
-.c-log {
-  grid-area: log;
-  gap: 4px;
-  padding-top: 28px;
-}
-.c-bars {
-  display: flex;
-  flex: 1;
-  align-items: flex-end;
-  gap: 3px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.c-bars li {
-  flex: 1;
-  height: calc(var(--h) * 100%);
-  min-height: 2px;
-  background: var(--fg);
-}
-.c-bars li:not([data-n]) {
-  background: var(--soft);
-}
-.c-axis {
-  display: flex;
-  justify-content: space-between;
-  padding-top: 2px;
-  border-top: 1px solid var(--fg);
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-/* 常写的标签：两列小表格，左边标签右边篇数，格子再矮也不会压到顶上的标签条 */
-.c-tags {
-  grid-area: tags;
-  justify-content: flex-start;
-  padding: 26px 0 0;
-}
-.c-tags ul {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--t-s);
-}
-.c-tags li:nth-child(odd) {
-  border-right: 1px solid var(--soft);
-}
-.c-tags li:nth-last-child(n + 3) {
-  border-bottom: 1px solid var(--soft);
-}
-.c-tags a {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 2px 10px;
-  text-decoration: none;
-}
-.c-tags a span {
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.c-tags a:hover,
-.c-tags a:focus-visible {
-  background: var(--neon);
-}
-.c-tags small {
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.c-hint {
-  position: fixed;
-  right: 28px;
-  bottom: 80px;
-  z-index: 2;
-  margin: 0;
-  padding: 2px 8px;
-  background: var(--tile);
-  border: 1px solid var(--soft);
-  font-size: var(--t-xs);
-  color: var(--fg);
-  pointer-events: none;
-  transition: opacity var(--dur-s);
-}
-[data-panel='posts'] .c-hint,
-[data-panel='categories'] .c-hint,
-[data-panel='about'] .c-hint {
-  opacity: 0;
-}
-/* 拖过一次地球之后，提示换成双击回正 */
-.c-hint-b,
-.c-dragged .c-hint-a {
-  display: none;
-}
-.c-dragged .c-hint-b {
-  display: inline;
-}
-
-/* 底部 Dock：等宽字母键帽加文字，键帽可以直接按 */
-.c-dock {
-  position: fixed;
-  left: 50%;
-  bottom: 16px;
-  z-index: 8;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  translate: -50% 0;
-  background: var(--tile);
-  border: 1px solid var(--line);
-  box-shadow: 4px 4px 0 var(--fg);
-  backdrop-filter: blur(6px);
-}
-.c-dock a {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 5px;
-  text-decoration: none;
-  border: 1px solid transparent;
-}
-.c-dock a:hover {
-  border-color: var(--fg);
-}
-.c-dock a[aria-current] {
-  background: var(--neon);
-  border-color: var(--fg);
-}
-.c-key {
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--fg);
-  box-shadow: 0 2px 0 var(--fg);
-  font-size: var(--t-xs);
-  font-weight: 700;
-  transition:
-    translate 0.08s,
-    box-shadow 0.08s;
-}
-.c-dock a:active .c-key,
-.c-dock a[aria-current] .c-key {
-  translate: 0 2px;
-  box-shadow: none;
-}
-.c-dock a[aria-current] .c-key {
-  background: var(--fg);
-  color: var(--neon);
-}
-.c-sep {
-  width: 1px;
-  height: 22px;
-  margin: 0 4px;
-  background: var(--soft);
-}
-/* 抽屉：从右边滑出，便当盒同时让到左边外面 */
-.c-drawer {
-  position: fixed;
-  top: 12px;
-  right: 12px;
-  bottom: 70px;
-  z-index: 6;
-  display: flex;
-  flex-direction: column;
-  width: min(560px, calc(100vw - 24px));
-  background: #fafaf8;
-  border: 1px solid var(--line);
-  box-shadow: -6px 6px 0 var(--fg);
-  visibility: hidden;
-  opacity: 0;
-  translate: calc(100% + 24px) 0;
-  transition:
-    translate var(--dur-m) var(--ease),
-    opacity var(--dur-s),
-    visibility var(--dur-m);
-}
-.c-drawer:focus {
-  outline: none;
-}
-[data-panel='posts'] .c-drawer[data-box='posts'],
-[data-panel='categories'] .c-drawer[data-box='categories'],
-[data-panel='about'] .c-drawer[data-box='about'] {
-  visibility: visible;
-  opacity: 1;
-  translate: 0 0;
-  transition-delay: 0.08s;
-}
-.c-drawer-h {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--line);
-  background: var(--dots), var(--neon);
-}
-.c-drawer-h h2 {
-  margin: 0;
-  padding: 0 6px;
-  background: var(--neon);
-  font-size: 17px;
-}
-.c-drawer-h h2 span {
-  font-weight: 400;
-}
-.c-drawer-h a {
-  margin-left: auto;
-  padding: 0 6px;
-  background: var(--neon);
-  font-size: var(--t-s);
-}
-.c-x {
-  padding: 2px 8px;
-  border: 1px solid var(--fg);
-  background: var(--tile);
-  font: var(--t-xs) var(--mono);
-  cursor: pointer;
-}
-.c-x:hover {
-  background: var(--fg);
-  color: var(--neon);
-}
-.c-drawer-b {
-  overflow: auto;
-  overscroll-behavior: contain;
-  padding: 0 12px 16px;
-}
-.c-grip {
-  display: none;
-}
-/* grep 过滤条：按 / 才出现，像终端里敲了一行命令 */
-.c-grep {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-bottom: 1px solid var(--line);
-  font-size: var(--t-s);
-}
-.c-grep[hidden] {
-  display: none;
-}
-.c-grep label {
-  font-weight: 700;
-}
-.c-grep input {
-  flex: 1;
-  min-width: 0;
-  padding: 2px 0;
-  border: 0;
-  border-bottom: 1px dashed var(--fg);
-  background: none;
-  font: var(--t-m) var(--mono);
-  color: inherit;
-  outline: none;
-}
-/* 系统自带的蓝色清除按钮和这套黑白不搭，清空交给 Esc */
-.c-grep input::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-  appearance: none;
-}
-/* 分类抽屉顶部的常用标签：一排带篇数的小标签，多出来的去标签页 */
-.c-alltags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin: 14px 0 6px;
-  padding: 0;
-  list-style: none;
-  font-size: var(--t-s);
-}
-.c-alltags a {
-  display: inline-flex;
-  gap: 6px;
-  padding: 1px 8px;
-  border: 1px solid var(--soft);
-  text-decoration: none;
-}
-.c-alltags a:hover,
-.c-alltags a:focus-visible {
-  border-color: var(--fg);
-  background: var(--neon);
-}
-.c-alltags small {
-  color: var(--muted);
-}
-.c-alltags-more a {
-  border-style: dashed;
-  color: var(--muted);
-}
-/* 一篇都没命中时在列表位置给一句话，而不是留一块空白 */
-.c-empty {
-  margin: 24px 0;
-  padding: 16px;
-  border: 1px dashed var(--line);
-  font-size: var(--t-s);
-  color: var(--muted);
-  text-align: center;
-}
-.c-empty[hidden] {
-  display: none;
-}
-.c-grep input:focus {
-  outline: 0;
-  border-bottom-style: solid;
-  background: rgba(220, 255, 0, 0.35);
-}
-.c-grep output {
-  color: var(--muted);
-  white-space: nowrap;
-}
-
-/* 快捷键：一张索引卡 */
-.c-keys {
-  width: min(420px, calc(100vw - 32px));
-  padding: 0;
-  border: 1px solid var(--line);
-  background: #fafaf8;
-  color: var(--fg);
-  box-shadow: 6px 6px 0 #fafaf8, 6px 6px 0 1px var(--fg);
-}
-.c-keys[open] {
-  animation: c-in var(--dur-s) both;
-}
-.c-keys::backdrop {
-  background: rgba(233, 233, 230, 0.6);
-}
-.c-keys header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--line);
-  background: var(--dots), #fafaf8;
-}
-.c-keys h2 {
-  margin: 0;
-  padding: 0 6px;
-  background: #fafaf8;
-  font-size: var(--t-l);
-}
-.c-keys form {
-  margin: 0;
-}
-.c-keys dl {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  margin: 0;
-  padding: 4px 12px;
-}
-.c-keys dt,
-.c-keys dd {
-  margin: 0;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--soft);
-}
-.c-keys dt {
-  display: flex;
-  gap: 4px;
-  padding-right: 16px;
-}
-.c-keys dl > :nth-last-child(-n + 2) {
-  border-bottom: 0;
-}
-.c-keys kbd {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 4px;
-  border: 1px solid var(--fg);
-  box-shadow: 0 2px 0 var(--fg);
-  font: 700 var(--t-xs) var(--mono);
-}
-.c-keys p {
-  margin: 0;
-  padding: 8px 12px;
-  border-top: 1px dashed var(--line);
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-.c-keys label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-top: 1px solid var(--line);
-  font-size: var(--t-s);
-  cursor: pointer;
-}
-.c-keys input {
-  accent-color: var(--fg);
-}
-/* 触屏上没有键盘，卡片只讲手势 */
-.c-keys dl.c-touch {
-  display: none;
-}
-@media (hover: none) {
-  .c-keys dl,
-  .c-keys label,
-  .c-keys p {
-    display: none;
-  }
-  .c-keys dl.c-touch {
-    display: grid;
-  }
-}
-.c-dock button {
-  padding: 4px 5px;
-  border: 1px solid transparent;
-  background: none;
-  cursor: pointer;
-}
-.c-dock button:hover {
-  border-color: var(--fg);
 }
 
 /* 索引卡细线：编号、细线分隔、紧凑行距 */
@@ -945,179 +162,34 @@ a.c-tile:focus-visible {
   translate: 0 -2px;
   border: 1px solid var(--fg);
   box-shadow: 0 2px 0 var(--fg);
-  background: #fafaf8;
+  background: var(--paper);
   font-size: var(--t-s);
   font-weight: 700;
-}
-/* 小节锚点：悬停标题时才露出来，键盘聚焦时也看得到 */
-.c-anchor {
-  margin-left: auto;
-  padding: 0 6px;
-  color: var(--muted);
-  font-size: var(--t-l);
-  text-decoration: none;
-  opacity: 0;
-  transition: opacity var(--dur-s);
-}
-.prose .c-anchor {
-  background: none;
-}
-.prose :is(h2, h3):hover .c-anchor,
-.c-anchor:focus-visible {
-  opacity: 1;
-}
-.prose .c-anchor:hover {
-  background: var(--neon);
-  color: var(--fg);
 }
 .prose h3 {
   display: flex;
   align-items: baseline;
   scroll-margin-top: 20px;
 }
-/* 过时提醒：正文前的一行注释 */
-.c-stale {
-  margin: 0 0 20px;
-  padding: 8px 12px;
-  border: 1px dashed var(--fg);
-  font-size: var(--t-s);
-  color: var(--muted);
-}
-/* 目录：默认收起的一张小卡，展开后点哪一节跳到哪一节，正在读的那一节画实心块 */
-.c-toc {
-  margin: 0 0 28px;
-  border: 1px solid var(--line);
-  font-size: var(--t-m);
-}
-.c-toc summary {
-  padding: 6px 12px;
-  cursor: pointer;
-  font-weight: 700;
-  list-style: none;
-}
-.c-toc summary::-webkit-details-marker {
-  display: none;
-}
-.c-toc summary::before {
-  content: '+ ';
-}
-.c-toc[open] summary::before {
-  content: '- ';
-}
-.c-toc summary:hover {
-  background: var(--neon);
-}
-.c-toc ol {
-  margin: 0;
-  padding: 4px 12px 10px 2.6em;
-  border-top: 1px solid var(--soft);
-}
-.c-toc li {
-  padding: 2px 0;
-}
-.c-toc a {
-  text-decoration: none;
-}
-.c-toc a:hover,
-.c-toc a[aria-current] {
-  background: var(--neon);
-}
-/* 桌面宽屏时目录挪到卡片左边，跟着滚动 */
-@media (min-width: 1240px) {
-  .c-toc {
-    position: fixed;
-    top: 96px;
-    left: max(16px, calc(50% - 392px - 260px));
-    width: 220px;
-    max-height: calc(100vh - 140px);
-    overflow: auto;
-    background: rgba(250, 250, 248, 0.94);
-  }
-}
-.c-series {
-  margin: 0 0 24px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-left: 4px solid var(--fg);
-  font-size: var(--t-m);
-}
-.c-series p {
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-.c-series ol {
-  margin: 0;
-  padding-left: 1.6em;
-}
-.c-series [aria-current] {
-  font-weight: 700;
-}
-.c-series a {
-  text-decoration: none;
-}
-.c-series a:hover {
-  background: var(--neon);
-}
-.lp-tags a {
-  padding: 0 4px;
-  border: 1px solid var(--soft);
-  color: var(--fg);
-  text-decoration: none;
-}
-.lp-tags a:hover,
-.lp-tags a:focus-visible {
-  background: var(--neon);
-  border-color: var(--fg);
-}
-/* 相关文章：卡片下面三张小索引卡 */
-.c-related {
-  margin: 32px 0 0;
-}
-.c-related h2 {
-  margin: 0 0 8px;
-  font-size: var(--t-l);
-}
-.c-related ol {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 8px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.c-related a {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  height: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  background: var(--tile);
-  text-decoration: none;
-}
-.c-related a:hover,
-.c-related a:focus-visible {
-  background: var(--neon);
-}
-.c-related span {
-  font-size: var(--t-xs);
-  color: var(--muted);
-}
-.c-related strong {
-  font: 600 var(--t-m) / 1.5 var(--sans);
-}
-.c-comments {
-  margin: 32px 0 0;
-}
 /* 正文链接平时是下划线，悬停才亮荧光，读长文时不会满屏跳色块 */
 .prose a,
+.prose .c-link,
 .lp-meta a {
   color: inherit;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
 }
+/* 长得像链接、点了打开全站搜索的按钮，比如 404 页里那个“搜一下” */
+.c-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
 .prose a:hover,
+.prose .c-link:hover,
 .lp-meta a:hover {
   background: var(--neon);
   text-decoration-thickness: 2px;
@@ -1132,7 +204,6 @@ a.c-tile:focus-visible {
   font-size: 0.88em;
 }
 .prose pre {
-  position: relative;
   border-color: var(--line);
   box-shadow: 4px 4px 0 var(--soft);
 }
@@ -1144,75 +215,8 @@ a.c-tile:focus-visible {
   border-left: 0;
   background:
     repeating-linear-gradient(-45deg, var(--fg) 0 2px, transparent 2px 7px) left / 8px 100% no-repeat,
-    rgba(255, 111, 181, 0.1);
+    color-mix(in srgb, var(--pink) 10%, transparent);
   color: var(--fg);
-}
-.c-copy {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  padding: 0 8px;
-  border: 1px solid var(--fg);
-  background: var(--tile);
-  font: 11px/20px var(--mono);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-.prose pre:hover .c-copy,
-.c-copy:focus-visible,
-.c-copy.is-done {
-  opacity: 1;
-}
-.c-copy:hover,
-.c-copy.is-done {
-  background: var(--neon);
-}
-/* 顶部荧光进度条 */
-.c-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  height: 4px;
-  background: var(--neon);
-  border-bottom: 1px solid var(--fg);
-  transform-origin: 0 50%;
-  scale: var(--p, 0) 1;
-  pointer-events: none;
-}
-.lp-head {
-  max-width: 784px;
-  padding-top: 20px;
-}
-.lp-brand::before {
-  content: '~/';
-  color: var(--muted);
-}
-.lp-main {
-  view-transition-name: c-card;
-  /* 正文行宽收在 720px 左右，中文一行三十几个字 */
-  max-width: 784px;
-  margin-top: 16px;
-  padding: 28px 32px 40px;
-  background: rgba(250, 250, 248, 0.94);
-  border: 1px solid var(--line);
-  box-shadow: 6px 6px 0 #fafaf8, 6px 6px 0 1px var(--fg);
-}
-.lp-h {
-  padding-bottom: 14px;
-  border-bottom: 1px dashed var(--line);
-}
-.lp-h h1 {
-  font-size: clamp(24px, 4vw, 34px);
-}
-.lp-tags li::before {
-  content: none;
-}
-.lp-foot {
-  max-width: 784px;
-  padding-top: 24px;
 }
 /* 全站搜索：屏幕上方一张索引卡，输入就出结果 */
 .c-find {
@@ -1221,9 +225,9 @@ a.c-tile:focus-visible {
   margin: 10vh auto auto;
   padding: 0;
   border: 1px solid var(--line);
-  background: #fafaf8;
+  background: var(--paper);
   color: var(--fg);
-  box-shadow: 6px 6px 0 #fafaf8, 6px 6px 0 1px var(--fg);
+  box-shadow: 6px 6px 0 var(--paper), 6px 6px 0 1px var(--fg);
 }
 .c-find[open] {
   display: flex;
@@ -1231,7 +235,7 @@ a.c-tile:focus-visible {
   animation: c-in var(--dur-s) both;
 }
 .c-find::backdrop {
-  background: rgba(233, 233, 230, 0.7);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
 }
 .c-find-bar {
   display: flex;
@@ -1252,7 +256,7 @@ a.c-tile:focus-visible {
   min-width: 0;
   padding: 4px 8px;
   border: 1px solid var(--fg);
-  background: #fafaf8;
+  background: var(--paper);
   font: 15px var(--mono);
   color: inherit;
   outline: none;
@@ -1324,186 +328,43 @@ a.c-tile:focus-visible {
   font: 700 10.5px/16px var(--mono);
   color: var(--fg);
 }
-/* 触屏上没有 ⌘K，键帽换成放大镜一样的斜杠 */
+/* 触屏上没有 ⌘K，搜索框底部的按键说明、顶栏搜索后面的键帽、404 页里的按键提示都收起来 */
 @media (hover: none) {
-  .c-find-foot {
+  .c-find-foot,
+  .lp-search kbd,
+  .c-keyhint {
     display: none;
   }
-  .c-key-w {
-    width: 22px;
-    font-size: 0;
-  }
-  .c-key-w::before {
-    content: '/';
-    font-size: var(--t-xs);
-  }
-}
-/* 子页面导航里的搜索入口 */
-.lp-search {
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--muted);
-  font-size: 14px;
-  cursor: pointer;
-}
-.lp-search:hover {
-  color: var(--fg);
-}
-/* Dock 上的搜索按钮，键帽比单字母宽一点 */
-.c-dock .c-find-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px 4px 5px;
-}
-.c-key-w {
-  width: auto;
-  padding: 0 4px;
-  white-space: nowrap;
 }
 
-/* 跨页变形：首页的格子或抽屉里那一行，和阅读页的文章卡片互相长成对方 */
-::view-transition-group(c-card) {
-  animation-duration: 0.45s;
+/* 跨页变形：首页的格子或抽屉里那一行，和阅读页的文章卡片互相长成对方。
+   卡片和页面其余部分（顶栏、目录）用同一个时长和曲线，一起出发一起落地；手机上距离短，再快一点 */
+:root {
+  --vt: var(--dur-m);
+}
+::view-transition-group(*) {
+  animation-duration: var(--vt);
   animation-timing-function: var(--ease);
 }
+/* 两页整体的淡入淡出只占前一半，地球和正文不会长时间叠成两层，剩下的时间只看卡片在长 */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: calc(var(--vt) * 0.5);
+  animation-timing-function: var(--ease);
+}
+/* 新旧两张快照只在前四成时间里交接，之后只剩新卡片在长，不会一路叠着两层字放大 */
 ::view-transition-old(c-card),
 ::view-transition-new(c-card) {
   height: 100%;
   object-fit: cover;
   object-position: top left;
+  animation-duration: calc(var(--vt) * 0.4);
+  animation-timing-function: linear;
 }
 
-@media (max-width: 900px) {
-  /* 手机首屏：地球单独占一格，跟着页面滚动；格子换成不透明的纸色，不再半透明地压在深色地球上 */
-  .c-bento {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: minmax(84px, auto);
-    grid-template-areas:
-      'brand brand clock clock'
-      'window window window window'
-      'latest latest latest latest'
-      'stack stack recent recent'
-      'log log tags tags';
-    width: auto;
-    padding: 14px 14px calc(96px + env(safe-area-inset-bottom));
-  }
-  .c-tile:not(.c-brand) {
-    background: #fafaf8;
-  }
-  .c-tile {
-    backdrop-filter: none;
-  }
-  .c-window {
-    position: relative;
-    display: block;
-    grid-area: window;
-    height: min(64vw, 300px);
-    border: 1px dashed var(--soft);
-  }
-  .c-window::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    height: 56vw;
-    aspect-ratio: 1;
-    border: 1px dashed var(--fg);
-    border-radius: 50%;
-    background: var(--dots);
-    opacity: 0.18;
-    translate: -50% -50%;
-    transition: opacity var(--dur-l);
-  }
-  .c-home:has(.earth.ready) .c-window::before,
-  .c-space::before,
-  .no-webgl .c-space::after {
-    opacity: 0;
-  }
-  .no-webgl .c-window::after {
-    content: '// 这台设备不支持 WebGL';
-    position: absolute;
-    bottom: 6px;
-    left: 8px;
-    font-size: var(--t-xs);
-    color: var(--muted);
-  }
-  .c-brand strong {
-    font-size: 36px;
-  }
-  .c-time {
-    font-size: clamp(40px, 13vw, 58px);
-  }
-  .c-shapes {
-    display: none;
-  }
-  .c-hint {
-    left: 14px;
-    right: auto;
-    bottom: calc(80px + env(safe-area-inset-bottom));
-  }
-  .c-dock {
-    bottom: calc(10px + env(safe-area-inset-bottom));
-  }
-  .c-drawer {
-    top: auto;
-    left: 8px;
-    right: 8px;
-    bottom: calc(66px + env(safe-area-inset-bottom));
-    width: auto;
-    height: 72vh;
-    translate: 0 calc(100% + 80px);
-  }
-  /* 底部面板顶上的把手，按住往下拖可以关掉 */
-  .c-grip {
-    display: block;
-    flex: none;
-    height: 18px;
-    background: linear-gradient(var(--fg), var(--fg)) center / 44px 4px no-repeat;
-    touch-action: none;
-    cursor: grab;
-  }
-  .c-drawer-h {
-    touch-action: none;
-  }
-}
 @media (max-width: 560px) {
-  .c-bento {
-    grid-template-areas:
-      'brand brand clock clock'
-      'window window window window'
-      'latest latest latest latest'
-      'stack stack stack stack'
-      'recent recent recent recent'
-      'log log log log'
-      'tags tags tags tags';
-  }
-  .c-latest strong {
-    font-size: 18px;
-  }
-  a.c-tile[href^='#']::after {
-    content: '↗';
-  }
-  .c-hint {
-    display: none;
-  }
-  .c-dock {
-    max-width: calc(100vw - 16px);
-  }
-  .c-dock a,
-  .c-dock .c-find-btn {
-    flex-direction: column;
-    gap: 2px;
-    padding: 4px 6px 2px;
-  }
-  .c-dock :is(a, .c-find-btn) span:not(.c-key) {
-    font-size: var(--t-xs);
-    line-height: 1.2;
-  }
-  .c-sep {
-    height: 30px;
-    margin: 0 2px;
+  :root {
+    --vt: 0.32s;
   }
   .lp-list a {
     grid-template-columns: 2.4em minmax(0, 1fr);
@@ -1514,9 +375,6 @@ a.c-tile:focus-visible {
   .lp-d {
     grid-column: 2;
     grid-row: auto;
-  }
-  .lp-main {
-    padding: 20px 16px;
   }
   .prose {
     font-size: 15px;

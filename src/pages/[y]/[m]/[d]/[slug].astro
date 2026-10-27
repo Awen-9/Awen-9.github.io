@@ -69,6 +69,7 @@ const giscus = GISCUS.repoId && GISCUS.categoryId;
     }
     {
       toc.length >= 3 && (
+        <>
         <details class="c-toc">
           <summary>目录 · {toc.length} 节</summary>
           <ol>
@@ -79,8 +80,21 @@ const giscus = GISCUS.repoId && GISCUS.categoryId;
             ))}
           </ol>
         </details>
+        <script is:inline>
+          // 宽屏时目录摆在左边默认展开。解析到这里就同步定下来，首帧就是展开的。1240px 和 styles/page.css 一致
+          if (matchMedia('(min-width: 1240px)').matches) document.currentScript.previousElementSibling.open = true;
+        </script>
+        </>
       )
     }
+    <script is:inline>
+      // 一年多没更新的技术文章，在正文前提醒一句版本可能变了。和正文一起画出来，不会画完再插进来把正文往下推
+      (() => {
+        const s = document.currentScript;
+        const days = Math.floor((Date.now() - +s.closest('article').dataset.date) / 864e5);
+        if (days > 365) s.insertAdjacentHTML('afterend', `<p class="c-stale">// 这篇最后更新在 ${Math.floor(days / 30)} 个月前，里面的版本和做法可能已经过时，参考时留意一下</p>`);
+      })();
+    </script>
     <div class="prose">
       <Content />
     </div>
@@ -159,83 +173,8 @@ const giscus = GISCUS.repoId && GISCUS.categoryId;
   }
 
   <script>
-    // 阅读页：顶部进度条、代码块复制按钮、目录高亮和返回逻辑
-    {
-      const home = '/';
-      // 记下读到哪篇，回首页时在抽屉里标出来
-      sessionStorage.setItem('c:last', location.pathname);
-      // 从站内首页点进来的，回到首页就是后退一步，抽屉、滚动位置都原样还在；直接打开的才跳到文章抽屉
-      const back = document.querySelector<HTMLAnchorElement>('.lp-back')!;
-      back.addEventListener('click', (e) => {
-        const ref = document.referrer && new URL(document.referrer);
-        if (ref && ref.origin === location.origin && ref.pathname === home && history.length > 1) {
-          e.preventDefault();
-          history.back();
-        }
-      });
+    import { initPost } from '../../../../scripts/post';
 
-      // 一年多没更新的技术文章，在正文前提醒一句版本可能变了
-      const article = document.querySelector<HTMLElement>('article')!;
-      const days = Math.floor((Date.now() - +article.dataset.date!) / 864e5);
-      if (days > 365) {
-        const note = document.createElement('p');
-        note.className = 'c-stale';
-        note.textContent = `// 这篇最后更新在 ${Math.floor(days / 30)} 个月前，里面的版本和做法可能已经过时，参考时留意一下`;
-        article.querySelector('.prose')!.before(note);
-      }
-
-      // 每个小节标题前挂一个 # 链接，点了复制这一节的地址
-      for (const h of document.querySelectorAll<HTMLElement>('.prose h2[id], .prose h3[id]')) {
-        const a = document.createElement('a');
-        a.className = 'c-anchor';
-        a.href = `#${h.id}`;
-        a.textContent = '#';
-        a.setAttribute('aria-label', `复制“${h.textContent}”这一节的链接`);
-        a.addEventListener('click', () => navigator.clipboard?.writeText(a.href).catch(() => {}));
-        h.append(a);
-      }
-
-      // 目录：宽屏时摆在左边默认展开，读到哪一节就把哪一项点亮
-      const tocBox = document.querySelector<HTMLDetailsElement>('.c-toc');
-      if (tocBox && matchMedia('(min-width: 1240px)').matches) tocBox.open = true;
-      const links = [...document.querySelectorAll<HTMLAnchorElement>('.c-toc a')];
-      const heads = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
-      const lightToc = () => {
-        let i = -1;
-        heads.forEach((h, j) => h && h.getBoundingClientRect().top < 140 && (i = j));
-        links.forEach((a, j) => (j === i ? a.setAttribute('aria-current', 'true') : a.removeAttribute('aria-current')));
-      };
-      if (links.length) {
-        addEventListener('scroll', lightToc, { passive: true });
-        lightToc();
-      }
-
-      const bar = document.body.appendChild(document.createElement('div'));
-      bar.className = 'c-progress';
-      const update = () => {
-        const { top, height } = article.getBoundingClientRect();
-        const p = Math.min(1, Math.max(0, -top / (height - innerHeight)));
-        bar.style.setProperty('--p', String(p));
-      };
-      addEventListener('scroll', update, { passive: true });
-      addEventListener('resize', update);
-      update();
-
-      for (const pre of document.querySelectorAll('.prose pre')) {
-        const btn = pre.appendChild(document.createElement('button'));
-        btn.type = 'button';
-        btn.className = 'c-copy';
-        btn.textContent = 'copy';
-        btn.addEventListener('click', async () => {
-          await navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '');
-          btn.textContent = 'copied';
-          btn.classList.add('is-done');
-          setTimeout(() => {
-            btn.textContent = 'copy';
-            btn.classList.remove('is-done');
-          }, 1500);
-        });
-      }
-    }
+    initPost();
   </script>
 </Page>

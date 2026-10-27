@@ -4,13 +4,14 @@
 
 ## 本地运行
 
-需要 Node 22.23 或更新的版本。
+需要 Node 22.23 或更新的版本。Windows 和 macOS 上怎么装环境、要注意什么，见 [docs/setup.md](docs/setup.md)。
 
 ```bash
 npm install
 npm run dev       # http://localhost:4321
 npm run build     # 输出到 dist/
 npm run preview   # 预览构建结果
+npm run check     # 类型检查，GitHub 上发布前也会跑
 ```
 
 ## 写文章
@@ -30,6 +31,8 @@ draft: true                             # 可选，草稿不会发布
 ---
 ```
 
+完整步骤（图片、预览、发布、修改）和一篇年终总结的例子见 [docs/writing.md](docs/writing.md)。
+
 ## 改个人信息
 
 标题、简介、技术栈、地球上的城市坐标和时区、giscus 评论都在 `src/config.ts`。giscus 的 `repoId` 和 `categoryId` 留空时不显示评论，也不加载外部脚本。
@@ -38,7 +41,7 @@ draft: true                             # 可选，草稿不会发布
 
 推送到 `main` 分支后，`.github/workflows/deploy.yml` 会自动构建并发布。仓库的 Settings → Pages → Source 需要选 GitHub Actions。
 
-依赖锁定文件 `package-lock.json` 直接使用官方源 `https://registry.npmjs.org/`，本地和 CI 都从该源安装，无需额外配置。
+本机的 npm 源是内网源，`package-lock.json` 里记录的也是内网地址，workflow 里已经在 CI 上换回官方源，不影响发布。
 
 ## 目录
 
@@ -48,7 +51,8 @@ src/content/posts/     文章
 src/pages/             页面路由，index.astro 是首页
 src/components/        文章列表、分类分组、关于、搜索框
 src/layouts/           Base 是 HTML 外壳，Page 是子页面外壳
-src/scripts/           地球、首页抽屉和时钟、全站搜索
-src/styles/            base.css 是基础排版，theme.css 是主题
+src/scripts/           地球、首页抽屉和时钟、全站搜索、阅读页（post.ts）
+src/styles/            base.css 基础排版，theme.css 配色和共用样式，home.css 首页，page.css 子页面
 public/textures/       地球贴图，来源见 ATTRIBUTION.md
+docs/                  启动手册 setup.md，写文章手册 writing.md
 ```

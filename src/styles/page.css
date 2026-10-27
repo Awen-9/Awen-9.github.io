@@ -1,0 +1,276 @@
+/* 子页面：阅读页、归档、分类、标签、关于和 404 共用的卡片外壳，以及阅读页的目录、代码块、进度条 */
+/* 小节锚点：悬停标题时才露出来，键盘聚焦时也看得到 */
+.c-anchor {
+  margin-left: auto;
+  padding: 0 6px;
+  color: var(--muted);
+  font-size: var(--t-l);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity var(--dur-s);
+}
+.prose .c-anchor {
+  background: none;
+}
+.prose :is(h2, h3):hover .c-anchor,
+.c-anchor:focus-visible {
+  opacity: 1;
+}
+.prose .c-anchor:hover {
+  background: var(--neon);
+  color: var(--fg);
+}
+/* 页面有滚动条、首页没有，预留出滚动条的位置，Windows 上卡片不会在过渡结束时横跳一下 */
+html {
+  scrollbar-gutter: stable;
+}
+/* 从首页点进来时，新卡片一开始就是实的、从那一行的大小长起来；
+   旧快照是那一行（悬停时是荧光底），拉伸到卡片大小会糊成一片黄，干脆不露出来 */
+::view-transition-new(c-card) {
+  animation: none;
+}
+/* 过时提醒：正文前的一行注释 */
+.c-stale {
+  margin: 0 0 20px;
+  padding: 8px 12px;
+  border: 1px dashed var(--fg);
+  font-size: var(--t-s);
+  color: var(--muted);
+}
+/* 目录：默认收起的一张小卡，展开后点哪一节跳到哪一节，正在读的那一节画实心块 */
+.c-toc {
+  margin: 0 0 28px;
+  border: 1px solid var(--line);
+  font-size: var(--t-m);
+}
+.c-toc summary {
+  padding: 6px 12px;
+  cursor: pointer;
+  font-weight: 700;
+  list-style: none;
+}
+.c-toc summary::-webkit-details-marker {
+  display: none;
+}
+.c-toc summary::before {
+  content: '+ ';
+}
+.c-toc[open] summary::before {
+  content: '- ';
+}
+.c-toc summary:hover {
+  background: var(--neon);
+}
+.c-toc ol {
+  margin: 0;
+  padding: 4px 12px 10px 2.6em;
+  border-top: 1px solid var(--soft);
+}
+.c-toc li {
+  padding: 2px 0;
+}
+.c-toc a {
+  text-decoration: none;
+}
+.c-toc a:hover,
+.c-toc a[aria-current] {
+  background: var(--neon);
+}
+/* 桌面宽屏时目录挪到卡片左边，跟着滚动 */
+/* 1240px 和文章页模板里目录默认展开的断点一致 */
+@media (min-width: 1240px) {
+  .c-toc {
+    position: fixed;
+    top: 96px;
+    left: max(16px, calc(50% - 392px - 260px));
+    width: 220px;
+    max-height: calc(100vh - 140px);
+    overflow: auto;
+    background: color-mix(in srgb, var(--paper) 94%, transparent);
+  }
+}
+.c-series {
+  margin: 0 0 24px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--fg);
+  font-size: var(--t-m);
+}
+.c-series p {
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+.c-series ol {
+  margin: 0;
+  padding-left: 1.6em;
+}
+.c-series [aria-current] {
+  font-weight: 700;
+}
+.c-series a {
+  text-decoration: none;
+}
+.c-series a:hover {
+  background: var(--neon);
+}
+.lp-tags a {
+  padding: 0 4px;
+  border: 1px solid var(--soft);
+  color: var(--fg);
+  text-decoration: none;
+}
+.lp-tags a:hover,
+.lp-tags a:focus-visible {
+  background: var(--neon);
+  border-color: var(--fg);
+}
+/* 相关文章：卡片下面三张小索引卡 */
+.c-related {
+  margin: 32px 0 0;
+}
+.c-related h2 {
+  margin: 0 0 8px;
+  font-size: var(--t-l);
+}
+.c-related ol {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.c-related a {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  height: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  background: var(--tile);
+  text-decoration: none;
+}
+.c-related a:hover,
+.c-related a:focus-visible {
+  background: var(--neon);
+}
+.c-related span {
+  font-size: var(--t-xs);
+  color: var(--muted);
+}
+.c-related strong {
+  font: 600 var(--t-m) / 1.5 var(--sans);
+}
+.c-comments {
+  margin: 32px 0 0;
+}
+/* 代码块外包一层，复制按钮定位在这层上，不随代码横向滚动 */
+.c-code {
+  position: relative;
+  margin: 0 0 1.1em;
+}
+.c-code pre {
+  margin: 0;
+}
+/* 右上角的按钮组：wrap 切换换行，copy 复制 */
+.c-code-bar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+}
+/* 换行模式：长行按页面宽度折下来，不再横向滚动 */
+.c-wrap .prose pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.c-copy {
+  padding: 0 8px;
+  border: 1px solid var(--fg);
+  background: var(--tile);
+  font: 11px/20px var(--mono);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.c-code:hover .c-copy,
+.c-copy:focus-visible,
+.c-copy.is-done {
+  opacity: 1;
+}
+.c-copy:hover,
+.c-copy.is-done,
+.c-copy[aria-pressed='true'] {
+  background: var(--neon);
+}
+/* 触屏上没有悬停，按钮一直显示 */
+@media (hover: none) {
+  .c-copy {
+    opacity: 1;
+  }
+}
+/* 顶部荧光进度条 */
+.c-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  height: 4px;
+  background: var(--neon);
+  border-bottom: 1px solid var(--fg);
+  transform-origin: 0 50%;
+  scale: var(--p, 0) 1;
+  pointer-events: none;
+}
+.lp-head {
+  max-width: 784px;
+  padding-top: 20px;
+}
+.lp-brand::before {
+  content: '~/';
+  color: var(--muted);
+}
+.lp-main {
+  view-transition-name: c-card;
+  /* 正文行宽收在 720px 左右，中文一行三十几个字 */
+  max-width: 784px;
+  margin-top: 16px;
+  padding: 28px 32px 40px;
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: 6px 6px 0 var(--paper), 6px 6px 0 1px var(--fg);
+}
+.lp-h {
+  padding-bottom: 14px;
+  border-bottom: 1px dashed var(--line);
+}
+.lp-h h1 {
+  font-size: clamp(24px, 4vw, 34px);
+}
+.lp-tags li::before {
+  content: none;
+}
+.lp-foot {
+  max-width: 784px;
+  padding-top: 24px;
+}
+/* 子页面导航里的搜索入口 */
+.lp-search {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+.lp-search:hover {
+  color: var(--fg);
+}
+
+@media (max-width: 560px) {
+  .lp-main {
+    padding: 20px 16px;
+  }
+}

@@ -27,6 +27,7 @@ jobs:
         env:
           npm_config_registry: https://registry.npmjs.org/
           npm_config_replace_registry_host: always
+      - run: npm run check
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

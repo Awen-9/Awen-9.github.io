@@ -1,12 +1,14 @@
 // 首页的行为层：地球、时钟、面板路由
-import { mountEarth, subsolarPoint, type EarthHandle, type EarthOptions } from './earth';
+import type { EarthHandle, EarthOptions } from './earth';
+import { subsolarPoint } from './sun';
 import { HOME } from '../config';
 
 export const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const PANELS = ['posts', 'categories', 'about'];
 
-/** 页面是浅色的，地球用浅底模式，光点在 HOME 配置的城市 */
-export function earth(canvas: HTMLCanvasElement, opts: Partial<EarthOptions> = {}): EarthHandle | null {
+/** 页面是浅色的，地球用浅底模式，光点在 HOME 配置的城市。three 单独打包、按需下载，抽屉和时钟不用等它 */
+export async function earth(canvas: HTMLCanvasElement, opts: Partial<EarthOptions> = {}): Promise<EarthHandle | null> {
+  const { mountEarth } = await import('./earth');
   const handle = mountEarth(canvas, {
     home: { lon: HOME.lon, lat: HOME.lat },
     reducedMotion,
