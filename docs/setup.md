@@ -45,10 +45,10 @@ npm ci
 
 `npm ci` 按 `package-lock.json` 安装，装出来的版本和 GitHub 上发布时用的一样。Windows 和 macOS 各自需要的编译工具，`package-lock.json` 里都写了，自动装对应系统的版本。
 
-`package-lock.json` 里记的下载地址是公司内网的 npm 源。电脑连不上内网时，`npm ci` 会卡住或报 `ETIMEDOUT`，改用下面这行，从官方源下载，和 GitHub Actions 上的做法一样：
+`package-lock.json` 里记的是官方 npm 源地址，直接 `npm ci` 即可。如果本机配置了公司内网的 npm 源，想强制走官方源可以加参数：
 
 ```bash
-npm ci --registry=https://registry.npmjs.org/ --replace-registry-host=always
+npm ci --registry=https://registry.npmjs.org/
 ```
 
 ## 4. 启动

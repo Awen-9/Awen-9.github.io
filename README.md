@@ -41,7 +41,7 @@ draft: true                             # 可选，草稿不会发布
 
 推送到 `main` 分支后，`.github/workflows/deploy.yml` 会自动构建并发布。仓库的 Settings → Pages → Source 需要选 GitHub Actions。
 
-本机的 npm 源是内网源，`package-lock.json` 里记录的也是内网地址，workflow 里已经在 CI 上换回官方源，不影响发布。
+`package-lock.json` 里记录的是官方 npm 源地址，本地和 GitHub Actions 上都能直接 `npm ci`；本机如果配了内网源，用 `npm ci --registry=https://registry.npmjs.org/` 强制走官方源。
 
 ## 目录
 

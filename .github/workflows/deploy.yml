@@ -22,11 +22,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      # lockfile 里记录的是本地内网源，CI 上统一换回官方源
+      # package-lock.json 里记的是官方源地址，CI 直接按锁文件装
       - run: npm ci
-        env:
-          npm_config_registry: https://registry.npmjs.org/
-          npm_config_replace_registry_host: always
       - run: npm run check
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
