@@ -36,8 +36,9 @@ const TOP_TAGS = 12;
 <Base bodyClass="c-home">
   <!-- 首帧等到快捷键卡片解析完。它前面的内联脚本这时已经跑过，返回首页时抽屉滚动位置和变形目标都已就位 -->
   <link slot="head" rel="expect" href="#c-keys" blocking="render" />
-  <!-- 手机上的地球贴图不等脚本跑起来就先下载；crossorigin 和 three 加载贴图的方式一致，才能复用这次下载 -->
-  {TEXTURES.low.map((f) => <link slot="head" rel="preload" as="image" href={`/textures/${f}`} media="(max-width: 899.98px)" crossorigin="anonymous" />)}
+  <!-- 首屏的 1k 贴图不等脚本跑起来就先下载（宽屏也一样，2k 等地球画出来再后台换）；
+       crossorigin 和 three 加载贴图的方式一致，才能复用这次下载 -->
+  {TEXTURES.low.map((f) => <link slot="head" rel="preload" as="image" href={`/textures/${f}`} crossorigin="anonymous" />)}
   <div class="c-space earth-wrap" aria-hidden="false">
     <canvas class="earth" id="earth" aria-label={`可拖动旋转的地球，橙色光点是${HOME.city}`}></canvas>
   </div>

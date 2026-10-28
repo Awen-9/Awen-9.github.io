@@ -3,7 +3,8 @@ import { subsolarPoint } from './sun';
 
 const DEG = Math.PI / 180;
 const TEX = '/textures/';
-/** 贴图，依次是白天、夜灯、海面高光、云。手机和省流量模式用 low，首页给手机提前预加载 low 这一组。
+/** 贴图，依次是白天、夜灯、海面高光、云。首屏一律先上 low 这一组（四张约 370 kB），
+ * 宽屏等地球画出来、浏览器空闲了再换成 high，只多一次后台下载，首屏却快得多。
  * 云图是灰度 JPG，亮度里已经乘好了透明度，比原来带透明通道的 PNG 小一半多 */
 export const TEXTURES = {
   low: ['earth-natural-1k.jpg', 'earth_lights_1024.jpg', 'earth_specular_1024.jpg', 'earth_clouds_1024.jpg'],
@@ -112,8 +113,10 @@ export interface EarthOptions {
   size?: number;
   /** 大气光的颜色，默认蓝色 */
   glow?: number;
-  /** 改用 1k 贴图，手机和省流量模式下首屏少下载一半多 */
+  /** 只用 1k 贴图，不再后台换 2k：手机、省流量模式和窄屏用 */
   lowRes?: boolean;
+  /** 贴图一张都没下来时调用。这时画布一直是透明的，页面上留着 CSS 画的那张示意图当兜底 */
+  onFail?: () => void;
 }
 
 export interface EarthHandle {
@@ -140,21 +143,36 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   const group = new THREE.Group();
   scene.add(group);
 
-  const manager = new THREE.LoadingManager(() => opts.onReady?.());
-  const loader = new THREE.TextureLoader(manager);
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
-  const tex = (file: string, srgb = true) => {
+  const tex = (loader: THREE.TextureLoader, file: string, srgb = true) => {
     const t = loader.load(TEX + file);
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = Math.min(8, maxAniso);
     t.wrapS = THREE.RepeatWrapping;
     return t;
   };
-  const [day, night, spec, cloud] = TEXTURES[opts.lowRes ? 'low' : 'high'];
-  const dayMap = tex(day);
-  const nightMap = tex(night);
-  const specMap = tex(spec, false);
-  const cloudMap = tex(cloud, false);
+
+  // 贴图全都没下来（断网、文件被删）就把渲染循环停掉，兜底交给页面上 CSS 画的那张示意图
+  let dead = false;
+  let failed = false;
+  const firstLoad = new THREE.LoadingManager();
+  firstLoad.onError = () => (failed = true);
+  firstLoad.onLoad = () => {
+    if (failed) {
+      dead = true;
+      opts.onFail?.();
+      return;
+    }
+    opts.onReady?.();
+    // 1k 已经出现在屏幕上了，再考虑换成 2k
+    if (!opts.lowRes) upgrade();
+  };
+  const firstLoader = new THREE.TextureLoader(firstLoad);
+  const [lowDay, lowNight, lowSpec, lowCloud] = TEXTURES.low;
+  const dayMap = tex(firstLoader, lowDay);
+  const nightMap = tex(firstLoader, lowNight);
+  const specMap = tex(firstLoader, lowSpec, false);
+  const cloudMap = tex(firstLoader, lowCloud, false);
 
   const sunDir = new THREE.Vector3();
   const uniforms = {
@@ -169,7 +187,8 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   const sphere = new THREE.SphereGeometry(1, 128, 64);
   const earth = new THREE.Mesh(sphere, new THREE.ShaderMaterial({ uniforms, vertexShader: worldVertex, fragmentShader: earthFragment }));
 
-  const cloudUniforms = { cloudMap: { value: cloudMap }, sunDir: uniforms.sunDir, cloudShift: uniforms.cloudShift };
+  // 和地球共用同一个云层 uniform，换 2k 贴图时两处一起生效
+  const cloudUniforms = { cloudMap: uniforms.cloudMap, sunDir: uniforms.sunDir, cloudShift: uniforms.cloudShift };
   const clouds = new THREE.Mesh(
     sphere,
     new THREE.ShaderMaterial({
@@ -298,6 +317,10 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   let raf = 0;
   let prev = performance.now();
   const frame = (now: number) => {
+    if (dead) {
+      raf = 0;
+      return;
+    }
     raf = requestAnimationFrame(frame);
     const dt = Math.min((now - prev) / 1000, 0.05);
     prev = now;
@@ -327,7 +350,7 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
     renderer.render(scene, camera);
   };
   const start = () => {
-    if (raf || !visible || document.hidden) return;
+    if (dead || raf || !visible || document.hidden) return;
     prev = performance.now();
     raf = requestAnimationFrame(frame);
   };
@@ -344,6 +367,42 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   document.addEventListener('visibilitychange', onVisibility);
   start();
 
+  /**
+   * 1k 已经画出来了，再慢慢把它换成 2k：等浏览器空闲、四张都到齐才一起换，不会一半清楚一半糊。
+   * 网络差、省流量，或者页面已经销毁就不再折腾，1k 留着也够看
+   */
+  function upgrade() {
+    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    if (dead || net?.saveData || (net?.effectiveType && net.effectiveType !== '4g')) return;
+    const swap = () => {
+      if (dead) return;
+      let hiFailed = false;
+      const manager = new THREE.LoadingManager();
+      manager.onError = () => (hiFailed = true);
+      const loader = new THREE.TextureLoader(manager);
+      const [day, night, spec, cloud] = TEXTURES.high;
+      const hi = {
+        dayMap: tex(loader, day),
+        nightMap: tex(loader, night),
+        specMap: tex(loader, spec, false),
+        cloudMap: tex(loader, cloud, false),
+      };
+      manager.onLoad = () => {
+        // 有一张没下来就维持 1k，不拿半套贴图去换
+        if (dead || hiFailed) return;
+        const old = [uniforms.dayMap.value, uniforms.nightMap.value, uniforms.specMap.value, uniforms.cloudMap.value];
+        uniforms.dayMap.value = hi.dayMap;
+        uniforms.nightMap.value = hi.nightMap;
+        uniforms.specMap.value = hi.specMap;
+        uniforms.cloudMap.value = hi.cloudMap;
+        for (const t of old) t.dispose();
+      };
+    };
+    // 后台标签页里空闲回调不跑，用户切回来看的时候再换
+    if (window.requestIdleCallback) window.requestIdleCallback(swap, { timeout: 4000 });
+    else window.setTimeout(swap, 1500);
+  }
+
   return {
     setFocus(x, y, instant = false) {
       focusTarget.set(x, y);
@@ -357,6 +416,7 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
       homing = opts.reducedMotion ? 60 : fast ? 6 : 1.4;
     },
     dispose() {
+      dead = true;
       stop();
       ro.disconnect();
       io.disconnect();

@@ -5,23 +5,37 @@
   inset: 0;
   z-index: 0;
 }
-/* 贴图下载完之前先画一个点阵圆占位，位置和大小与地球一致；没有 WebGL 时它就留着当示意图 */
+/* 贴图到之前先画一张示意图：点阵当海陆、径向渐变当球面明暗，位置和大小都和地球一致，
+   所以首屏不会只挂着一个空框。贴图到了（.earth.ready）它淡出去；没 WebGL 或者贴图没下来时，它就留着当兜底 */
 .c-space::before {
   content: '';
   position: absolute;
-  aspect-ratio: 1;
-  border: 1px dashed var(--fg);
-  border-radius: 50%;
-  background: var(--dots);
-  opacity: 0.18;
-  translate: -50% -50%;
-  transition: opacity var(--dur-l);
-  pointer-events: none;
-}
-.c-space::before {
   top: 48%;
   left: 70%;
   height: 82vh;
+  aspect-ratio: 1;
+  translate: -50% -50%;
+  border: 1px dashed var(--fg);
+  border-radius: 50%;
+  background:
+    var(--dots),
+    radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--paper) 92%, transparent), color-mix(in srgb, var(--paper) 40%, transparent) 52%, color-mix(in srgb, var(--fg) 8%, transparent) 74%);
+  opacity: 0.22;
+  transition: opacity var(--dur-l);
+  pointer-events: none;
+}
+/* 还在等贴图的时候让占位球慢慢呼吸，看得出是在加载，不是画坏了。已经确定画不出来时就不动了
+   （no-webgl / no-texture 挂在 html 上，所以判断要写在 html 这一层） */
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.no-webgl):not(.no-texture) .c-home:not(:has(.earth.ready)) .c-space::before,
+  html:not(.no-webgl):not(.no-texture) .c-home:not(:has(.earth.ready)) .c-window::before {
+    animation: c-breathe 2.2s ease-in-out infinite;
+  }
+}
+@keyframes c-breathe {
+  50% {
+    opacity: 0.4;
+  }
 }
 .c-home:has(.earth.ready) .c-space::before,
 [data-panel]:not([data-panel='']) .c-space::before {
@@ -30,14 +44,26 @@
 .no-webgl .c-space {
   background: none;
 }
-.no-webgl .c-space::after {
-  content: '// 这台设备不支持 WebGL，地球先画成这样';
+/* 兜底说明：只有没 WebGL 或者贴图没下来时才出现，平时不占地方，也不闪一下 */
+.c-space::after {
+  display: none;
+  content: '';
   position: absolute;
   top: calc(48% + 43vh);
   left: 70%;
   translate: -50% 0;
   font-size: var(--t-xs);
   color: var(--muted);
+}
+.no-webgl .c-space::after {
+  content: '// 这台设备不支持 WebGL，地球先画成这样';
+}
+.no-texture .c-space::after {
+  content: '// 地球贴图没加载出来，先看这张示意图';
+}
+.no-webgl .c-space::after,
+.no-texture .c-space::after {
+  display: block;
 }
 /* 孟菲斯几何碎片：只做装饰，不挡拖动。贴着便当盒和画面边角摆，不压地球 */
 .c-shapes {
@@ -843,6 +869,7 @@ a.c-tile:focus-visible {
     border: 1px dashed var(--soft);
     pointer-events: auto;
   }
+  /* 手机上地球住在格子里，占位球也缩小到格子内，样式和桌面那张一致 */
   .c-window::before {
     content: '';
     position: absolute;
@@ -852,24 +879,36 @@ a.c-tile:focus-visible {
     aspect-ratio: 1;
     border: 1px dashed var(--fg);
     border-radius: 50%;
-    background: var(--dots);
-    opacity: 0.18;
+    background:
+      var(--dots),
+      radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--paper) 92%, transparent), color-mix(in srgb, var(--paper) 40%, transparent) 52%, color-mix(in srgb, var(--fg) 8%, transparent) 74%);
+    opacity: 0.22;
     translate: -50% -50%;
     transition: opacity var(--dur-l);
     pointer-events: none;
   }
   .c-home:has(.earth.ready) .c-window::before,
-  .c-space::before,
-  .no-webgl .c-space::after {
+  .c-space::before {
     opacity: 0;
   }
-  .no-webgl .c-window::after {
-    content: '// 这台设备不支持 WebGL';
+  /* 说明写在格子里，桌面那条压在整块背景上的收起来 */
+  .no-webgl .c-space::after,
+  .no-texture .c-space::after {
+    display: none;
+  }
+  .no-webgl .c-window::after,
+  .no-texture .c-window::after {
     position: absolute;
     bottom: 6px;
     left: 8px;
     font-size: var(--t-xs);
     color: var(--muted);
+  }
+  .no-webgl .c-window::after {
+    content: '// 这台设备不支持 WebGL';
+  }
+  .no-texture .c-window::after {
+    content: '// 贴图没加载出来，先这样看';
   }
   .c-brand strong {
     font-size: 36px;

@@ -118,6 +118,33 @@ function codeBlocks() {
   addEventListener('resize', markLong);
 }
 
+/**
+ * 正文配图：图还在路上时先铺点阵占位（样式在 base.css），解码完淡进来，正文不会跳。
+ * 加载失败就把裂图标换成一句话，说明是哪张图没了，别让读者对着一块空白猜
+ */
+function images() {
+  // 换掉裂图标。图外面可能还包着一层链接（点图看大图），一起换掉，别留个点了没反应的框
+  const failed = (img: HTMLImageElement) => {
+    const alt = img.alt.trim() || (img.getAttribute('src') ?? '');
+    const note = document.createElement('span');
+    note.className = 'c-img-fail';
+    note.textContent = `图片没加载出来：${alt}`;
+    const link = img.closest('a');
+    (link && link.childElementCount === 1 ? link : img).replaceWith(note);
+  };
+  for (const img of document.querySelectorAll<HTMLImageElement>('.prose img')) {
+    // complete 为真说明这张图已经定了：要么解码好，要么已经失败。失败早于脚本执行时 error 事件不会再来，得在这儿判
+    if (img.complete) {
+      if (img.naturalWidth > 0) img.dataset.img = 'ok';
+      else failed(img);
+      continue;
+    }
+    img.dataset.img = 'loading';
+    img.addEventListener('load', () => (img.dataset.img = 'ok'), { once: true });
+    img.addEventListener('error', () => failed(img), { once: true });
+  }
+}
+
 export function initPost() {
   // 记下读到哪篇，回首页时在抽屉里标出来。悬停时浏览器可能已在后台预渲染这一页，
   // 预渲染期间写的 sessionStorage 打开后会被丢掉，所以等真正打开了再记
@@ -128,6 +155,7 @@ export function initPost() {
   const article = document.querySelector<HTMLElement>('article')!;
   backLink();
   anchors();
+  images();
   toc();
   progress(article);
   codeBlocks();

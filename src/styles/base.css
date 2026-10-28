@@ -48,7 +48,7 @@ button {
   white-space: nowrap;
 }
 
-/* 地球画布：加载完成前透明，拖动时换手形 */
+/* 地球画布：贴图到齐前透明，拖动时换手形。画不出来时兜底的那张示意图在 home.css 的 .c-space::before */
 canvas.earth {
   display: block;
   width: 100%;
@@ -63,10 +63,6 @@ canvas.earth.ready {
 }
 canvas.earth.is-grabbing {
   cursor: grabbing;
-}
-/* 没有 WebGL 时用一张静态的浅色地球示意 */
-.no-webgl .earth-wrap {
-  background: radial-gradient(circle at 50% 50%, #9cc4e8 0 30%, #5d8fc2 34%, transparent 34.5%);
 }
 
 /* ---------- 正文排版 ---------- */
@@ -141,9 +137,48 @@ canvas.earth.is-grabbing {
   border: 1px solid var(--line);
   text-align: left;
 }
+/* 正文配图：解码完之前先铺一层淡点阵占位（图片自己的背景，图到了自然盖住），
+   占位高度让正文不会在图到的时候突然往下跳一截；图烂了由 scripts/post.ts 换成一句话 */
 .prose img {
+  display: block;
   max-width: 100%;
   height: auto;
+  margin: 0 auto;
+  border: 1px solid var(--soft);
+  /* 点阵比站里其他地方淡一半：这是整块大面积的底，浓了点会盖过正文 */
+  background:
+    radial-gradient(color-mix(in srgb, var(--fg) 18%, transparent) 1.1px, transparent 1.6px) 0 0 / 12px 12px,
+    var(--paper);
+  object-fit: contain;
+}
+.prose img[data-img='loading'] {
+  min-height: 7em;
+}
+.prose img[data-img='ok'] {
+  animation: c-img-in var(--dur-m) var(--ease) both;
+}
+@keyframes c-img-in {
+  from {
+    opacity: 0.6;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .prose img[data-img='ok'] {
+    animation: none;
+  }
+}
+/* 图片没加载出来时的大方说明，替掉浏览器的裂图标 */
+.c-img-fail {
+  display: block;
+  margin: 0 auto 1.1em;
+  padding: 30px 16px;
+  border: 1px dashed var(--line);
+  background:
+    radial-gradient(color-mix(in srgb, var(--fg) 18%, transparent) 1.1px, transparent 1.6px) 0 0 / 12px 12px,
+    var(--paper);
+  font-size: var(--t-s);
+  color: var(--muted);
+  text-align: center;
 }
 .prose hr {
   border: 0;
