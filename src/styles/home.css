@@ -5,8 +5,8 @@
   inset: 0;
   z-index: 0;
 }
-/* 贴图到之前先画一张示意图：点阵当海陆、径向渐变当球面明暗，位置和大小都和地球一致，
-   所以首屏不会只挂着一个空框。贴图到了（.earth.ready）它淡出去；没 WebGL 或者贴图没下来时，它就留着当兜底 */
+/* 地球画出来之前先摆一张示意图：点阵当海陆、径向渐变当球面明暗，位置和大小都和地球一致，
+   所以首屏不会只挂着一个空框。第一帧画好（.earth.ready）它淡出去；没有 WebGL 时它就留着当兜底 */
 .c-space::before {
   content: '';
   position: absolute;
@@ -24,11 +24,11 @@
   transition: opacity var(--dur-l);
   pointer-events: none;
 }
-/* 还在等贴图的时候让占位球慢慢呼吸，看得出是在加载，不是画坏了。已经确定画不出来时就不动了
-   （no-webgl / no-texture 挂在 html 上，所以判断要写在 html 这一层） */
+/* 等脚本把地球画出来的那一小会儿，让占位球慢慢呼吸，看得出是在加载，不是画坏了。
+   no-webgl 挂在 html 上，判断要写在 html 这一层 */
 @media (prefers-reduced-motion: no-preference) {
-  html:not(.no-webgl):not(.no-texture) .c-home:not(:has(.earth.ready)) .c-space::before,
-  html:not(.no-webgl):not(.no-texture) .c-home:not(:has(.earth.ready)) .c-window::before {
+  html:not(.no-webgl) .c-home:not(:has(.earth.ready)) .c-space::before,
+  html:not(.no-webgl) .c-home:not(:has(.earth.ready)) .c-window::before {
     animation: c-breathe 2.2s ease-in-out infinite;
   }
 }
@@ -44,7 +44,7 @@
 .no-webgl .c-space {
   background: none;
 }
-/* 兜底说明：只有没 WebGL 或者贴图没下来时才出现，平时不占地方，也不闪一下 */
+/* 兜底说明：只有没有 WebGL 时才出现，平时不占地方，也不闪一下 */
 .c-space::after {
   display: none;
   content: '';
@@ -57,12 +57,6 @@
 }
 .no-webgl .c-space::after {
   content: '// 这台设备不支持 WebGL，地球先画成这样';
-}
-.no-texture .c-space::after {
-  content: '// 地球贴图没加载出来，先看这张示意图';
-}
-.no-webgl .c-space::after,
-.no-texture .c-space::after {
   display: block;
 }
 /* 孟菲斯几何碎片：只做装饰，不挡拖动。贴着便当盒和画面边角摆，不压地球 */
@@ -892,23 +886,16 @@ a.c-tile:focus-visible {
     opacity: 0;
   }
   /* 说明写在格子里，桌面那条压在整块背景上的收起来 */
-  .no-webgl .c-space::after,
-  .no-texture .c-space::after {
+  .no-webgl .c-space::after {
     display: none;
   }
-  .no-webgl .c-window::after,
-  .no-texture .c-window::after {
+  .no-webgl .c-window::after {
+    content: '// 这台设备不支持 WebGL';
     position: absolute;
     bottom: 6px;
     left: 8px;
     font-size: var(--t-xs);
     color: var(--muted);
-  }
-  .no-webgl .c-window::after {
-    content: '// 这台设备不支持 WebGL';
-  }
-  .no-texture .c-window::after {
-    content: '// 贴图没加载出来，先这样看';
   }
   .c-brand strong {
     font-size: 36px;

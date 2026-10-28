@@ -1,11 +1,14 @@
 import * as THREE from 'three';
 import { subsolarPoint } from './sun';
+import { LAND } from './world';
 
 const DEG = Math.PI / 180;
 const TEX = '/textures/';
-/** 贴图，依次是白天、夜灯、海面高光、云。首屏一律先上 low 这一组（四张约 370 kB），
- * 宽屏等地球画出来、浏览器空闲了再换成 high，只多一次后台下载，首屏却快得多。
- * 云图是灰度 JPG，亮度里已经乘好了透明度，比原来带透明通道的 PNG 小一半多 */
+/** 手绘兜底的纸色和墨色，和 theme.css 的 --paper、--fg 一致 */
+const PAPER = '#fafaf8';
+const INK = '26, 26, 26';
+/** 照片贴图，依次是白天、夜灯、海面高光、云。
+ * 手机和省流量模式只用 low（四张约 370 kB）不再升级；宽屏等 1k 画出来、浏览器空闲了再换 high */
 export const TEXTURES = {
   low: ['earth-natural-1k.jpg', 'earth_lights_1024.jpg', 'earth_specular_1024.jpg', 'earth_clouds_1024.jpg'],
   high: ['earth-natural-2k.jpg', 'earth_lights_2048.png', 'earth_specular_2048.jpg', 'earth_clouds_1024.jpg'],
@@ -31,13 +34,19 @@ const worldVertex = /* glsl */ `
   }
 `;
 
+/**
+ * 一层球面同时画两种地球：手绘海图和照片贴图，靠 photoMix 在两者之间过渡。
+ * 手绘图是现画的，第一帧就有；照片贴图在后台下，到齐了再淡进来，下不来就一直用手绘的兜底。
+ */
 const earthFragment = /* glsl */ `
+  uniform sampler2D chart;
   uniform sampler2D dayMap;
   uniform sampler2D nightMap;
   uniform sampler2D specMap;
   uniform sampler2D cloudMap;
   uniform vec3 sunDir;
   uniform float cloudShift;
+  uniform float photoMix;
   varying vec2 vUv;
   varying vec3 vNormalW;
   varying vec3 vPosW;
@@ -46,25 +55,36 @@ const earthFragment = /* glsl */ `
     vec3 n = normalize(vNormalW);
     vec3 v = normalize(cameraPosition - vPosW);
     float ndl = dot(n, sunDir);
-    float dayMix = smoothstep(-0.1, 0.16, ndl);
+    float rim = pow(1.0 - max(dot(n, v), 0.0), 6.0);
 
-    float cloud = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0)).r;
+    // 手绘海图：白天是纸和墨，夜里把整张纸反过来。颜色先在 sRGB 里算，负片才够黑，最后再转到线性
+    vec3 inkSRGB = texture2D(chart, vUv).rgb;
+    vec3 ink = mix(1.0 - inkSRGB, inkSRGB, smoothstep(-0.05, 0.06, ndl));
+    ink = mix(ink, vec3(0.1), rim * 0.72);
+    vec3 col = pow(ink, vec3(2.2));
 
-    vec3 day = texture2D(dayMap, vUv).rgb * (1.0 - cloud * 0.3);
-    vec3 dayCol = day * (0.06 + 1.15 * max(ndl, 0.0));
-    vec3 night = texture2D(nightMap, vUv).rgb;
-    vec3 nightCol = night * vec3(1.0, 0.72, 0.42) * 1.8 * (1.0 - cloud * 0.7);
-    vec3 col = mix(nightCol, dayCol, dayMix);
+    if (photoMix > 0.001) {
+      float dayMix = smoothstep(-0.1, 0.16, ndl);
+      float cloud = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0)).r;
 
-    float ocean = texture2D(specMap, vUv).r;
-    vec3 h = normalize(sunDir + v);
-    col += vec3(1.0, 0.93, 0.8) * pow(max(dot(n, h), 0.0), 70.0) * ocean * 0.55 * dayMix;
+      vec3 day = texture2D(dayMap, vUv).rgb * (1.0 - cloud * 0.3);
+      vec3 dayCol = day * (0.06 + 1.15 * max(ndl, 0.0));
+      vec3 night = texture2D(nightMap, vUv).rgb;
+      vec3 nightCol = night * vec3(1.0, 0.72, 0.42) * 1.8 * (1.0 - cloud * 0.7);
+      vec3 photo = mix(nightCol, dayCol, dayMix);
 
-    float twilight = smoothstep(-0.18, 0.0, ndl) * (1.0 - smoothstep(0.0, 0.22, ndl));
-    col += vec3(0.95, 0.38, 0.12) * twilight * 0.1;
+      float ocean = texture2D(specMap, vUv).r;
+      vec3 h = normalize(sunDir + v);
+      photo += vec3(1.0, 0.93, 0.8) * pow(max(dot(n, h), 0.0), 70.0) * ocean * 0.55 * dayMix;
 
-    float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
-    col += vec3(0.32, 0.62, 1.0) * fres * 0.85 * smoothstep(-0.35, 0.5, ndl);
+      float twilight = smoothstep(-0.18, 0.0, ndl) * (1.0 - smoothstep(0.0, 0.22, ndl));
+      photo += vec3(0.95, 0.38, 0.12) * twilight * 0.1;
+
+      float fres = pow(1.0 - max(dot(n, v), 0.0), 3.0);
+      photo += vec3(0.32, 0.62, 1.0) * fres * 0.85 * smoothstep(-0.35, 0.5, ndl);
+
+      col = mix(col, photo, photoMix);
+    }
 
     gl_FragColor = vec4(col, 1.0);
     #include <colorspace_fragment>
@@ -75,33 +95,142 @@ const cloudFragment = /* glsl */ `
   uniform sampler2D cloudMap;
   uniform vec3 sunDir;
   uniform float cloudShift;
+  uniform float photoMix;
   varying vec2 vUv;
   varying vec3 vNormalW;
   void main() {
     float cloud = texture2D(cloudMap, vUv + vec2(cloudShift, 0.0)).r;
     float ndl = dot(normalize(vNormalW), sunDir);
     float lit = smoothstep(-0.2, 0.25, ndl);
-    gl_FragColor = vec4(vec3(0.05 + 0.95 * max(ndl, 0.0)), cloud * (0.04 + 0.86 * lit));
+    gl_FragColor = vec4(vec3(0.05 + 0.95 * max(ndl, 0.0)), cloud * (0.04 + 0.86 * lit) * photoMix);
     #include <colorspace_fragment>
   }
 `;
 
-// 背面渲染的外层球：只在地球轮廓外侧留下一圈大气光，默认蓝色
+/**
+ * 外层球：手绘时沿轮廓描一圈墨，换成照片后变回一圈淡淡的大气光，
+ * 两种光晕按 photoMix 过渡，切换的时候不会突然换一种边。
+ */
 const atmoFragment = /* glsl */ `
   uniform vec3 sunDir;
-  uniform vec3 glow;
+  uniform vec3 ink;
+  uniform vec3 paper;
   uniform float lightBg;
+  uniform float photoMix;
   varying vec3 vNormalW;
   varying vec3 vPosW;
   void main() {
     vec3 n = normalize(vNormalW);
     vec3 v = normalize(cameraPosition - vPosW);
-    float i = pow(smoothstep(0.0, 0.34, -dot(n, v)), 1.6);
+    float i = pow(smoothstep(0.0, 0.3, -dot(n, v)), 1.8);
     float lit = smoothstep(-0.45, 0.6, dot(n, sunDir));
-    float a = i * (0.12 + 0.88 * lit);
+    vec3 glow = mix(ink, paper, photoMix);
+    float a = i * mix(0.06 + 0.3 * lit, 0.12 + 0.88 * lit, photoMix);
     gl_FragColor = lightBg > 0.5 ? vec4(glow, a) : vec4(glow * a, 1.0);
   }
 `;
+
+/**
+ * 地球的兜底贴图在页面里现画：一张等距圆柱投影的手绘海图。
+ * 纸底、点阵陆地、虚线经纬网，海岸线描两遍，第二遍故意抖一点，像手描的复写线。
+ * 不下载任何图片、第一帧就能有；照片贴图到齐之后再淡入换掉它。
+ * @param size 贴图宽度，高度是宽度的一半
+ */
+function drawChart(size: number) {
+  const w = size;
+  const h = size / 2;
+  const c = document.createElement('canvas');
+  c.width = w;
+  c.height = h;
+  const g = c.getContext('2d');
+  if (!g) return c;
+
+  const u = w / 360; // 一度几像素
+  const x = (lon: number) => (lon + 180) * u;
+  const y = (lat: number) => (90 - lat) * u;
+  // 笔宽、点距都按画布缩放，2048 和 4096 画出来是同一张，只是细一倍
+  const k = w / 4096;
+
+  g.fillStyle = PAPER;
+  g.fillRect(0, 0, w, h);
+
+  // 经纬网：每 30° 一条虚线，赤道留一条实线当基准
+  g.strokeStyle = `rgba(${INK}, 0.16)`;
+  g.lineWidth = 1.6 * k;
+  g.setLineDash([7 * k, 9 * k]);
+  g.beginPath();
+  for (let lon = -150; lon < 180; lon += 30) {
+    g.moveTo(x(lon), 0);
+    g.lineTo(x(lon), h);
+  }
+  for (let lat = -60; lat <= 60; lat += 30) {
+    g.moveTo(0, y(lat));
+    g.lineTo(w, y(lat));
+  }
+  g.stroke();
+  g.setLineDash([]);
+  g.strokeStyle = `rgba(${INK}, 0.34)`;
+  g.lineWidth = 2.2 * k;
+  g.beginPath();
+  g.moveTo(0, y(0));
+  g.lineTo(w, y(0));
+  g.stroke();
+
+  // 陆地：用点阵当网点。一格 28px，里一个点，远看是一片灰，近看是点和纸
+  const tile = document.createElement('canvas');
+  tile.width = tile.height = Math.round(28 * k);
+  const tg = tile.getContext('2d');
+  if (tg) {
+    tg.fillStyle = `rgba(${INK}, 0.05)`;
+    tg.fillRect(0, 0, tile.width, tile.height);
+    tg.fillStyle = `rgba(${INK}, 0.26)`;
+    tg.beginPath();
+    tg.arc(tile.width / 2, tile.height / 2, 1.6 * k, 0, Math.PI * 2);
+    tg.fill();
+  }
+  const dots = g.createPattern(tile, 'repeat');
+
+  g.beginPath();
+  for (const ring of LAND) {
+    for (let i = 0; i < ring.length; i += 2) {
+      const px = x(ring[i]);
+      const py = y(ring[i + 1]);
+      if (i === 0) g.moveTo(px, py);
+      else g.lineTo(px, py);
+    }
+    g.closePath();
+  }
+  if (dots) {
+    g.fillStyle = dots;
+    g.fill();
+  }
+
+  // 第一遍：贴着实测绘深一点的海岸线
+  g.lineJoin = 'round';
+  g.lineCap = 'round';
+  g.strokeStyle = `rgba(${INK}, 0.58)`;
+  g.lineWidth = 2.4 * k;
+  g.stroke();
+
+  // 第二遍：每个点抖一点点，叠出一道浅的复写线，像手描的
+  let seed = 0x9e3779b9;
+  const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296) - 0.5;
+  g.beginPath();
+  for (const ring of LAND) {
+    for (let i = 0; i < ring.length; i += 2) {
+      const px = x(ring[i]) + rnd() * 4 * k;
+      const py = y(ring[i + 1]) + rnd() * 4 * k;
+      if (i === 0) g.moveTo(px, py);
+      else g.lineTo(px, py);
+    }
+    g.closePath();
+  }
+  g.strokeStyle = `rgba(${INK}, 0.24)`;
+  g.lineWidth = 1.2 * k;
+  g.stroke();
+
+  return c;
+}
 
 export interface EarthOptions {
   home: { lon: number; lat: number };
@@ -111,12 +240,8 @@ export interface EarthOptions {
   backdrop?: 'dark' | 'light';
   /** 地球直径占画布高度的比例，默认 0.76 */
   size?: number;
-  /** 大气光的颜色，默认蓝色 */
-  glow?: number;
-  /** 只用 1k 贴图，不再后台换 2k：手机、省流量模式和窄屏用 */
+  /** 只用 1k 照片贴图、不再升到 2k（手绘图和 2k 升级都不受影响）：手机和省流量模式用 */
   lowRes?: boolean;
-  /** 贴图一张都没下来时调用。这时画布一直是透明的，页面上留着 CSS 画的那张示意图当兜底 */
-  onFail?: () => void;
 }
 
 export interface EarthHandle {
@@ -144,6 +269,13 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   scene.add(group);
 
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
+
+  // 兜底的手绘海图：现画，拿到就是最终精度。照片贴图还没到之前，屏幕上就是它
+  const chart = new THREE.CanvasTexture(drawChart(opts.lowRes ? 2048 : 4096));
+  chart.colorSpace = THREE.NoColorSpace; // 颜色原样取用，负片才够黑
+  chart.anisotropy = Math.min(8, maxAniso);
+  chart.wrapS = THREE.RepeatWrapping;
+
   const tex = (loader: THREE.TextureLoader, file: string, srgb = true) => {
     const t = loader.load(TEX + file);
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
@@ -152,43 +284,44 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
     return t;
   };
 
-  // 贴图全都没下来（断网、文件被删）就把渲染循环停掉，兜底交给页面上 CSS 画的那张示意图
-  let dead = false;
-  let failed = false;
-  const firstLoad = new THREE.LoadingManager();
-  firstLoad.onError = () => (failed = true);
-  firstLoad.onLoad = () => {
-    if (failed) {
-      dead = true;
-      opts.onFail?.();
-      return;
-    }
-    opts.onReady?.();
-    // 1k 已经出现在屏幕上了，再考虑换成 2k
+  // 照片贴图在后台拿。到齐了就记下开始淡入的时刻；一张没下来就一直用手绘图。
+  // 开了省流量模式就干脆不下载：手绘这张本身也够看
+  const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+  const wantPhoto = !net?.saveData;
+  let blendAt = 0;
+  let photoFailed = false;
+  const photoLoad = new THREE.LoadingManager();
+  photoLoad.onError = () => (photoFailed = true);
+  photoLoad.onLoad = () => {
+    if (photoFailed) return;
+    blendAt = performance.now();
+    // 1k 已经换上了，宽屏再考虑升到 2k
     if (!opts.lowRes) upgrade();
   };
-  const firstLoader = new THREE.TextureLoader(firstLoad);
+  const photoLoader = new THREE.TextureLoader(photoLoad);
   const [lowDay, lowNight, lowSpec, lowCloud] = TEXTURES.low;
-  const dayMap = tex(firstLoader, lowDay);
-  const nightMap = tex(firstLoader, lowNight);
-  const specMap = tex(firstLoader, lowSpec, false);
-  const cloudMap = tex(firstLoader, lowCloud, false);
+  const dayMap = wantPhoto ? tex(photoLoader, lowDay) : null;
+  const nightMap = wantPhoto ? tex(photoLoader, lowNight) : null;
+  const specMap = wantPhoto ? tex(photoLoader, lowSpec, false) : null;
+  const cloudMap = wantPhoto ? tex(photoLoader, lowCloud, false) : null;
 
   const sunDir = new THREE.Vector3();
   const uniforms = {
+    chart: { value: chart },
     dayMap: { value: dayMap },
     nightMap: { value: nightMap },
     specMap: { value: specMap },
     cloudMap: { value: cloudMap },
     sunDir: { value: sunDir },
     cloudShift: { value: 0 },
+    photoMix: { value: 0 },
   };
 
   const sphere = new THREE.SphereGeometry(1, 128, 64);
   const earth = new THREE.Mesh(sphere, new THREE.ShaderMaterial({ uniforms, vertexShader: worldVertex, fragmentShader: earthFragment }));
 
-  // 和地球共用同一个云层 uniform，换 2k 贴图时两处一起生效
-  const cloudUniforms = { cloudMap: uniforms.cloudMap, sunDir: uniforms.sunDir, cloudShift: uniforms.cloudShift };
+  // 云单独一层，透明度跟着 photoMix 一起淡入，手绘阶段它是看不见的
+  const cloudUniforms = { cloudMap: uniforms.cloudMap, sunDir: uniforms.sunDir, cloudShift: uniforms.cloudShift, photoMix: uniforms.photoMix };
   const clouds = new THREE.Mesh(
     sphere,
     new THREE.ShaderMaterial({
@@ -205,7 +338,13 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   const atmosphere = new THREE.Mesh(
     new THREE.SphereGeometry(1, 64, 32),
     new THREE.ShaderMaterial({
-      uniforms: { sunDir: uniforms.sunDir, lightBg: { value: light ? 1 : 0 }, glow: { value: new THREE.Color().setHex(opts.glow ?? 0x59a6ff, THREE.LinearSRGBColorSpace) } },
+      uniforms: {
+        sunDir: uniforms.sunDir,
+        lightBg: { value: light ? 1 : 0 },
+        ink: { value: new THREE.Color().setHex(0x1a1a1a, THREE.LinearSRGBColorSpace) },
+        paper: { value: new THREE.Color().setHex(0xfafaf8, THREE.LinearSRGBColorSpace) },
+        photoMix: uniforms.photoMix,
+      },
       vertexShader: worldVertex,
       fragmentShader: atmoFragment,
       side: THREE.BackSide,
@@ -216,9 +355,9 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   );
   atmosphere.scale.setScalar(1.12);
 
-  // 所在城市的小光点
+  // 所在城市的橙色光点
   const marker = new THREE.Mesh(
-    new THREE.SphereGeometry(0.009, 12, 8),
+    new THREE.SphereGeometry(0.011, 12, 8),
     new THREE.MeshBasicMaterial({ color: 0xffc46b }),
   );
   lonLatToVec(opts.home.lon, opts.home.lat, marker.position).multiplyScalar(1.004);
@@ -313,6 +452,8 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   updateSun();
   const sunTimer = window.setInterval(updateSun, 60_000);
 
+  let dead = false;
+  let shown = false;
   let visible = true;
   let raf = 0;
   let prev = performance.now();
@@ -343,11 +484,21 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
       focus.lerp(focusTarget, 1 - Math.exp(-dt * (opts.reducedMotion ? 60 : 4.5)));
       applyFocus();
     }
+    // 照片到齐后 0.9 秒内把手绘图换成照片，用平滑的曲线，两头都不突兀
+    if (blendAt) {
+      const t = Math.min(1, (now - blendAt) / 900);
+      uniforms.photoMix.value = t * t * (3 - 2 * t);
+    }
     group.rotation.set(pitch, yaw, 0);
     stars.rotation.set(pitch * 0.08, yaw * 0.08, 0);
     sunDir.copy(sunLocal).applyQuaternion(group.quaternion);
     if (!opts.reducedMotion) uniforms.cloudShift.value = (now / 1000) * 0.0009;
     renderer.render(scene, camera);
+    // 第一帧真的画出来了再让画布淡进来，页面上那张占位图正好交班
+    if (!shown) {
+      shown = true;
+      opts.onReady?.();
+    }
   };
   const start = () => {
     if (dead || raf || !visible || document.hidden) return;
@@ -367,12 +518,8 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
   document.addEventListener('visibilitychange', onVisibility);
   start();
 
-  /**
-   * 1k 已经画出来了，再慢慢把它换成 2k：等浏览器空闲、四张都到齐才一起换，不会一半清楚一半糊。
-   * 网络差、省流量，或者页面已经销毁就不再折腾，1k 留着也够看
-   */
+  /** 1k 照片已经上身，再慢慢换成 2k：等浏览器空闲、四张都到齐才一起换，换完把旧的显存放掉 */
   function upgrade() {
-    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
     if (dead || net?.saveData || (net?.effectiveType && net.effectiveType !== '4g')) return;
     const swap = () => {
       if (dead) return;
@@ -395,7 +542,7 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
         uniforms.nightMap.value = hi.nightMap;
         uniforms.specMap.value = hi.specMap;
         uniforms.cloudMap.value = hi.cloudMap;
-        for (const t of old) t.dispose();
+        for (const t of old) t?.dispose();
       };
     };
     // 后台标签页里空闲回调不跑，用户切回来看的时候再换
@@ -422,6 +569,8 @@ export function mountEarth(canvas: HTMLCanvasElement, opts: EarthOptions): Earth
       io.disconnect();
       clearInterval(sunTimer);
       document.removeEventListener('visibilitychange', onVisibility);
+      chart.dispose();
+      for (const t of [uniforms.dayMap.value, uniforms.nightMap.value, uniforms.specMap.value, uniforms.cloudMap.value]) t?.dispose();
       renderer.dispose();
     },
   };

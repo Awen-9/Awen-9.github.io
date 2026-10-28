@@ -51,8 +51,8 @@ src/content/posts/     文章
 src/pages/             页面路由，index.astro 是首页
 src/components/        文章列表、分类分组、关于、搜索框
 src/layouts/           Base 是 HTML 外壳，Page 是子页面外壳
-src/scripts/           地球、首页抽屉和时钟、全站搜索、阅读页（post.ts）
+src/scripts/           地球、海岸线数据（world.ts）、首页抽屉和时钟、全站搜索、阅读页（post.ts）
 src/styles/            base.css 基础排版，theme.css 配色和共用样式，home.css 首页，page.css 子页面
-public/textures/       地球贴图，来源见 ATTRIBUTION.md
-docs/                  启动手册 setup.md，写文章手册 writing.md
+public/textures/       照片贴图，手绘图先顶上，它到齐后淡入换掉；来源见 docs/attribution.md
+docs/                  启动手册 setup.md，写文章手册 writing.md，素材来源 attribution.md
 ```

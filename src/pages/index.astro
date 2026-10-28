@@ -6,7 +6,6 @@ import PostList from '../components/PostList.astro';
 import CategoryGroups from '../components/CategoryGroups.astro';
 import About from '../components/About.astro';
 import { SITE, PROFILE, HOME } from '../config';
-import { TEXTURES } from '../scripts/earth';
 import { getPosts, groupByCategory, formatDate, postPath, tagHref, tagCounts, readingMinutes } from '../lib/posts';
 
 const posts = await getPosts();
@@ -36,9 +35,7 @@ const TOP_TAGS = 12;
 <Base bodyClass="c-home">
   <!-- 首帧等到快捷键卡片解析完。它前面的内联脚本这时已经跑过，返回首页时抽屉滚动位置和变形目标都已就位 -->
   <link slot="head" rel="expect" href="#c-keys" blocking="render" />
-  <!-- 首屏的 1k 贴图不等脚本跑起来就先下载（宽屏也一样，2k 等地球画出来再后台换）；
-       crossorigin 和 three 加载贴图的方式一致，才能复用这次下载 -->
-  {TEXTURES.low.map((f) => <link slot="head" rel="preload" as="image" href={`/textures/${f}`} crossorigin="anonymous" />)}
+  <!-- 地球第一帧就是脚本里现画的手绘海图，没有图片要预加载；照片贴图在它后面慢慢下，到齐了再淡入-->
   <div class="c-space earth-wrap" aria-hidden="false">
     <canvas class="earth" id="earth" aria-label={`可拖动旋转的地球，橙色光点是${HOME.city}`}></canvas>
   </div>
@@ -284,7 +281,7 @@ const TOP_TAGS = 12;
       if (!wide.matches) return globe?.setFocus(0, 0, true);
       globe?.setFocus(root.dataset.panel ? -0.2 : 0.2, -0.02, instant);
     };
-    earth(canvas, { size: wide.matches ? 0.82 : 0.86, lowRes: !wide.matches || !!saveData, glow: 0xfafaf8 }).then((g) => {
+    earth(canvas, { size: wide.matches ? 0.82 : 0.86, lowRes: !wide.matches || !!saveData }).then((g) => {
       globe = g;
       focus(true);
     });

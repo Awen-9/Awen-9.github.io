@@ -14,8 +14,6 @@ export async function earth(canvas: HTMLCanvasElement, opts: Partial<EarthOption
     reducedMotion,
     backdrop: 'light',
     onReady: () => canvas.classList.add('ready'),
-    // 贴图一张都没下来：画布保持透明，页面上那张 CSS 画的示意图顶上，并说明一句
-    onFail: () => document.documentElement.classList.add('no-texture'),
     ...opts,
   });
   if (!handle) document.documentElement.classList.add('no-webgl');

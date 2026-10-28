@@ -48,13 +48,14 @@ button {
   white-space: nowrap;
 }
 
-/* 地球画布：贴图到齐前透明，拖动时换手形。画不出来时兜底的那张示意图在 home.css 的 .c-space::before */
+/* 地球画布：第一帧画出来之前透明，拖动时换手形。画不出来时兜底的是 home.css 里 .c-space::before 那张点阵球。
+   0.5 秒就淡进来：手绘图先立住，照片贴图到齐后再由着色器接管 */
 canvas.earth {
   display: block;
   width: 100%;
   height: 100%;
   opacity: 0;
-  transition: opacity 1.2s ease;
+  transition: opacity 0.5s ease;
   cursor: grab;
   touch-action: pan-y;
 }
